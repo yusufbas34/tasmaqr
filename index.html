@@ -1,0 +1,1559 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tasma QR</title>
+<meta name="description" content="Köpeğinizin tasmasına QR künye: bulan kişi tek dokunuşla sizi arasın, konumunu göndersin.">
+<link rel="icon" type="image/svg+xml" href="shared/logo.svg">
+<meta name="theme-color" content="#b8501a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<link rel="stylesheet" href="shared/tag.css">
+<script src="shared/tag.js"></script>
+<script>
+  // ==================== AYARLAR (Supabase > Project Settings > API) ====================
+  // Araç QR ile aynı Supabase projesi: tablolar "tasma_" önekli olduğu için çakışmaz (supabase/kurulum.sql).
+  const SUPABASE_URL = "https://icedhptvywmqsiarxpio.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_IEPlZ5oNcsrQt7_8DK_QKQ_1s9UMT6z";
+  // Künyelere basılan QR'ın açacağı adres (GitHub Pages)
+  const SITE_URL = "https://yusufbas34.github.io/tasmaqr/";
+  // =====================================================================================
+</script>
+<style>
+:root{--ink:#111418;--band:#b8501a;--band2:#163a7a;--line:#d6cfc7;--muted:#5d5650;
+  --ok:#0c7a43;--err:#b3261e;--bg:#f6f1ea}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);
+  min-height:100vh;padding:max(28px,env(safe-area-inset-top)) 18px 40px}
+main{max-width:440px;margin:0 auto}
+main.wide{max-width:1100px}
+main.home{max-width:780px}
+main.mid{max-width:640px}
+.pet{display:flex;align-items:center;gap:12px;background:#fff;border:3px solid var(--ink);border-radius:999px;padding:6px 18px 6px 6px;margin-bottom:22px}
+.pet .ic{width:46px;height:46px;border-radius:50%;background:var(--band);display:flex;align-items:center;justify-content:center;flex:none}
+.pet .ic svg{width:28px;height:28px}
+.pet.is-lost .ic{background:var(--err)}
+.pet .nm{flex:1;font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;font-size:28px;letter-spacing:.04em;line-height:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pet small{font-size:13px;color:var(--muted);letter-spacing:.08em}
+h1{font-size:25px;line-height:1.2;margin:0 0 8px}
+h2{font-size:21px;margin:26px 0 10px}
+p{font-size:16px;line-height:1.5;margin:0 0 16px;color:var(--muted)}
+label{display:block;font-weight:600;font-size:15px;margin:18px 0 6px}
+.opt{font-weight:400;color:var(--muted)}
+input,select.big{width:100%;font:inherit;font-size:19px;padding:13px;border:2px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+textarea{width:100%;font:inherit;font-size:17px;padding:12px 14px;border:2px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);resize:vertical}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--band)}
+.hint{display:block;font-size:14px;color:var(--muted);margin-top:6px;line-height:1.45}
+/* ana sayfa */
+.hero{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;margin-bottom:34px}
+.hero h1{font-size:34px;line-height:1.1;margin-bottom:12px}
+.hero .lead{font-size:18px}
+.hero .cta{display:inline-block;width:auto;padding:14px 22px;margin:6px 8px 0 0}
+.btn.alt{background:var(--band2)}
+.showcase{display:flex;flex-direction:column;align-items:center;gap:10px}
+.showcase .pair{display:flex;gap:14px;align-items:center}
+.showcase button,.chip{font:inherit;font-size:14px;font-weight:600;color:var(--band);background:#fff;border:2px solid var(--line);
+  border-radius:999px;padding:6px 14px;cursor:pointer}
+.note{background:#fff;border-left:4px solid var(--band);border-radius:6px;padding:12px 14px;font-size:15px;color:var(--ink);margin-bottom:30px}
+section{margin-bottom:38px}
+section > h2{font-size:24px;margin:0 0 14px}
+.steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;counter-reset:s}
+.steps li{background:#fff;border-radius:10px;padding:16px 14px;counter-increment:s;font-size:15px;line-height:1.45;color:var(--muted)}
+.steps li::before{content:counter(s);display:flex;width:32px;height:32px;border-radius:50%;background:var(--band);color:#fff;
+  font-weight:700;align-items:center;justify-content:center;margin-bottom:8px}
+.steps b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+.perks{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.perks div{background:#fff;border-radius:10px;padding:14px;font-size:15px;line-height:1.45;color:var(--muted)}
+.perks b{display:block;color:var(--ink);margin-bottom:2px}
+details{background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:8px}
+summary{font-weight:700;cursor:pointer}
+details p{margin:8px 0 0}
+.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px}
+.card > h2:first-child{margin-top:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:15px;line-height:1.45;color:var(--muted)}
+.check input{width:20px;height:20px;flex:none;margin-top:2px}
+.lostcheck{background:#fbe9e8;color:var(--err);border-radius:8px;padding:12px;font-weight:600}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+@media (max-width:640px){.hero{grid-template-columns:1fr}.hero h1{font-size:28px}.row2{grid-template-columns:1fr}}
+/* bulan kişi ekranı */
+.lost{background:var(--err);color:#fff;border-radius:12px;padding:16px;margin-bottom:20px;font-size:16px;line-height:1.45}
+.lost b{display:block;font-size:22px;letter-spacing:.02em;margin-bottom:4px}
+.lost .reward{display:block;margin-top:8px;background:#fff;color:var(--err);border-radius:8px;padding:8px 10px;font-weight:700}
+/* künye oluşturma ve künyelerim */
+.designs{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.designs button{display:flex;align-items:center;gap:6px;font:inherit;font-size:14px;font-weight:600;padding:6px 12px 6px 6px;border-radius:999px;
+  border:2px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.designs button i{width:20px;height:20px;border-radius:50%;border:1px solid #0003}
+.designs button.on{border-color:var(--band);box-shadow:0 0 0 2px var(--band)}
+.preview{display:flex;justify-content:center;gap:16px;align-items:center;background:#fff;border-radius:12px;padding:18px;margin-bottom:6px}
+.preview .grid{zoom:1.6}
+.cards{display:grid;gap:10px}
+.mine{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:#fff;border-radius:12px;padding:12px 14px;color:inherit;text-decoration:none;border-left:5px solid var(--line)}
+.mine.is-lost{border-left-color:var(--err)}
+.mine b{font-size:19px}
+.mine span{display:block;font-size:14px;color:var(--muted);line-height:1.5}
+.tagchip{display:inline-block;font-size:13px;font-weight:700;border-radius:999px;padding:2px 9px;background:#e6f4ec;color:var(--ok);margin-right:4px}
+.tagchip.red{background:#fbe9e8;color:var(--err)}
+.pinbox{font-size:30px;font-weight:700;letter-spacing:.2em;text-align:center;background:#fff7d6;border:2px dashed #e0a100;border-radius:10px;padding:10px;margin:6px 0 12px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:15px;line-height:1.5}
+.kv dt{color:var(--muted)}.kv dd{margin:0;word-break:break-all}
+.sight{font-size:15px;line-height:1.6;margin:0;padding-left:20px}
+.sight a{color:var(--band)}
+.printgrid{display:flex;flex-wrap:wrap;gap:3mm;background:#fff;border-radius:12px;padding:14px;margin-top:12px}
+/* yönetim sekmeleri ve talepler */
+.tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:2px solid var(--line);overflow-x:auto}
+.tabs button{font:inherit;font-size:16px;font-weight:700;padding:10px 16px;border:0;background:none;color:var(--muted);
+  border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;white-space:nowrap}
+.tabs button.on{color:var(--band);border-bottom-color:var(--band)}
+.badge{display:inline-block;min-width:22px;padding:1px 7px;border-radius:999px;background:var(--err);color:#fff;font-size:13px;margin-left:4px}
+.reqs{display:grid;gap:12px}
+.req{background:#fff;border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:10px 18px;border-left:5px solid var(--line)}
+.req.st-yeni{border-left-color:var(--err)}.req.st-verildi{border-left-color:var(--ok)}
+.req.order.st-odeme_bildirildi{border-left-color:var(--err)}.req.order.st-onaylandi{border-left-color:#e0a100}
+.req.order.st-baskida{border-left-color:var(--band)}.req.order.st-kargolandi{border-left-color:var(--ok)}
+details.howto{background:#f7f3ee;margin:12px 0 0}
+details.howto ol{margin:8px 0 0;padding-left:20px;line-height:1.6;font-size:15px}
+.req h3{margin:0;font-size:18px}
+.req .meta{font-size:14px;color:var(--muted);line-height:1.6}
+.req .meta a{color:var(--band)}
+.req .note{margin:8px 0 0;padding:8px 10px;font-size:14px}
+.req .act{display:flex;flex-direction:column;gap:6px;min-width:200px}
+.req .act select,.req .act input{font:inherit;font-size:15px;padding:8px;border:2px solid var(--line);border-radius:6px}
+.req .act button{font:inherit;font-size:15px;font-weight:700;padding:8px;border:0;border-radius:6px;background:var(--band);color:#fff;cursor:pointer}
+@media (max-width:640px){.req{grid-template-columns:1fr}}
+.btn{display:block;width:100%;text-align:center;font:inherit;font-size:19px;font-weight:700;padding:16px;border-radius:8px;
+  border:0;background:var(--band);color:#fff;text-decoration:none;margin-top:14px;cursor:pointer}
+form .btn[type=submit]{margin-top:22px}
+.btn[disabled]{opacity:.6}
+.btn.call{background:var(--ok);font-size:22px;padding:20px}
+.btn.loc{background:var(--band2)}
+.btn.ghost{background:#fff;color:var(--band);border:2px solid var(--line)}
+.btn.danger{background:var(--err)}
+.btn.small{display:inline-block;width:auto;font-size:15px;padding:9px 14px;margin:6px 6px 0 0}
+.msg.info{background:#fff;color:var(--ink);border-left:4px solid var(--band)}
+.msg.info a{color:var(--band)}
+.btn:focus-visible,a:focus-visible,button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.msg{padding:12px 14px;border-radius:8px;font-size:15px;line-height:1.45;margin-bottom:14px}
+.msg.err{background:#fbe9e8;color:var(--err)}
+.msg.ok{background:#e6f4ec;color:var(--ok)}
+.small{font-size:14px;text-align:center;margin-top:26px}
+.small a{color:var(--muted)}
+.back{display:inline-block;font-size:15px;font-weight:600;color:var(--band);text-decoration:none;margin-bottom:14px}
+/* yönetim / baskı */
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.bar .btn{width:auto;margin:0;padding:10px 16px;font-size:15px}
+.bar select,.bar label{font:inherit;font-size:15px;margin:0}
+.bar select{padding:9px;border:2px solid var(--line);border-radius:8px;background:#fff;max-width:100%}
+.admingrid{display:flex;flex-wrap:wrap;gap:5mm;align-items:flex-start}
+.tag{break-inside:avoid;page-break-inside:avoid;display:flex;flex-direction:column}
+.state{width:max(var(--w),42mm);font-size:13px;color:#555;padding:6px 2px;background:var(--bg)}
+.state select{width:100%;margin-top:5px;font:inherit;font-size:14px;padding:7px;border:2px solid var(--line);border-radius:6px;background:#fff}
+.state .mini{display:block;width:100%;margin-top:5px;font:inherit;font-size:14px;font-weight:700;padding:8px;border-radius:6px;
+  border:0;background:var(--band);color:#fff;cursor:pointer}
+.state .mini.ghost{background:transparent;color:var(--band);border:2px solid var(--line);font-weight:600}
+.state .mini.alt{background:#2b3240}
+.state .mini[disabled],.bar .btn[disabled]{opacity:.6}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;
+  border-radius:10px;font-weight:600;z-index:20;box-shadow:0 6px 24px #0004;max-width:calc(100% - 32px);text-align:center}
+.confetti{position:fixed;top:-12px;width:9px;height:14px;z-index:19;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+@media (prefers-reduced-motion:reduce){.confetti{display:none}}
+@media print{.noprint,.tag.skip{display:none!important}body{background:#fff;padding:0}main,main.wide,main.mid{max-width:none}
+  .admingrid{gap:3mm}.printgrid{padding:0;border-radius:0;margin:0}
+  .admingrid.tek{display:block}.tek .tag{display:block}.tek .sticker,.tek .pin{break-after:page;page-break-after:always;margin:0 auto}}
+</style>
+</head>
+<body>
+<main id="app"><p>Yükleniyor…</p></main>
+
+<script>
+const app = document.getElementById("app");
+const params = new URLSearchParams(location.search);
+const BASE = location.origin + location.pathname;
+// Yerelde denerken de basılan QR'lar gerçek siteyi açsın
+const SITE = /^https?:$/.test(location.protocol) && !/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname) ? BASE : SITE_URL;
+const tagLink = code => `${SITE}?k=${encodeURIComponent(code)}`;
+
+// ---------------------------------------------------------------- yardımcılar
+async function rpc(fn, args = {}) {
+  const headers = {"Content-Type": "application/json", apikey: SUPABASE_KEY};
+  if (SUPABASE_KEY.startsWith("eyJ")) headers.Authorization = "Bearer " + SUPABASE_KEY; // eski tip anon key
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {method: "POST", headers, body: JSON.stringify(args)});
+  const data = await r.json().catch(() => null);
+  if (!r.ok) { const e = new Error(data?.message || r.statusText); e.status = r.status; throw e; }
+  return data;
+}
+
+function normalizePhone(raw) {
+  let s = String(raw || "").replace(/[^\d+]/g, "");
+  if (s.startsWith("00")) s = "+" + s.slice(2);
+  if (s.startsWith("+")) return (s.length - 1 >= 10 && s.length - 1 <= 15) ? s : null;
+  if (s.startsWith("90") && s.length === 12) return "+" + s;
+  if (s.startsWith("0") && s.length === 11) return "+9" + s;
+  if (s.startsWith("5") && s.length === 10) return "+90" + s;
+  return null;
+}
+
+function prettyPhone(p) {
+  if (p && p.startsWith("+90") && p.length === 13) {
+    const n = p.slice(3);
+    return `0${n.slice(0,3)} ${n.slice(3,6)} ${n.slice(6,8)} ${n.slice(8)}`;
+  }
+  return p || "";
+}
+
+const digits = p => String(p || "").replace(/\D/g, "");
+const waHref = (phone, text) => `https://wa.me/${digits(phone)}?text=${encodeURIComponent(text)}`;
+const smsHref = (phone, text) => `sms:${phone}?body=${encodeURIComponent(text)}`;
+const dateTR = t => t ? new Date(t).toLocaleString("tr-TR", {dateStyle: "medium", timeStyle: "short"}) : "";
+
+function ago(t) {
+  const m = Math.round((Date.now() - new Date(t)) / 60000);
+  if (m < 1) return "az önce";
+  if (m < 60) return `${m} dakika önce`;
+  if (m < 60 * 24) return `${Math.round(m / 60)} saat önce`;
+  return `${Math.round(m / 1440)} gün önce`;
+}
+
+function show(html, cls = "") { app.className = cls === true ? "wide" : cls; app.innerHTML = html; scrollTo(0, 0); }
+
+const petBadge = (name, code, lost) => `<div class="pet${lost ? " is-lost" : ""}"><div class="ic">${icon("paw", "#fff")}</div>
+  <div class="nm">${name ? esc(upTR(name)) : "TASMA QR"}</div><small>${esc(code)}</small></div>`;
+
+function showMessage(title, text) {
+  show(`<h1>${esc(title)}</h1><p>${esc(text)}</p><a class="btn ghost" href="${esc(BASE)}">Ana sayfa</a>`);
+}
+
+// ---------------------------------------------------------------- bu cihazdaki künyeler ve siparişler
+const store = {
+  get(key, fallback) { try { const v = localStorage.getItem("tasmaqr-" + key); return v === null ? fallback : JSON.parse(v); } catch (e) { return fallback; } },
+  set(key, value) { try { localStorage.setItem("tasmaqr-" + key, JSON.stringify(value)); } catch (e) {} },
+};
+const myTags = () => store.get("tags", []);
+const findTag = code => myTags().find(t => t.code === code);
+function saveTag(tag) {
+  const old = findTag(tag.code) || {design: "klasik", size: "y35", copies: 1, created: Date.now()};
+  store.set("tags", [{...old, ...tag}, ...myTags().filter(t => t.code !== tag.code)]);
+}
+const removeTag = code => store.set("tags", myTags().filter(t => t.code !== code));
+const myOrders = () => store.get("orders", []);
+function saveOrder(o) { store.set("orders", [{...myOrders().find(x => x.code === o.code), ...o}, ...myOrders().filter(x => x.code !== o.code)]); }
+function deviceId() {
+  let id = store.get("device", null);
+  if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now(); store.set("device", id); }
+  return id;
+}
+
+// ---------------------------------------------------------------- eğlence
+function toast(text, ms = 3200) {
+  document.querySelector(".toast")?.remove();
+  const t = Object.assign(document.createElement("div"), {className: "toast noprint", textContent: text});
+  t.setAttribute("role", "status");
+  document.body.append(t);
+  setTimeout(() => t.remove(), ms);
+}
+
+function confetti() {
+  const colors = ["#b8501a", "#ffd400", "#0c7a43", "#e05a8a", "#163a7a", "#c98b4f"];
+  for (let i = 0; i < 70; i++) {
+    const c = document.createElement("div");
+    c.className = "confetti noprint";
+    c.style.cssText = `left:${Math.random() * 100}vw;background:${colors[i % colors.length]};` +
+      `animation-duration:${1.6 + Math.random() * 1.6}s;animation-delay:${Math.random() * .4}s;border-radius:${i % 3 ? 2 : 50}px`;
+    document.body.append(c);
+    setTimeout(() => c.remove(), 3800);
+  }
+}
+
+// ---------------------------------------------------------------- bulan kişi: QR okutulunca
+function showFound(code, tag) {
+  const name = tag.pet_name || "", phone = tag.phone;
+  const hello = `Merhaba, ${name ? `${name} adlı köpeğinizi` : "köpeğinizi"} buldum (Tasma QR).`;
+  const since = tag.lost_since ? ` (${ago(tag.lost_since)} kayıp olarak işaretlendi)` : "";
+  const backup = tag.backup_phone ? `
+    <div class="msg info" style="margin-top:18px">Ulaşamazsanız${tag.backup_name ? ` <b>${esc(tag.backup_name)}</b>` : ""}:
+      <a href="tel:${esc(tag.backup_phone)}"><b>${esc(prettyPhone(tag.backup_phone))}</b></a></div>
+    <a class="btn ghost" href="tel:${esc(tag.backup_phone)}" style="margin-top:8px">Yedek numarayı ara</a>` : "";
+  show(`
+    ${petBadge(name, code, tag.lost)}
+    ${tag.lost ? `<div class="lost" role="alert"><b>🚨 ${name ? esc(upTR(name)) : "BU KÖPEK"} KAYIP!</b>Sahibi onu arıyor${esc(since)}.
+      Lütfen hemen arayın ve mümkünse köpeği güvenli bir yerde tutun.${tag.reward ? `<span class="reward">Ödül: ${esc(tag.reward)}</span>` : ""}</div>` : ""}
+    <h1>${name ? `Merhaba, ben ${esc(name)}! 🐾` : "Merhaba, beni buldun! 🐾"}</h1>
+    <p>Sahibime ulaşmama yardım eder misin? Aşağıdan arayabilir ya da bulunduğun yeri tek dokunuşla gönderebilirsin.</p>
+    ${tag.notes ? `<div class="msg info"><b>Sahibimin notu:</b> ${esc(tag.notes)}</div>` : ""}
+    <a class="btn call" href="tel:${esc(phone)}">📞 Sahibimi ara</a>
+    <button class="btn loc" type="button" id="loc">📍 Konumumu sahibine gönder</button>
+    <div id="locbox"></div>
+    <a class="btn ghost" href="${esc(waHref(phone, hello))}">💬 WhatsApp'tan yaz</a>
+    <a class="btn ghost" href="${esc(smsHref(phone, hello))}">✉️ SMS gönder</a>
+    ${backup}
+    <p class="small"><a href="${esc(tagLink(code))}&duzenle">Köpeğin sahibi misiniz? Bilgileri düzenleyin</a></p>`);
+  const btn = document.getElementById("loc"), box = document.getElementById("locbox");
+  const sendButtons = text => `<a class="btn" href="${esc(waHref(phone, text))}">WhatsApp'tan gönder</a>
+    <a class="btn ghost" href="${esc(smsHref(phone, text))}">SMS ile gönder</a>`;
+  btn.onclick = () => {
+    const fail = why => {
+      btn.disabled = false; btn.textContent = "📍 Tekrar dene";
+      box.innerHTML = `<div class="msg err" style="margin-top:14px">${esc(why)} Yine de mesajla nerede olduğunuzu yazabilirsiniz.</div>`;
+    };
+    if (!navigator.geolocation) return fail("Tarayıcınız konum paylaşımını desteklemiyor.");
+    btn.disabled = true; btn.textContent = "Konum alınıyor…";
+    navigator.geolocation.getCurrentPosition(async pos => {
+      const {latitude: lat, longitude: lng, accuracy} = pos.coords;
+      const text = `${hello} Şu an buradayız: https://maps.google.com/?q=${lat.toFixed(6)},${lng.toFixed(6)}`;
+      let saved = false;
+      try { saved = !!(await rpc("tasma_report_location", {p_code: code, p_lat: lat, p_lng: lng, p_accuracy: Math.round(accuracy || 0)}))?.ok; }
+      catch (e) {}
+      btn.remove();
+      box.innerHTML = `<div class="msg ok" style="margin-top:14px"><b>Teşekkürler!</b> Konumunuz alındı${saved ? " ve sahibinin künye sayfasına kaydedildi" : ""}.
+        Sahibine hemen haber vermek için mesajla da gönderin:</div>${sendButtons(text)}`;
+      confetti();
+    }, err => fail(err.code === 1 ? "Konum izni verilmedi." : "Konum alınamadı."),
+    {enableHighAccuracy: true, timeout: 15000, maximumAge: 60000});
+  };
+}
+
+// ---------------------------------------------------------------- sahibi: künyeyi bağla / düzenle (PIN ile)
+function showEdit(code, tag, error = "", v = null) {
+  const claim = !tag.phone, own = findTag(code);
+  v ||= {name: tag.pet_name || own?.name || "", phone: prettyPhone(tag.phone), lost: !!tag.lost, reward: tag.reward || "",
+    notes: tag.notes || "", backup: prettyPhone(tag.backup_phone), backupName: tag.backup_name || "", pin: own?.pin || ""};
+  const val = k => `value="${esc(v[k] || "")}"`;
+  show(`
+    ${petBadge(v.name, code, v.lost)}
+    <h1>${claim ? "Bu künyeyi köpeğinize bağlayın" : "Künye bilgilerini düzenleyin"}</h1>
+    <p>${claim ? "Künye henüz kullanılmıyor. Bilgilerinizi ve künyeyle gelen karttaki PIN'i girin. Bundan sonra QR'ı okutan herkes sizi arayabilecek."
+              : "Değişiklikler QR'ı okutan kişiye hemen yansır. Kaydetmek için künyenin PIN'i gerekir."}</p>
+    ${error ? `<div class="msg err" role="alert">${esc(error)}</div>` : ""}
+    <form id="f" novalidate>
+      <label for="e-name">Köpeğinizin adı</label>
+      <input id="e-name" maxlength="20" autocomplete="off" placeholder="ör. Karabaş" ${val("name")}>
+      <label for="e-phone">QR okutulunca aranacak numara</label>
+      <input id="e-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" ${val("phone")}>
+      <label class="check lostcheck"><input type="checkbox" id="e-lost"${v.lost ? " checked" : ""}> 🚨 Köpeğim kayıp: QR'ı okutana kırmızı uyarı gösterilsin</label>
+      <label for="e-reward">Ödül <span class="opt">(isteğe bağlı, yalnızca kayıpken gösterilir)</span></label>
+      <input id="e-reward" maxlength="60" placeholder="ör. 1.000 TL" ${val("reward")}>
+      <label for="e-notes">Bulan kişiye notunuz <span class="opt">(isteğe bağlı)</span></label>
+      <textarea id="e-notes" rows="3" maxlength="300" placeholder="ör. Çekingendir, yavaşça yaklaşın. Kalp ilacı kullanıyor. Mikroçipi var.">${esc(v.notes)}</textarea>
+      <div class="row2">
+        <div><label for="e-backup">Yedek numara <span class="opt">(isteğe bağlı)</span></label>
+          <input id="e-backup" type="tel" inputmode="tel" placeholder="05xx xxx xx xx" ${val("backup")}></div>
+        <div><label for="e-bname">Yedek kişinin adı</label><input id="e-bname" maxlength="40" placeholder="ör. Eşim Ayşe" ${val("backupName")}></div>
+      </div>
+      <label for="e-pin">${claim ? "Karttaki PIN" : "PIN"}</label>
+      <input id="e-pin" type="text" inputmode="numeric" maxlength="6" placeholder="6 haneli" autocomplete="off" ${val("pin")}>
+      ${own?.pin && !claim ? `<span class="hint">PIN bu cihazda kayıtlı olduğu için dolduruldu.</span>` : ""}
+      <button class="btn" type="submit">${claim ? "Künyeyi bağla" : "Kaydet"}</button>
+    </form>
+    <p class="small"><a href="${esc(tagLink(code))}">Vazgeç</a></p>`, "mid");
+  document.getElementById("f").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const g = id => document.getElementById(id);
+    const nv = {name: g("e-name").value.trim(), phone: g("e-phone").value.trim(), lost: g("e-lost").checked, reward: g("e-reward").value.trim(),
+      notes: g("e-notes").value.trim(), backup: g("e-backup").value.trim(), backupName: g("e-bname").value.trim(), pin: g("e-pin").value.trim()};
+    const again = msg => showEdit(code, tag, msg, nv);
+    const phone = normalizePhone(nv.phone), backup = nv.backup ? normalizePhone(nv.backup) : null;
+    if (!nv.name) return again("Köpeğinizin adını yazın.");
+    if (!phone) return again("Numara geçersiz. Örnek: 0532 123 45 67");
+    if (nv.backup && !backup) return again("Yedek numara geçersiz. İstemiyorsanız boş bırakın.");
+    if (!/^\d{6}$/.test(nv.pin)) return again("PIN 6 haneli olmalı.");
+    ev.submitter && (ev.submitter.disabled = true);
+    let res;
+    try {
+      res = await rpc("tasma_tag_save", {p_code: code, p_pin: nv.pin, p_phone: phone, p_pet_name: nv.name, p_notes: nv.notes,
+        p_lost: nv.lost, p_reward: nv.reward, p_backup_phone: backup, p_backup_name: nv.backupName, p_claim: claim});
+    } catch (e) { return again("Bağlantı hatası. İnternetinizi kontrol edip tekrar deneyin."); }
+    if (res?.ok) {
+      saveTag({code, pin: nv.pin, name: nv.name, phone});
+      return showSaved(code, nv.name, phone, claim, nv.lost);
+    }
+    if (res?.error === "already") return route(); // biri az önce bağlamış
+    again({bad_pin: claim ? "PIN hatalı. Künyeyle gelen karttaki 6 haneli PIN'i girin." : "PIN hatalı. Künyeyi oluştururken gösterilen ya da kartta yazan 6 haneli PIN'i girin.",
+      locked: `Çok fazla yanlış deneme. ${res?.minutes || 15} dakika sonra tekrar deneyin.`,
+      bad_phone: "Numara geçersiz. Örnek: 0532 123 45 67", bad_backup: "Yedek numara geçersiz.",
+      missing: "Köpeğinizin adını yazın.", not_found: "Bu künye bulunamadı."}[res?.error] || "Kaydedilemedi, tekrar deneyin.");
+  });
+}
+
+function showSaved(code, name, phone, claimed, lost) {
+  show(`
+    ${petBadge(name, code, lost)}
+    <div class="msg ok">${claimed ? `Künye bağlandı! Bu QR artık ${esc(prettyPhone(phone))} numarasını arar.` : "Kaydedildi."}
+      ${lost ? "<br><b>Kayıp modu açık:</b> QR'ı okutan kişi kırmızı uyarıyı görecek. Umarız çabucak kavuşursunuz." : ""}</div>
+    <p>PIN'inizi saklayın; bilgileri değiştirmek için gerekecek. Künye bu cihazda <b>Künyelerim</b>'e de eklendi.</p>
+    <a class="btn" href="${esc(BASE)}#kunye/${encodeURIComponent(code)}">Künyemi gör</a>
+    <a class="btn ghost" href="${esc(tagLink(code))}">QR'ı test et</a>`);
+  if (!lost) confetti();
+}
+
+// ---------------------------------------------------------------- PDF
+function loadScript(src) {
+  return new Promise((ok, fail) => {
+    if (document.querySelector(`script[src="${src}"]`)) return ok();
+    const el = Object.assign(document.createElement("script"), {src, onload: ok, onerror: () => fail(new Error("Kütüphane yüklenemedi"))});
+    document.head.append(el);
+  });
+}
+
+async function loadPdfLibs() {
+  await Promise.all([
+    loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"),
+    loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"),
+  ]);
+  await document.fonts?.ready;
+}
+
+const PX = 25.4 / 96; // CSS px -> mm
+
+async function snap(el) {
+  const r = el.getBoundingClientRect();
+  const canvas = await html2canvas(el, {scale: 6, backgroundColor: "#ffffff", logging: false});
+  return {img: canvas.toDataURL("image/png"), w: r.width * PX, h: r.height * PX};
+}
+
+// Görüntüleri A4'e gerçek boyutlarıyla dizer
+function layoutA4(pdf, shots) {
+  const {W, H, M, G} = A4;
+  let x = M, y = M, rowH = 0, first = true;
+  for (const s of shots) {
+    if (x + s.w > W - M + .1) { x = M; y += rowH + G; rowH = 0; }
+    if (y + s.h > H - M + .1) { pdf.addPage(); x = M; y = M; rowH = 0; }
+    pdf.addImage(s.img, "PNG", x, y, s.w, s.h, undefined, "FAST");
+    x += s.w + G; rowH = Math.max(rowH, s.h); first = false;
+  }
+  return !first;
+}
+
+// Tek künye sayfası (matbaa / etiket yazıcısı): PIN kartı da sığsın
+const singlePage = size => { const {w, h} = dims(size); return {w: Math.max(w, 46), h: Math.max(h, 32)}; };
+
+function downloadBlob(blob, name) {
+  const a = Object.assign(document.createElement("a"), {href: URL.createObjectURL(blob), download: name});
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+// ---------------------------------------------------------------- ana sayfa ve talep formu
+const SAMPLE_NAMES = ["KARABAŞ", "PAMUK", "ZEYTİN", "FINDIK", "BOBİ", "TARÇIN", "ÇAPKIN", "LOKUM"];
+const randomOf = a => a[Math.floor(Math.random() * a.length)];
+
+function showcaseHtml() {
+  if (typeof qrcode !== "function") return "";
+  const d = pickRandom(), name = randomOf(SAMPLE_NAMES), link = BASE + "#olustur";
+  return `<div class="pair">${tagAt("ÖRNEK", d, "y40", {link, name})}${tagAt("ÖRNEK", d, "k35x50", {link, name})}</div>`;
+}
+
+function showHome() {
+  const mine = myTags().length;
+  show(`
+    <div class="hero">
+      <div>
+        <h1>Köpeğiniz kaybolursa, onu bulan sizi tek dokunuşla arasın</h1>
+        <p class="lead">Tasmadaki QR künyeyi okutan kişi köpeğinizin adını, notunuzu ve <b>sahibini ara</b> butonunu görür; isterse bulunduğu yeri tek dokunuşla size gönderir. Okutan kişinin uygulama indirmesine gerek yok.</p>
+        <a class="btn cta" href="#olustur">Ücretsiz künyemi oluştur</a>
+        <a class="btn cta alt" href="#talep">Hazır künye iste</a>
+        ${mine ? `<a class="btn cta ghost" href="#kunyelerim">Künyelerim (${mine})</a>` : ""}
+      </div>
+      <div class="showcase" aria-label="Örnek künyeler">
+        <div id="sample">${showcaseHtml()}</div>
+        <button type="button" id="another">🎲 Başka tasarım göster</button>
+      </div>
+    </div>
+
+    <div class="note">Bir köpeğin tasmasındaki QR'ı okuttuysanız sahibine ulaşma ekranı doğrudan açılır. Bu sayfa künye edinmek isteyenler içindir.</div>
+
+    <section>
+      <h2>Nasıl çalışır?</h2>
+      <ol class="steps">
+        <li><b>Künyenizi oluşturun</b>Köpeğinizin adını ve telefonunuzu girin, tasarımı seçin. Bir dakika sürer, ücretsizdir.</li>
+        <li><b>Yazdırıp takın</b>İstediğiniz ölçüde yazdırın, künyeye ya da tasmaya yapıştırın. İsterseniz su geçirmez baskısını sipariş edin.</li>
+        <li><b>Kaybolursa kayıp modunu açın</b>QR'ı okutan kişi kırmızı “KAYIP” uyarısını ve varsa ödül notunuzu görür.</li>
+        <li><b>Bulan kişi size ulaşır</b>Tek dokunuşla sizi arar, WhatsApp'tan yazar ya da konumunu gönderir.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Neden Tasma QR?</h2>
+      <div class="perks">
+        <div><b>Numaranız künyede yazmaz</b>Yoldan geçen herkes numaranızı göremez; yalnızca QR'ı okutan kişi arama ekranında görür.</div>
+        <div><b>Uygulama gerekmez</b>Her telefonun kamerası okur, sayfa kendiliğinden açılır.</div>
+        <div><b>Konum paylaşımı</b>Bulan kişi tek dokunuşla konumunu gönderir; son konumları künye sayfanızda görürsünüz.</div>
+        <div><b>Kayıp modu ve ödül</b>Köpeğiniz kaybolunca bir dokunuşla açın, bulan kişi durumun acil olduğunu hemen anlasın.</div>
+        <div><b>Sağlık ve karakter notu</b>“İlaç kullanıyor”, “çekingendir, yavaş yaklaşın” gibi bilgileri bulan kişi görür.</div>
+        <div><b>Her ırka bir ölçü</b>Ø25 mm'den büyük ırklar için 50×75 mm'ye; ${Object.keys(DESIGNS).length} farklı tasarım.</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Sık sorulanlar</h2>
+      <details><summary>Numaram herkese görünür mü?</summary><p>Künyede numaranız yazmaz. QR'ı okutan kişi sizi arayabilsin diye arama ekranında numaranızı görür.</p></details>
+      <details><summary>Telefon numaram değişirse ne olacak?</summary><p>QR'ı okutun, sayfanın altındaki “Bilgileri düzenleyin” bağlantısına dokunun ve PIN'inizle yeni numaranızı girin. Künyeyi yeniden basmanız gerekmez.</p></details>
+      <details><summary>Künyeyi nasıl hazırlarım?</summary><p>Yazdırdığınız künyeyi kesip metal ya da plastik künyenin üzerine yapıştırın, üzerini şeffaf koli bandı veya laminasyonla kaplayın. Suya ve sürtünmeye dayanıklı baskıyı sipariş de edebilirsiniz.</p></details>
+      <details><summary>Konumum kaydediliyor mu?</summary><p>Yalnızca bulan kişi “Konumumu sahibine gönder” butonuna basıp izin verirse kaydedilir ve yalnızca künyenin sahibi görür. QR'ı okutmak tek başına konum göndermez.</p></details>
+      <details><summary>Mikroçipin yerine geçer mi?</summary><p>Hayır. Mikroçip yasal zorunluluktur ve kalıcıdır; Tasma QR, köpeğinizi bulan kişinin size dakikalar içinde ulaşabilmesi için ek bir önlemdir.</p></details>
+      <details><summary>PIN'imi kaybedersem?</summary><p>Künyeyi bu cihazda oluşturduysanız PIN <b>Künyelerim</b>'de yazar. Değilse talep formunun not alanından bize yazın, yardımcı olalım.</p></details>
+    </section>
+
+    <section id="talep">
+      <h2>Hazır künye talep formu</h2>
+      <p>Künyeyi kendiniz oluşturmak istemiyorsanız formu doldurun; QR künyenizi ve size özel PIN kartını e-postayla ya da WhatsApp'tan gönderelim.</p>
+      <div class="card" id="formbox">${requestFormHtml()}</div>
+    </section>`, "home");
+  document.getElementById("another").onclick = () => { document.getElementById("sample").innerHTML = showcaseHtml(); };
+  bindRequestForm();
+  if (location.hash === "#talep") document.getElementById("talep").scrollIntoView();
+}
+
+function requestFormHtml(error = "", v = {}) {
+  const val = k => `value="${esc(v[k] || "")}"`;
+  return `
+    ${error ? `<div class="msg err" role="alert">${esc(error)}</div>` : ""}
+    <form id="rf" novalidate>
+      <div class="row2">
+        <div><label for="r-first">Ad</label><input id="r-first" autocomplete="given-name" required ${val("first")}></div>
+        <div><label for="r-last">Soyad</label><input id="r-last" autocomplete="family-name" required ${val("last")}></div>
+      </div>
+      <label for="r-email">E-posta</label>
+      <input id="r-email" type="email" inputmode="email" autocomplete="email" placeholder="ornek@mail.com" required ${val("email")}>
+      <label for="r-phone">Telefon <span class="opt">(isteğe bağlı)</span></label>
+      <input id="r-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" aria-describedby="r-phone-hint" ${val("phone")}>
+      <span id="r-phone-hint" class="hint">Künyeyi WhatsApp'tan isterseniz telefonunuzu girin.</span>
+      <label for="r-pet">Köpeğinizin adı <span class="opt">(isteğe bağlı)</span></label>
+      <input id="r-pet" maxlength="20" ${val("pet")}>
+      <label for="r-note">Notunuz <span class="opt">(isteğe bağlı: tasarım, ölçü, adet…)</span></label>
+      <textarea id="r-note" rows="3" maxlength="500">${esc(v.note || "")}</textarea>
+      <div class="hp" aria-hidden="true"><label for="r-web">Web sitesi</label><input id="r-web" tabindex="-1" autocomplete="off"></div>
+      <label class="check"><input type="checkbox" id="r-ok"${v.ok ? " checked" : ""}> Bilgilerimin yalnızca künye talebimin işlenmesi ve benimle iletişim kurulması amacıyla kullanılmasını kabul ediyorum.</label>
+      <button class="btn" type="submit">Talep gönder</button>
+    </form>`;
+}
+
+function bindRequestForm() {
+  document.getElementById("rf").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const g = id => document.getElementById(id);
+    const v = {first: g("r-first").value.trim(), last: g("r-last").value.trim(), email: g("r-email").value.trim(),
+      phone: g("r-phone").value.trim(), pet: g("r-pet").value.trim(), note: g("r-note").value.trim(), ok: g("r-ok").checked};
+    const box = g("formbox");
+    const fail = msg => { box.innerHTML = requestFormHtml(msg, v); bindRequestForm(); box.querySelector(".msg").scrollIntoView({block: "center"}); };
+    if (!v.first || !v.last) return fail("Ad ve soyadınızı yazın.");
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) return fail("E-posta adresi geçersiz. Örnek: ornek@mail.com");
+    const phone = v.phone ? normalizePhone(v.phone) : null;
+    if (v.phone && !phone) return fail("Telefon numarası geçersiz (örnek: 0532 123 45 67). İstemiyorsanız boş bırakabilirsiniz.");
+    if (!v.ok) return fail("Devam etmek için bilgilendirme onayını işaretleyin.");
+    const done = () => {
+      box.innerHTML = `<div class="msg ok" role="status"><b>Talebiniz alındı, teşekkürler ${esc(v.first)}!</b><br>${phone ? `Künyenizi ${esc(prettyPhone(phone))} numarasına WhatsApp'tan göndereceğiz.` : `En kısa sürede ${esc(v.email)} adresinden size ulaşacağız.`}</div>`;
+      confetti();
+    };
+    if (g("r-web").value) return done(); // bot tuzağı: sessizce geç
+    ev.submitter && (ev.submitter.disabled = true);
+    try {
+      const res = await rpc("tasma_request_create", {p_first_name: v.first, p_last_name: v.last, p_email: v.email, p_phone: phone,
+        p_pet_name: v.pet || null, p_note: v.note || null});
+      if (res?.ok) return done();
+      fail({missing: "Ad ve soyadınızı yazın.", bad_email: "E-posta adresi geçersiz.", bad_phone: "Telefon numarası geçersiz.",
+        too_many: "Bugün bu bilgilerle zaten talep gönderdiniz; sizinle iletişime geçeceğiz.",
+        busy: "Şu an çok yoğunuz, birkaç dakika sonra tekrar deneyin."}[res?.error] || "Talep gönderilemedi, tekrar deneyin.");
+    } catch (e) {
+      fail("Bağlantı hatası. İnternetinizi kontrol edip tekrar deneyin.");
+    }
+  });
+}
+
+// ---------------------------------------------------------------- sahibi: kendi künyesini oluşturur
+const backLink = (href, text) => `<a class="back" href="${esc(href)}">← ${esc(text)}</a>`;
+const designChips = sel => `<div class="designs" role="radiogroup" aria-label="Tasarım">${Object.entries(DESIGNS).map(([k, d]) =>
+  `<button type="button" role="radio" aria-checked="${k === sel}" data-d="${k}" class="${k === sel ? "on" : ""}"><i style="background:${d.ring}"></i>${esc(d.name)}</button>`).join("")}</div>`;
+
+function showCreate(error = "", v = {}) {
+  v = {design: store.get("lastDesign", "klasik"), name: "", phone: store.get("lastPhone", ""), ...v};
+  if (typeof qrcode !== "function") return showMessage("QR kütüphanesi yüklenemedi", "Sayfayı yenileyip tekrar deneyin.");
+  const preview = () => `${tagAt("······", v.design, "y35", {link: SITE, name: v.name})}${tagAt("······", v.design, "k35x50", {link: SITE, name: v.name})}`;
+  show(`
+    ${backLink("#", "Ana sayfa")}
+    <h1>Künyenizi oluşturun</h1>
+    <p>Köpeğinizin adını ve size ulaşılacak numarayı girin, tasarımı seçin. Sonra istediğiniz ölçüde yazdırabilirsiniz.</p>
+    <div class="preview" id="pv">${preview()}</div>
+    ${error ? `<div class="msg err" role="alert" style="margin-top:14px">${esc(error)}</div>` : ""}
+    <form id="f" novalidate>
+      <label for="c-name">Köpeğinizin adı</label>
+      <input id="c-name" maxlength="20" autocomplete="off" placeholder="ör. Karabaş" value="${esc(v.name)}">
+      <label for="c-phone">QR okutulunca aranacak numara</label>
+      <input id="c-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" value="${esc(v.phone)}">
+      <span class="hint">Numaranız künyede yazmaz. QR'ı okutan kişi sizi arayabilsin diye arama ekranında görür. Sonradan değiştirebilirsiniz.</span>
+      <label>Tasarım</label>
+      ${designChips(v.design)}
+      <button class="btn" type="submit">Künyemi oluştur</button>
+    </form>`, "mid");
+  const g = id => document.getElementById(id), pv = g("pv");
+  let timer;
+  g("c-name").oninput = () => { clearTimeout(timer); timer = setTimeout(() => { v.name = g("c-name").value.trim(); pv.innerHTML = preview(); }, 150); };
+  document.querySelector(".designs").onclick = ev => {
+    const b = ev.target.closest("[data-d]");
+    if (!b) return;
+    v.design = b.dataset.d;
+    document.querySelectorAll(".designs button").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-checked", x === b); });
+    pv.innerHTML = preview();
+  };
+  g("f").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    v.name = g("c-name").value.trim(); v.phone = g("c-phone").value.trim();
+    const phone = normalizePhone(v.phone);
+    if (!v.name) return showCreate("Köpeğinizin adını yazın.", v);
+    if (!phone) return showCreate("Numara geçersiz. Örnek: 0532 123 45 67", v);
+    ev.submitter && (ev.submitter.disabled = true, ev.submitter.textContent = "Oluşturuluyor…");
+    let res;
+    try { res = await rpc("tasma_tag_create", {p_pet_name: v.name, p_phone: phone, p_device: deviceId()}); }
+    catch (e) { return showCreate(navigator.onLine === false ? "İnternet bağlantısı yok. Bağlanıp tekrar deneyin." : "Sunucuya ulaşılamadı, biraz sonra tekrar deneyin.", v); }
+    if (!res?.ok) {
+      return showCreate({bad_phone: "Numara geçersiz. Örnek: 0532 123 45 67", missing: "Köpeğinizin adını yazın.",
+        too_many: "Bugün çok fazla künye oluşturdunuz. Yarın tekrar deneyin ya da Künyelerim'deki künyeyi kullanın.",
+        busy: "Şu an çok yoğun, birkaç dakika sonra tekrar deneyin."}[res?.error] || "Künye oluşturulamadı, tekrar deneyin.", v);
+    }
+    store.set("lastPhone", v.phone); store.set("lastDesign", v.design);
+    saveTag({code: res.code, pin: res.pin, name: v.name, phone, design: v.design, created: Date.now()});
+    location.replace(`#kunye/${encodeURIComponent(res.code)}/yeni`);
+  });
+}
+
+// ---------------------------------------------------------------- sahibi: künyelerim
+const loadStats = async tags => {
+  if (!tags.length) return {};
+  try {
+    const rows = await rpc("tasma_tag_stats", {p_codes: tags.map(t => t.code), p_pins: tags.map(t => t.pin)});
+    const map = Object.fromEntries((rows || []).map(r => [r.code, r]));
+    // sunucudaki güncel ad ve numarayı yerelde de güncelle
+    tags.forEach(t => { const r = map[t.code]; if (r && (r.pet_name !== t.name || r.phone !== t.phone)) saveTag({code: t.code, name: r.pet_name, phone: r.phone}); });
+    return map;
+  } catch (e) { return {}; }
+};
+
+const statLine = st => !st ? "" : `${st.lost ? `<span class="tagchip red">KAYIP</span>` : ""}👀 ${st.last30} okutma / 30 gün` +
+  (st.sightings?.length ? ` · 📍 son konum ${ago(st.sightings[0].at)}` : "");
+
+const ORDER_STATUS = {
+  odeme_bekleniyor: "Ödeme bekleniyor", odeme_bildirildi: "Ödeme yapıldı, kontrol edilecek",
+  onaylandi: "Onaylandı, baskıya gönderilecek", baskida: "Baskıda", kargolandi: "Kargolandı", iptal: "İptal",
+};
+
+function showMine(error = "") {
+  const list = myTags(), orders = myOrders();
+  show(`
+    ${backLink("#", "Ana sayfa")}
+    <h1>Künyelerim</h1>
+    <p>Bu cihazda oluşturduğunuz ya da eklediğiniz künyeler. Tarayıcı verilerini silerseniz liste de silinir; PIN'lerinizi bir yere not edin.</p>
+    ${list.length ? `<div class="cards">${list.map(t => `
+      <a class="mine" href="#kunye/${encodeURIComponent(t.code)}" data-code="${esc(t.code)}">
+        ${tagAt(t.code, t.design, "y25", {name: t.name})}
+        <div><b>${esc(t.name || t.code)}</b>
+          <span>${esc(t.code)} · ${esc(prettyPhone(t.phone))}<br><span data-stat>…</span></span></div>
+      </a>`).join("")}</div>` : `<div class="msg info">Henüz künyeniz yok.</div>`}
+    <a class="btn" href="#olustur">+ Yeni künye oluştur</a>
+    <details style="margin-top:14px"${error ? " open" : ""}><summary>Elimdeki künyeyi ekle (kod ve PIN ile)</summary>
+      ${error ? `<div class="msg err" style="margin-top:10px">${esc(error)}</div>` : ""}
+      <form id="addf" novalidate>
+        <div class="row2">
+          <div><label for="a-code">Künye kodu</label><input id="a-code" autocomplete="off" placeholder="ör. K7F3A9C2" style="text-transform:uppercase"></div>
+          <div><label for="a-pin">PIN</label><input id="a-pin" inputmode="numeric" maxlength="6" autocomplete="off"></div>
+        </div>
+        <button class="btn ghost" type="submit">Ekle</button>
+      </form>
+    </details>
+    ${orders.length ? `<h2>Siparişlerim</h2><div class="cards">${orders.map(o => `
+      <a class="mine" href="#odeme/${encodeURIComponent(o.code)}" style="grid-template-columns:1fr">
+        <div><b>${esc(o.code)} · ${esc(o.amount)} TL</b>
+          <span data-order="${esc(o.code)}">${esc(ORDER_STATUS[o.status] || o.status)}${o.tracking ? ` · Takip no: ${esc(o.tracking)}` : ""}</span></div>
+      </a>`).join("")}</div>` : ""}`, "mid");
+  document.getElementById("addf").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const code = document.getElementById("a-code").value.trim().toUpperCase(), pin = document.getElementById("a-pin").value.trim();
+    if (!code || !/^\d{6}$/.test(pin)) return showMine("Künye kodunu ve 6 haneli PIN'i girin.");
+    let rows;
+    try { rows = await rpc("tasma_tag_stats", {p_codes: [code], p_pins: [pin]}); }
+    catch (e) { return showMine("Bağlantı hatası, tekrar deneyin."); }
+    const r = rows?.[0];
+    if (!r) return showMine("Kod ya da PIN hatalı.");
+    if (!r.phone) { location.href = `${tagLink(code)}&duzenle`; return; } // henüz bağlanmamış: önce bağlasın
+    saveTag({code, pin, name: r.pet_name, phone: r.phone});
+    location.hash = `#kunye/${encodeURIComponent(code)}`;
+  });
+  loadStats(list).then(st => document.querySelectorAll(".mine[data-code]").forEach(el => {
+    const s = st[el.dataset.code];
+    el.classList.toggle("is-lost", !!s?.lost);
+    el.querySelector("[data-stat]").innerHTML = statLine(s);
+  }));
+  refreshOrders().then(() => myOrders().forEach(o => {
+    const el = document.querySelector(`[data-order="${CSS.escape(o.code)}"]`);
+    if (el) el.textContent = (ORDER_STATUS[o.status] || o.status) + (o.tracking ? ` · Takip no: ${o.tracking}` : "");
+  }));
+}
+
+async function refreshOrders() {
+  const list = myOrders();
+  if (!list.length) return;
+  try {
+    const rows = await rpc("tasma_order_status", {p_codes: list.map(o => o.code), p_tokens: list.map(o => o.token)});
+    (rows || []).forEach(r => saveOrder({code: r.code, status: r.status, tracking: r.tracking}));
+  } catch (e) {}
+}
+
+// ---------------------------------------------------------------- sahibi: tek künye (yazdır, PDF, kayıp modu, konumlar)
+function showTagPage(code, fresh) {
+  const t = findTag(code);
+  if (!t) {
+    return show(`${backLink("#kunyelerim", "Künyelerim")}<h1>Künye bu cihazda kayıtlı değil</h1>
+      <p>Künyeyi Künyelerim'den kodu ve PIN'i ile ekleyebilirsiniz.</p><a class="btn" href="#kunyelerim">Künyelerim</a>`);
+  }
+  const {w, h} = dims(t.size), fit = perA4({w, h});
+  const copies = Math.min(t.copies || 1, fit);
+  const copyOpts = [...new Set([1, 2, 4, 6, 10, fit].filter(n => n <= fit))];
+  show(`
+    <div class="noprint">
+      ${backLink("#kunyelerim", "Künyelerim")}
+      ${petBadge(t.name, t.code)}
+      ${fresh ? `<div class="msg ok"><b>Künyeniz hazır!</b> Aşağıdaki PIN'i bir yere not edin: bilgileri değiştirmek ve kayıp modunu açmak için gerekir.</div>` : ""}
+      <div class="card">
+        <div id="lostbox"></div>
+        <dl class="kv">
+          <dt>PIN</dt><dd><b id="pinv">${fresh ? esc(t.pin) : "••••••"}</b> ${fresh ? "" : `<button class="chip" type="button" id="pinshow">Göster</button>`}</dd>
+          <dt>Aranacak</dt><dd>${esc(prettyPhone(t.phone))}</dd>
+          <dt>QR adresi</dt><dd><a href="${esc(tagLink(t.code))}" style="color:var(--band)">${esc(tagLink(t.code))}</a></dd>
+          <dt>Okutma</dt><dd id="scans">…</dd>
+        </dl>
+        <div id="sightings"></div>
+        <a class="btn ghost" href="${esc(tagLink(t.code))}&duzenle">Bilgileri düzenle (ad, numara, not, ödül)</a>
+      </div>
+
+      <div class="card">
+        <h2>Yazdır</h2>
+        <div class="bar">
+          <select id="size" aria-label="Ölçü">${Object.entries(SIZES).map(([k, n]) => `<option value="${k}"${k === t.size ? " selected" : ""}>${esc(n)}</option>`).join("")}</select>
+          <select id="copies" aria-label="Adet">${copyOpts.map(n => `<option value="${n}"${n === copies ? " selected" : ""}>${n === fit ? `A4 dolusu (${n} adet)` : `${n} adet`}</option>`).join("")}</select>
+        </div>
+        ${designChips(t.design)}
+        <div class="bar" style="margin:16px 0 0">
+          <button class="btn" type="button" id="print">Yazdır</button>
+          <button class="btn alt" type="button" id="pdf">PDF indir</button>
+        </div>
+        <span class="hint">Yazdırırken ölçek <b>%100 / Gerçek boyut</b> olmalı. Künyeyi kesip yapıştırın, üzerini şeffaf bant ya da laminasyonla kaplayın.</span>
+      </div>
+      <div id="shopbox"></div>
+    </div>
+    <div class="printgrid" id="pg" style="${sizeVars(t.size)}">${Array.from({length: copies}, () => tagHtml(t.code, t.design, {name: t.name, round: dims(t.size).round})).join("")}</div>
+    <div class="noprint">
+      <p class="small"><a href="#" id="forget">Bu künyeyi bu cihazdan kaldır</a></p>
+    </div>`, "mid");
+  if (fresh) confetti();
+  const g = id => document.getElementById(id);
+  const pageStyle = () => {
+    let st = g("pagestyle");
+    if (!st) { st = Object.assign(document.createElement("style"), {id: "pagestyle"}); document.head.append(st); }
+    st.textContent = `@page{size:A4;margin:${A4.M}mm}`;
+  };
+  const rerender = patch => { saveTag({code, ...patch}); showTagPage(code, fresh); };
+  g("pinshow")?.addEventListener("click", ev => { g("pinv").textContent = t.pin; ev.target.remove(); });
+  g("size").onchange = () => rerender({size: g("size").value});
+  g("copies").onchange = () => rerender({copies: Number(g("copies").value)});
+  document.querySelector(".designs").onclick = ev => { const b = ev.target.closest("[data-d]"); if (b) rerender({design: b.dataset.d}); };
+  g("print").onclick = () => { pageStyle(); print(); };
+  g("pdf").onclick = async ev => {
+    ev.target.disabled = true;
+    toast("PDF hazırlanıyor…", 60000);
+    try {
+      await loadPdfLibs();
+      const s = await snap(document.querySelector("#pg .sticker"));
+      const pdf = new window.jspdf.jsPDF({unit: "mm", format: "a4"});
+      layoutA4(pdf, Array.from({length: copies}, () => s));
+      pdf.save(`kunye-${t.code}-${t.size}.pdf`);
+      toast("PDF indirildi.");
+    } catch (e) { toast("PDF oluşturulamadı: " + e.message, 5000); }
+    ev.target.disabled = false;
+  };
+  g("forget").onclick = ev => {
+    ev.preventDefault();
+    if (!confirm(`${t.name || t.code} künyesi bu cihazdan kaldırılsın mı? Künye çalışmaya devam eder; PIN'iniz yoksa bir daha ekleyemezsiniz.\n\nPIN: ${t.pin}`)) return;
+    removeTag(code); location.hash = "#kunyelerim";
+  };
+  // sunucudan güncel durum: kayıp modu, okutmalar, konumlar
+  loadStats([t]).then(st => {
+    const s = st[code];
+    if (!s) { g("scans").textContent = "alınamadı"; return; }
+    g("scans").textContent = s.total ? `${s.total} kez (son 30 günde ${s.last30}) · son: ${ago(s.last)}` : "Henüz okutulmadı";
+    g("sightings").innerHTML = s.sightings.length ? `<h2>📍 Bulan kişilerin gönderdiği konumlar</h2><ol class="sight">${s.sightings.map(x =>
+      `<li><a href="https://maps.google.com/?q=${x.lat},${x.lng}" target="_blank" rel="noopener">${esc(dateTR(x.at))}</a> · ${esc(ago(x.at))}${x.accuracy ? ` · ±${esc(x.accuracy)} m` : ""}</li>`).join("")}</ol>` : "";
+    const lostHtml = () => s.lost
+      ? `<div class="lost"><b>🚨 Kayıp modu açık</b>QR'ı okutan kişi kırmızı uyarıyı görüyor.<button class="btn ghost" type="button" id="lostbtn">${esc(t.name || "Köpeğim")} bulundu, kayıp modunu kapat</button></div>`
+      : `<button class="btn danger" type="button" id="lostbtn" style="margin:0 0 16px">🚨 Köpeğim kayboldu: kayıp modunu aç</button>`;
+    g("lostbox").innerHTML = lostHtml();
+    g("lostbox").onclick = async ev => {
+      if (ev.target.id !== "lostbtn") return;
+      const on = !s.lost;
+      if (on && !confirm("Kayıp modu açılsın mı? QR'ı okutan kişi kırmızı “KAYIP” uyarısını görecek.")) return;
+      ev.target.disabled = true;
+      try {
+        const r = await rpc("tasma_tag_set_lost", {p_code: code, p_pin: t.pin, p_lost: on});
+        if (!r?.ok) throw new Error(r?.error === "bad_pin" ? "PIN hatalı" : r?.error === "locked" ? "çok fazla deneme, biraz bekleyin" : "kaydedilemedi");
+        s.lost = on; g("lostbox").innerHTML = lostHtml();
+        if (on) toast("Kayıp modu açıldı. Umarız çabucak kavuşursunuz.", 5000); else { confetti(); toast("Ne güzel! Kayıp modu kapatıldı."); }
+      } catch (e) { ev.target.disabled = false; toast("İşlem yapılamadı: " + e.message, 5000); }
+    };
+  });
+  // basılı künye satışı açıksa sipariş kartı
+  rpc("tasma_shop_info").then(shop => {
+    if (!shop?.active) return;
+    g("shopbox").innerHTML = `<div class="card"><h2>Basılı künye sipariş edin · ${esc(shop.price)} TL</h2>
+      <p>${esc(shop.product_text)} ${esc(shop.shipping_text)}</p>
+      <a class="btn alt" href="#siparis/${encodeURIComponent(code)}">Sipariş ver</a></div>`;
+  }, () => {});
+}
+
+// ---------------------------------------------------------------- sahibi: basılı künye siparişi (IBAN ile ödeme)
+async function showOrderForm(code, error = "", v = null) {
+  const t = findTag(code);
+  if (!t) return showTagPage(code);
+  let shop;
+  try { shop = await rpc("tasma_shop_info"); } catch (e) { return showMessage("Bağlantı hatası", "Sayfayı yenileyip tekrar deneyin."); }
+  if (!shop?.active) return showMessage("Şu an sipariş alınmıyor", "Künyenizi kendiniz yazdırabilirsiniz. Satış açıldığında burada görünecek.");
+  v ||= {...store.get("address", {}), phone: store.get("address", {}).phone || prettyPhone(t.phone), design: t.design};
+  const val = k => `value="${esc(v[k] || "")}"`;
+  show(`
+    ${backLink(`#kunye/${encodeURIComponent(code)}`, "Künyeye dön")}
+    <h1>Basılı künye siparişi</h1>
+    <p>${esc(shop.product_text)} <b>${esc(shop.price)} TL</b>. ${esc(shop.shipping_text)}</p>
+    <div class="preview">${tagAt(code, v.design, "y35", {name: t.name})}${tagAt(code, v.design, "k35x50", {name: t.name})}</div>
+    ${error ? `<div class="msg err" role="alert" style="margin-top:14px">${esc(error)}</div>` : ""}
+    <form id="of" novalidate>
+      <label>Tasarım</label>
+      ${designChips(v.design)}
+      <label for="o-name">Ad soyad</label><input id="o-name" autocomplete="name" ${val("name")}>
+      <label for="o-phone">Telefon</label><input id="o-phone" type="tel" inputmode="tel" autocomplete="tel" ${val("phone")}>
+      <label for="o-email">E-posta <span class="opt">(isteğe bağlı)</span></label><input id="o-email" type="email" autocomplete="email" ${val("email")}>
+      <div class="row2">
+        <div><label for="o-city">İl</label><input id="o-city" autocomplete="address-level1" ${val("city")}></div>
+        <div><label for="o-district">İlçe</label><input id="o-district" autocomplete="address-level2" ${val("district")}></div>
+      </div>
+      <label for="o-address">Açık adres</label><textarea id="o-address" rows="3" maxlength="400" autocomplete="street-address">${esc(v.address || "")}</textarea>
+      <label for="o-note">Not <span class="opt">(isteğe bağlı)</span></label><input id="o-note" maxlength="300" ${val("note")}>
+      <button class="btn" type="submit">Siparişi oluştur · ${esc(shop.price)} TL</button>
+      <span class="hint">Sonraki adımda havale / EFT bilgilerini göreceksiniz.</span>
+    </form>`, "mid");
+  const form = document.getElementById("of"), g = id => document.getElementById(id).value.trim();
+  const read = () => ({design: v.design, name: g("o-name"), phone: g("o-phone"), email: g("o-email"), city: g("o-city"),
+    district: g("o-district"), address: g("o-address"), note: g("o-note")});
+  form.querySelector(".designs").onclick = ev => { const b = ev.target.closest("[data-d]"); if (b) showOrderForm(code, "", {...read(), design: b.dataset.d}); };
+  form.addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const nv = read(), phone = normalizePhone(nv.phone);
+    if (nv.name.length < 3) return showOrderForm(code, "Ad soyad yazın.", nv);
+    if (!phone) return showOrderForm(code, "Telefon geçersiz. Örnek: 0532 123 45 67", nv);
+    if (nv.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(nv.email)) return showOrderForm(code, "E-posta geçersiz.", nv);
+    if (!nv.city || !nv.district || nv.address.length < 10) return showOrderForm(code, "İl, ilçe ve açık adresi eksiksiz yazın.", nv);
+    ev.submitter && (ev.submitter.disabled = true);
+    let res;
+    try {
+      res = await rpc("tasma_order_create", {p_tag_code: code, p_design: nv.design, p_full_name: nv.name, p_phone: phone, p_email: nv.email || null,
+        p_city: nv.city, p_district: nv.district, p_address: nv.address, p_note: nv.note || null, p_device: deviceId()});
+    } catch (e) { return showOrderForm(code, "Bağlantı hatası, tekrar deneyin.", nv); }
+    if (!res?.ok) {
+      return showOrderForm(code, {closed: "Şu an sipariş alınmıyor.", no_tag: "Bu künye bulunamadı.", missing: "Bilgiler eksik.",
+        bad_phone: "Telefon geçersiz.", bad_email: "E-posta geçersiz.", too_many: "Bugün çok fazla sipariş verdiniz.",
+        busy: "Şu an çok yoğun, biraz sonra deneyin."}[res?.error] || "Sipariş oluşturulamadı.", nv);
+    }
+    store.set("address", {name: nv.name, phone: nv.phone, email: nv.email, city: nv.city, district: nv.district, address: nv.address});
+    saveTag({code, design: nv.design});
+    saveOrder({code: res.code, token: res.token, amount: res.amount, status: res.status, tag: code, created: Date.now()});
+    location.replace(`#odeme/${encodeURIComponent(res.code)}`);
+  });
+}
+
+async function showPay(orderCode) {
+  await refreshOrders();
+  const o = myOrders().find(x => x.code === orderCode);
+  if (!o) return showMessage("Sipariş bulunamadı", "Bu sipariş bu cihazda kayıtlı değil.");
+  let shop = null;
+  try { shop = await rpc("tasma_shop_info"); } catch (e) {}
+  const waiting = o.status === "odeme_bekleniyor";
+  const iban = (shop?.iban || "").replace(/(.{4})/g, "$1 ").trim();
+  show(`
+    ${backLink("#kunyelerim", "Künyelerim")}
+    <h1>Sipariş ${esc(o.code)}</h1>
+    <div class="msg ${o.status === "iptal" ? "err" : "info"}"><b>Durum:</b> ${esc(ORDER_STATUS[o.status] || o.status)}${o.tracking ? `<br><b>Kargo takip no:</b> ${esc(o.tracking)}` : ""}</div>
+    ${waiting && shop ? `
+      <div class="card">
+        <h2>${esc(o.amount)} TL'yi havale / EFT ile gönderin</h2>
+        <dl class="kv">
+          <dt>IBAN</dt><dd><b>${esc(iban)}</b> <button class="chip" type="button" id="copy">Kopyala</button></dd>
+          <dt>Alıcı</dt><dd>${esc(shop.account_name)}</dd>
+          ${shop.bank_name ? `<dt>Banka</dt><dd>${esc(shop.bank_name)}</dd>` : ""}
+          <dt>Açıklama</dt><dd><b>${esc(o.code)}</b></dd>
+        </dl>
+        <p style="margin-top:12px">Açıklamaya sipariş numarasını yazmayı unutmayın. Ödemeyi yaptıktan sonra aşağıdaki butona basın.</p>
+        <button class="btn" type="button" id="paid">Ödemeyi yaptım</button>
+      </div>` : ""}
+    ${o.status === "odeme_bildirildi" ? `<p>Teşekkürler! Ödemeniz kontrol edildikten sonra künyeleriniz baskıya alınacak. Durumu buradan ve Künyelerim'den takip edebilirsiniz.</p>` : ""}`, "mid");
+  document.getElementById("copy")?.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(shop.iban); toast("IBAN kopyalandı."); } catch (e) { toast("Kopyalanamadı; IBAN'ı uzun basıp seçin."); }
+  });
+  document.getElementById("paid")?.addEventListener("click", async ev => {
+    ev.target.disabled = true;
+    try {
+      const r = await rpc("tasma_order_paid", {p_code: o.code, p_token: o.token});
+      if (!r?.ok) throw new Error();
+      saveOrder({code: o.code, status: r.status});
+      await showPay(orderCode);
+      confetti();
+    } catch (e) { ev.target.disabled = false; toast("Bildirilemedi, tekrar deneyin."); }
+  });
+}
+
+// ---------------------------------------------------------------- kurulum yardımı
+// Eksik veritabanı kurulumunu telefondan da yapabilmek için SQL'i panoya kopyalar.
+const SQL_EDITOR = `https://supabase.com/dashboard/project/${new URL(SUPABASE_URL).hostname.split(".")[0]}/sql/new`;
+
+function setupHtml(text) {
+  return `<div class="msg err noprint setup">${esc(text)} Kurmak için: <b>1.</b> SQL'i kopyalayın, <b>2.</b> Supabase SQL Editor'ı açın,
+    <b>3.</b> yapıştırın, en üstteki <b>v_sifre</b> satırına admin şifrenizi yazın ve <b>Run</b>'a basın, <b>4.</b> bu sayfayı yenileyin.
+    <div class="bar" style="margin:10px 0 0">
+      <button class="btn" type="button" data-sql="supabase/kurulum.sql">1. SQL'i kopyala</button>
+      <a class="btn" href="${esc(SQL_EDITOR)}" target="_blank" rel="noopener">2. SQL Editor'ı aç</a>
+    </div></div>`;
+}
+
+document.addEventListener("click", async ev => {
+  const btn = ev.target.closest("button[data-sql]");
+  if (!btn) return;
+  const box = btn.closest(".setup");
+  let sql;
+  try {
+    const r = await fetch(btn.dataset.sql, {cache: "no-store"});
+    if (!r.ok) throw new Error(r.status);
+    sql = await r.text();
+  } catch (e) {
+    const url = `https://raw.githubusercontent.com/yusufbas34/tasmaqr/main/${btn.dataset.sql}`;
+    return box.insertAdjacentHTML("beforeend", `<p style="margin:10px 0 0">SQL yüklenemedi. <a href="${esc(url)}" target="_blank" rel="noopener">Buradan açıp</a> tümünü seçerek kopyalayın.</p>`);
+  }
+  try {
+    await navigator.clipboard.writeText(sql);
+    btn.textContent = "✓ Kopyalandı";
+    toast("SQL kopyalandı. Şimdi SQL Editor'ı açıp yapıştırın.");
+  } catch (e) {
+    box.querySelector("textarea")?.remove();
+    const ta = Object.assign(document.createElement("textarea"), {value: sql, rows: 8, readOnly: true});
+    ta.style.marginTop = "10px";
+    box.append(ta); ta.focus(); ta.select();
+    toast("Metin seçildi; uzun basıp Kopyala deyin.");
+  }
+});
+
+// ---------------------------------------------------------------- yönetim
+let adminKey = "";
+
+async function showAdminLogin(error = "") {
+  let installed = true;
+  try { await rpc("tasma_version"); } catch (e) { installed = !e.status; } // bağlantı hatasında kurulu varsay
+  show(`
+    <h1>Künye yönetimi</h1>
+    ${installed ? "" : setupHtml("Veritabanı kurulu değil.")}
+    <p>Kurulumda belirlediğiniz admin şifresini girin.</p>
+    ${error ? `<div class="msg err">${esc(error)}</div>` : ""}
+    <form id="lf">
+      <label for="k">Admin şifresi</label>
+      <input id="k" type="password" autocomplete="current-password" required>
+      <button class="btn" type="submit">Giriş yap</button>
+    </form>`);
+  document.getElementById("lf").addEventListener("submit", ev => {
+    ev.preventDefault();
+    adminKey = document.getElementById("k").value;
+    showAdmin();
+  });
+}
+
+function pref(key, fallback, allowed) {
+  try { const v = localStorage.getItem("tasmaqr-admin-" + key); if (v !== null && (!allowed || allowed.includes(v))) return v; } catch (e) {}
+  return fallback;
+}
+function savePref(key, value) { try { localStorage.setItem("tasmaqr-admin-" + key, value); } catch (e) {} }
+
+let view = "ready";
+let printMode = pref("mode", "", ["", "only-sticker", "only-pin"]);
+let defaultDesign = pref("design", "klasik");
+let stickerSize = pref("size", "y35", Object.keys(SIZES));
+let paper = pref("paper", "a4", ["a4", "tek"]);
+const designOf = {};
+let adminTab = "tags", reqFilter = "yeni", orderFilter = "odeme_bildirildi", orderBadge = 0;
+
+// Seçili ölçüyü ve kağıt tipini künyelere ve yazdırma sayfasına uygular.
+function applySize() {
+  const grid = document.querySelector(".admingrid"), {w, h} = singlePage(stickerSize);
+  if (grid) {
+    grid.style.cssText = sizeVars(stickerSize);
+    grid.className = ["admingrid", printMode, paper === "tek" ? "tek" : ""].join(" ").trim();
+    grid.querySelectorAll(".sticker").forEach(el => {
+      const round = dims(stickerSize).round;
+      if (el.classList.contains("round") !== round) el.outerHTML = tagHtml(el.closest(".tag").dataset.code, designOf[el.closest(".tag").dataset.code], {round});
+    });
+  }
+  let st = document.getElementById("pagestyle");
+  if (!st) { st = Object.assign(document.createElement("style"), {id: "pagestyle"}); document.head.append(st); }
+  st.textContent = paper === "tek" ? `@page{size:${w}mm ${h}mm;margin:0}` : `@page{size:A4;margin:${A4.M}mm}`;
+}
+
+function adminError(text) {
+  document.getElementById("msg").innerHTML = `<div class="msg err noprint">${esc(text)}</div>`;
+}
+
+const setGiven = (codes, given) => rpc("tasma_admin_set_given", {p_key: adminKey, p_codes: codes, p_given: given});
+
+// A4: künyeleri gerçek boyutlarıyla sayfaya dizer. Tek: her künye / PIN kartı kendi sayfasında (matbaa, etiket yazıcısı).
+async function savePdf(codes) {
+  await loadPdfLibs();
+  const {jsPDF} = window.jspdf;
+  const tags = codes.map(c => document.querySelector(`.tag[data-code="${CSS.escape(c)}"]`)).filter(Boolean);
+  let pdf;
+  if (paper === "tek") {
+    const {w, h} = singlePage(stickerSize), fmt = [w, h];
+    for (const tag of tags) {
+      for (const el of tag.querySelectorAll(".sticker, .pin")) {
+        if (!el.offsetParent) continue; // seçili modda gizli
+        const s = await snap(el);
+        if (pdf) pdf.addPage(fmt, "portrait"); else pdf = new jsPDF({unit: "mm", format: fmt, orientation: "portrait"});
+        pdf.addImage(s.img, "PNG", (w - s.w) / 2, (h - s.h) / 2, s.w, s.h, undefined, "FAST");
+      }
+    }
+  } else {
+    pdf = new jsPDF({unit: "mm", format: "a4"});
+    const shots = [];
+    for (const tag of tags) shots.push(await snap(tag.querySelector(".block")));
+    if (!layoutA4(pdf, shots)) pdf = null;
+  }
+  if (!pdf) throw new Error("Kaydedilecek künye yok");
+  const name = codes.length === 1 ? `kunye-${codes[0]}` : `kunyeler-${codes.length}`;
+  pdf.save(`${name}-${stickerSize}.pdf`);
+}
+
+// Yazdırır ya da PDF kaydeder; ardından verilmemiş olanları verildi olarak işaretlemeyi önerir.
+async function deliver(codes, how) {
+  if (!codes.length) return;
+  if (how === "pdf") {
+    toast("PDF hazırlanıyor…", 60000);
+    try { await savePdf(codes); toast("PDF kaydedildi."); }
+    catch (e) { document.querySelector(".toast")?.remove(); return adminError("PDF oluşturulamadı: " + e.message); }
+  } else {
+    document.querySelectorAll(".tag").forEach(t => t.classList.toggle("skip", !codes.includes(t.dataset.code)));
+    await new Promise(done => { addEventListener("afterprint", done, {once: true}); print(); });
+    document.querySelectorAll(".tag.skip").forEach(t => t.classList.remove("skip"));
+  }
+  const fresh = codes.filter(c => document.querySelector(`.tag[data-code="${CSS.escape(c)}"]`)?.dataset.state === "ready");
+  if (!fresh.length) return;
+  if (!confirm(`${fresh.length} künye verildi olarak işaretlensin mi? Verilen künyeler bu listede bir daha görünmez.`)) return;
+  try {
+    await setGiven(fresh, true);
+    await showAdmin();
+    confetti();
+    toast(fresh.length === 1 ? `${fresh[0]} yeni dostuna kavuştu!` : `${fresh.length} künye yeni dostlarına yolculuğa çıktı!`);
+  } catch (e) { adminError("İşaretlenemedi: " + e.message); }
+}
+
+const designOptions = (sel, withRandom) =>
+  (withRandom ? `<option value="${RANDOM}"${sel === RANDOM ? " selected" : ""}>Rastgele (her künyeye farklı)</option>` : "") +
+  Object.entries(DESIGNS).map(([k, d]) => `<option value="${k}"${k === sel ? " selected" : ""}>${esc(d.name)}</option>`).join("");
+
+function tabsHtml(newCount) {
+  const tab = (id, name, n) => `<button data-tab="${id}" class="${adminTab === id ? "on" : ""}">${name}${n ? `<span class="badge">${n}</span>` : ""}</button>`;
+  return `<div class="tabs noprint">
+    ${tab("tags", "Künyeler")}${tab("requests", "Talepler", newCount)}${tab("orders", "Siparişler", orderBadge)}${tab("settings", "Ayarlar")}
+  </div>`;
+}
+
+function bindTabs() {
+  document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { adminTab = b.dataset.tab; showAdmin(); });
+}
+
+async function loadRequests() {
+  try { const r = await rpc("tasma_admin_requests", {p_key: adminKey}); return Array.isArray(r) ? r : null; }
+  catch (e) { return null; }
+}
+
+async function loadOrders() {
+  try { const r = await rpc("tasma_admin_orders", {p_key: adminKey}); return Array.isArray(r) ? r : null; }
+  catch (e) { return null; }
+}
+
+async function showAdmin() {
+  show("<p>Yükleniyor…</p>");
+  let rows;
+  try { rows = await rpc("tasma_admin_list", {p_key: adminKey}); }
+  catch (e) { return showAdminLogin(e.status === 403 ? "Şifre hatalı." : e.status ? "Veritabanı kurulu değil ya da güncel değil." : "Bağlantı hatası, tekrar deneyin."); }
+  if (!Array.isArray(rows)) return showAdminLogin("Beklenmeyen yanıt, tekrar deneyin.");
+  if (typeof qrcode !== "function") return showMessage("QR kütüphanesi yüklenemedi", "Sayfayı yenileyip tekrar deneyin.");
+  const [requests, orders] = await Promise.all([loadRequests(), loadOrders()]);
+  orderBadge = orders ? orders.filter(o => o.status === "odeme_bildirildi").length : 0;
+  const newReq = requests ? requests.filter(r => r.status === "yeni").length : 0;
+  if (adminTab === "requests") return showRequests(rows, requests, newReq);
+  if (adminTab === "orders") return showOrders(orders, newReq);
+  if (adminTab === "settings") return showSettings(newReq);
+  const state = r => r.phone ? "used" : r.given_at ? "given" : "ready";
+  const count = {ready: 0, given: 0, used: 0};
+  rows.forEach(r => count[state(r)]++);
+  const list = rows.filter(r => view === "all" || (view === "ready") === (state(r) === "ready"));
+  list.forEach(r => { designOf[r.code] ||= defaultDesign === RANDOM ? pickRandom() : defaultDesign; });
+  const label = {ready: "Verilmedi", given: "Verildi, henüz bağlanmadı", used: "Kullanımda"};
+  const round = dims(stickerSize).round;
+  show(`
+    ${tabsHtml(newReq)}
+    <div class="bar noprint">
+      <select id="view" aria-label="Hangi künyeler">
+        <option value="ready">Verilecek künyeler (${count.ready})</option>
+        <option value="out">Verilmiş künyeler (${count.given + count.used})</option>
+        <option value="all">Tümü (${rows.length})</option>
+      </select>
+      <select id="mode" aria-label="Ne çıkarılsın">
+        <option value="">Künye + PIN kartı</option>
+        <option value="only-sticker">Sadece künyeler</option>
+        <option value="only-pin">Sadece PIN kartları</option>
+      </select>
+      <select id="size" aria-label="Baskı ölçüsü">${Object.entries(SIZES).map(([k, n]) =>
+        `<option value="${k}"${k === stickerSize ? " selected" : ""}>${esc(n)} · A4'e ${perA4(dims(k))}</option>`).join("")}</select>
+      <select id="paper" aria-label="Kağıt">
+        <option value="a4">A4 kağıda diz</option>
+        <option value="tek">Her sayfaya bir künye (matbaa / etiket yazıcısı)</option>
+      </select>
+      <select id="design" aria-label="Tümü için tasarım">${designOptions(defaultDesign, true)}</select>
+      <button class="btn" id="dice" title="Hepsine rastgele tasarım">🎲 Karıştır</button>
+      <button class="btn" id="print">Listedekileri yazdır</button>
+      <button class="btn" id="pdf">Listedekileri PDF kaydet</button>
+      <button class="btn" id="add">10 künye daha üret</button>
+    </div>
+    <p class="noprint">Talep edene künye verirken tasarımı seçip <b>Yazdır ve ver</b> ya da <b>PDF kaydet ve ver</b>'e basın; künye verildi olarak işaretlenip bu listeden kalkar.
+      Kişi QR'ı okutup köpeğinin adını, numarasını ve PIN'i girdiğinde künye çalışmaya başlar.
+      Yazdırırken ölçek <b>%100 / Gerçek boyut</b> olmalı.</p>
+    <div id="msg"></div>
+    ${list.length ? "" : `<p>Bu listede künye yok.${view === "ready" ? " Yeni künye üretmek için “10 künye daha üret”e basın." : ""}</p>`}
+    <div class="admingrid">
+      ${list.map(r => `
+        <div class="tag" data-code="${esc(r.code)}" data-state="${state(r)}">
+          <div class="block">${tagHtml(r.code, designOf[r.code], {round})}
+            <div class="pin"><b>${esc(r.code)}</b> künyesinin PIN'i<span>${esc(r.pin)}</span><small>QR'ı okutup köpeğinizi bağlamak ve bilgileri değiştirmek için gerekir. Bu kartı tasmada bırakmayın.</small></div>
+          </div>
+          <div class="state noprint">
+            <div>${label[state(r)]}${r.phone ? `: ${esc(r.pet_name || "")} · ${esc(prettyPhone(r.phone))}` : ""}</div>
+            <select data-act="design" aria-label="${esc(r.code)} tasarımı">${designOptions(designOf[r.code], false)}</select>
+            ${state(r) === "ready" ? `<button class="mini" data-act="give">Yazdır ve ver</button>
+              <button class="mini alt" data-act="givepdf">PDF kaydet ve ver</button>
+              <button class="mini ghost" data-act="mark">Sadece verildi işaretle</button>` :
+              `<button class="mini alt" data-act="pdf">PDF kaydet</button>`}
+            ${state(r) === "given" ? `<button class="mini ghost" data-act="undo">Geri al (verilmedi)</button>` : ""}
+          </div>
+        </div>`).join("")}
+    </div>`, true);
+  bindTabs();
+  const $ = id => document.getElementById(id);
+  const codes = list.map(r => r.code);
+  $("view").value = view; $("mode").value = printMode; $("paper").value = paper;
+  applySize();
+  $("view").onchange = () => { view = $("view").value; showAdmin(); };
+  $("mode").onchange = () => { printMode = $("mode").value; savePref("mode", printMode); applySize(); };
+  $("size").onchange = () => { stickerSize = $("size").value; savePref("size", stickerSize); applySize(); };
+  $("paper").onchange = () => { paper = $("paper").value; savePref("paper", paper); applySize(); };
+  const redesign = (code, d) => {
+    designOf[code] = d;
+    const tag = document.querySelector(`.tag[data-code="${CSS.escape(code)}"]`);
+    tag.querySelector(".sticker").outerHTML = tagHtml(code, d, {round: dims(stickerSize).round});
+    tag.querySelector('select[data-act="design"]').value = d;
+  };
+  $("design").onchange = () => {
+    defaultDesign = $("design").value;
+    savePref("design", defaultDesign);
+    codes.forEach(c => redesign(c, defaultDesign === RANDOM ? pickRandom() : defaultDesign));
+  };
+  $("dice").onclick = () => { codes.forEach(c => redesign(c, pickRandom())); toast("Tasarımlar karıştırıldı!", 1500); };
+  $("print").onclick = () => deliver(codes, "print");
+  $("pdf").onclick = async ev => { ev.target.disabled = true; await deliver(codes, "pdf"); ev.target.disabled = false; };
+  const grid = document.querySelector(".admingrid");
+  grid.onchange = ev => {
+    if (ev.target.dataset.act === "design") redesign(ev.target.closest(".tag").dataset.code, ev.target.value);
+  };
+  grid.onclick = async ev => {
+    const btn = ev.target.closest("button[data-act]");
+    if (!btn) return;
+    const code = btn.closest(".tag").dataset.code, act = btn.dataset.act;
+    btn.disabled = true;
+    try {
+      if (act === "give") return await deliver([code], "print");
+      if (act === "givepdf" || act === "pdf") return await deliver([code], "pdf");
+      await setGiven([code], act === "mark");
+      await showAdmin();
+      if (act === "mark") toast(`${code} verildi olarak işaretlendi.`);
+    } catch (e) { adminError("İşlem yapılamadı: " + e.message); }
+    finally { btn.disabled = false; }
+  };
+  $("add").onclick = async ev => {
+    ev.target.disabled = true;
+    try { await rpc("tasma_admin_add", {p_key: adminKey, p_count: 10}); }
+    catch (e) { ev.target.disabled = false; return adminError("Künye üretilemedi: " + e.message); }
+    showAdmin();
+  };
+}
+
+// ---------------------------------------------------------------- yönetim: talepler
+function showRequests(rows, requests, newCount) {
+  const ready = rows.filter(r => !r.phone && !r.given_at).map(r => r.code);
+  const list = (requests || []).filter(r => reqFilter === "all" || r.status === reqFilter);
+  show(`
+    ${tabsHtml(newCount)}
+    ${requests ? "" : setupHtml("Talep formu kurulu değil.")}
+    <div class="bar">
+      <select id="rfilter" aria-label="Talep durumu">
+        <option value="yeni">Yeni talepler (${newCount})</option>
+        <option value="verildi">Künyesi verilenler</option>
+        <option value="iptal">İptal edilenler</option>
+        <option value="all">Tümü (${requests?.length || 0})</option>
+      </select>
+      <button class="btn" id="csv">Excel için indir (CSV)</button>
+    </div>
+    <div id="msg"></div>
+    <datalist id="ready-codes">${ready.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
+    ${requests && !list.length ? "<p>Bu listede talep yok.</p>" : ""}
+    <div class="reqs">
+      ${list.map(r => `
+        <div class="req st-${esc(r.status)}" data-id="${esc(r.id)}">
+          <div>
+            <h3>${esc(r.first_name)} ${esc(r.last_name)}${r.pet_name ? ` · 🐾 ${esc(r.pet_name)}` : ""}</h3>
+            <div class="meta">
+              ${esc(dateTR(r.created_at))}<br>
+              <a href="mailto:${esc(r.email)}">${esc(r.email)}</a>
+              ${r.phone ? ` · <a href="tel:${esc(r.phone)}">${esc(prettyPhone(r.phone))}</a> ·
+              <a href="${esc(waHref(r.phone, `Merhaba ${r.first_name}, Tasma QR künyeniz hazır!`))}" target="_blank" rel="noopener"><b>WhatsApp'tan istiyor</b></a>` : " · <span>E-postayla</span>"}
+            </div>
+            ${r.note ? `<div class="note">${esc(r.note)}</div>` : ""}
+          </div>
+          <div class="act">
+            <select data-f="status" aria-label="Durum">
+              ${[["yeni", "Yeni"], ["verildi", "Künyesi verildi"], ["iptal", "İptal"]].map(([k, n]) =>
+                `<option value="${k}"${k === r.status ? " selected" : ""}>${n}</option>`).join("")}
+            </select>
+            <input data-f="code" list="ready-codes" placeholder="Verilen künye kodu" value="${esc(r.tag_code || "")}" aria-label="Verilen künye kodu">
+            <button data-act="save">Kaydet</button>
+          </div>
+        </div>`).join("")}
+    </div>`, true);
+  bindTabs();
+  const filter = document.getElementById("rfilter");
+  filter.value = reqFilter;
+  filter.onchange = () => { reqFilter = filter.value; showRequests(rows, requests, newCount); };
+  document.getElementById("csv").onclick = () => {
+    const cols = ["created_at", "first_name", "last_name", "email", "phone", "pet_name", "note", "status", "tag_code"];
+    // Formdan gelen metin Excel'de formül olarak çalışmasın (=, +, -, @ ile başlayanlar). Telefon sunucuda zaten yalnızca rakam ve +.
+    const cell = (v, c) => { let t = String(v ?? ""); if (c !== "phone" && /^[=+\-@\t\r]/.test(t)) t = "'" + t; return `"${t.replace(/"/g, '""')}"`; };
+    const csv = "﻿" + [cols.join(";"), ...list.map(r => cols.map(c => cell(r[c], c)).join(";"))].join("\r\n");
+    downloadBlob(new Blob([csv], {type: "text/csv"}), "kunye-talepleri.csv");
+  };
+  document.querySelector(".reqs").onclick = async ev => {
+    const btn = ev.target.closest('button[data-act="save"]');
+    if (!btn) return;
+    const box = btn.closest(".req"), id = Number(box.dataset.id);
+    const status = box.querySelector('[data-f="status"]').value;
+    const code = box.querySelector('[data-f="code"]').value.trim().toUpperCase();
+    const msg = document.getElementById("msg");
+    if (code && !rows.some(r => String(r.code).toUpperCase() === code)) {
+      msg.innerHTML = `<div class="msg err">${esc(code)} kodunda bir künye yok.</div>`; return;
+    }
+    btn.disabled = true;
+    try {
+      await rpc("tasma_admin_request_update", {p_key: adminKey, p_id: id, p_status: status, p_tag_code: code || null});
+      if (status === "verildi" && code && ready.includes(code)) await setGiven([code], true);
+      await showAdmin();
+      if (status === "verildi") { confetti(); toast("Talep tamamlandı, künye yolda!"); } else toast("Kaydedildi.");
+    } catch (e) {
+      btn.disabled = false;
+      msg.innerHTML = `<div class="msg err">Kaydedilemedi: ${esc(e.message)}</div>`;
+    }
+  };
+}
+
+// ---------------------------------------------------------------- yönetim: basılı künye siparişleri
+async function loadShopAdmin() {
+  try { const r = await rpc("tasma_admin_shop_get", {p_key: adminKey}); return Array.isArray(r) ? r[0] : r; }
+  catch (e) { return null; }
+}
+
+// Siparişin A4 baskı PDF'i: aynı QR 7 ölçüde 29 künye (shared/tag.js orderSheetHtml)
+async function orderPdf(o) {
+  await loadPdfLibs();
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;left:-30000px;top:0;background:#fff";
+  box.innerHTML = orderSheetHtml(o.tag_code, o.design, tagLink(o.tag_code), o.pet_name || "");
+  document.body.append(box);
+  try {
+    const canvas = await html2canvas(box.firstElementChild, {scale: 4, backgroundColor: "#ffffff", logging: false});
+    const pdf = new window.jspdf.jsPDF({unit: "mm", format: "a4"});
+    pdf.addImage(canvas.toDataURL("image/png"), "PNG", 10, 10, 190, 277, undefined, "FAST");
+    return pdf.output("blob");
+  } finally { box.remove(); }
+}
+
+function printerMail(o) {
+  const subject = `Baskı siparişi ${o.code}`;
+  const body = `Merhaba,
+
+Ekteki A4 sayfayı su geçirmez, UV dayanımlı vinil sticker olarak 1 adet basmanızı rica ederim. Künyeler kesim çizgileriyle birlikte dosyadadır.
+
+Sipariş no: ${o.code}
+Teslimat adresi:
+${o.full_name}
+${o.address}
+${o.district} / ${o.city}
+Tel: ${prettyPhone(o.phone)}
+
+Teşekkürler.`;
+  return {subject, body};
+}
+
+function customerMessage(o) {
+  const first = o.full_name.split(" ")[0];
+  return {
+    odeme_bekleniyor: `Merhaba ${first}, Tasma QR siparişiniz (${o.code}) için ${o.amount} TL ödemenizi bekliyoruz.`,
+    odeme_bildirildi: `Merhaba ${first}, Tasma QR siparişinizin (${o.code}) ödemesini kontrol ediyoruz.`,
+    onaylandi: `Merhaba ${first}, Tasma QR siparişinizin (${o.code}) ödemesi alındı, künyeleriniz baskıya hazırlanıyor.`,
+    baskida: `Merhaba ${first}, Tasma QR künyeleriniz (${o.code}) baskıda. Kargoya verilince takip numarasını ileteceğiz.`,
+    kargolandi: `Merhaba ${first}, Tasma QR siparişiniz (${o.code}) kargoya verildi.${o.tracking ? ` Takip no: ${o.tracking}` : ""} Sağlıklı günlerde kullanın!`,
+    iptal: `Merhaba ${first}, Tasma QR siparişiniz (${o.code}) iptal edildi.`,
+  }[o.status] || `Merhaba ${first}, Tasma QR siparişiniz (${o.code}) hakkında yazıyoruz.`;
+}
+
+async function showOrders(orders, newCount) {
+  const shop = await loadShopAdmin();
+  const list = (orders || []).filter(o => orderFilter === "all" || o.status === orderFilter);
+  const count = st => (orders || []).filter(o => o.status === st).length;
+  const canShareFiles = !!(navigator.canShare && navigator.canShare({files: [new File([""], "x.pdf", {type: "application/pdf"})]}));
+  show(`
+    ${tabsHtml(newCount)}
+    ${orders ? "" : setupHtml("Sipariş sistemi kurulu değil.")}
+    ${orders && shop && !(shop.active && shop.iban && shop.account_name) ? `<div class="msg err">Satış kapalı: sitede sipariş alınmıyor. <b>Ayarlar</b> sekmesinden IBAN ve alıcı adını girip satışı açın.</div>` : ""}
+    <div class="bar">
+      <select id="ofilter" aria-label="Sipariş durumu">
+        ${[...Object.entries(ORDER_STATUS).map(([k, n]) => [k, `${n} (${count(k)})`]), ["all", `Tümü (${orders?.length || 0})`]]
+          .map(([k, n]) => `<option value="${k}"${k === orderFilter ? " selected" : ""}>${esc(n)}</option>`).join("")}
+      </select>
+    </div>
+    <div id="msg"></div>
+    ${orders && !list.length ? "<p>Bu listede sipariş yok.</p>" : ""}
+    <div class="reqs">
+      ${list.map(o => `
+        <div class="req order st-${esc(o.status)}" data-id="${esc(o.id)}">
+          <div>
+            <h3>${esc(o.code)} · ${esc(o.amount)} TL${o.pet_name ? ` · 🐾 ${esc(o.pet_name)}` : ""}</h3>
+            <div class="meta">
+              <b>${esc(ORDER_STATUS[o.status] || o.status)}</b> · ${esc(dateTR(o.created_at))}${o.paid_at ? ` · ödeme bildirimi: ${esc(dateTR(o.paid_at))}` : ""}<br>
+              <b>${esc(o.full_name)}</b> · <a href="tel:${esc(o.phone)}">${esc(prettyPhone(o.phone))}</a>
+              · <a href="${esc(waHref(o.phone, customerMessage(o)))}" target="_blank" rel="noopener">WhatsApp</a>
+              ${o.email ? ` · <a href="mailto:${esc(o.email)}">${esc(o.email)}</a>` : ""}<br>
+              ${esc(o.address)}, ${esc(o.district)} / ${esc(o.city)}<br>
+              Tasarım: ${esc(DESIGNS[o.design]?.name || o.design)} · QR: <a href="${esc(tagLink(o.tag_code))}" target="_blank" rel="noopener">${esc(o.tag_code)}</a>
+              ${o.tracking ? ` · Takip no: <b>${esc(o.tracking)}</b>` : ""}
+            </div>
+            ${o.note ? `<div class="note">Müşteri notu: ${esc(o.note)}</div>` : ""}
+            ${o.admin_note ? `<div class="note">Notunuz: ${esc(o.admin_note)}</div>` : ""}
+          </div>
+          <div class="act">
+            ${["odeme_bekleniyor", "odeme_bildirildi"].includes(o.status) ? `<button data-act="approve" style="background:var(--ok)">✓ Ödeme geldi, onayla</button>` : ""}
+            <button data-act="pdf">Baskı PDF'i indir</button>
+            ${["onaylandi", "baskida"].includes(o.status) ? `<button data-act="mail">Baskıcıya e-posta</button>
+              ${canShareFiles ? `<button data-act="share">PDF'i paylaş (e-posta ekli)</button>` : ""}` : ""}
+            <input data-f="tracking" placeholder="Kargo takip no" value="${esc(o.tracking || "")}" aria-label="Kargo takip no">
+            ${["onaylandi", "baskida"].includes(o.status) ? `<button data-act="shipped">Kargolandı</button>` : ""}
+            <select data-f="status" aria-label="Durum">${Object.entries(ORDER_STATUS).map(([k, n]) =>
+              `<option value="${k}"${k === o.status ? " selected" : ""}>${esc(n)}</option>`).join("")}</select>
+            <input data-f="note" placeholder="Kendi notunuz" value="${esc(o.admin_note || "")}" aria-label="Not">
+            <button data-act="save" style="background:#2b3240">Kaydet</button>
+          </div>
+        </div>`).join("")}
+    </div>`, true);
+  bindTabs();
+  const filter = document.getElementById("ofilter");
+  filter.onchange = () => { orderFilter = filter.value; showOrders(orders, newCount); };
+  document.querySelector(".reqs").onclick = async ev => {
+    const btn = ev.target.closest("button[data-act]");
+    if (!btn) return;
+    const box = btn.closest(".req"), o = orders.find(x => String(x.id) === box.dataset.id), act = btn.dataset.act;
+    const f = name => box.querySelector(`[data-f="${name}"]`).value.trim();
+    const msg = document.getElementById("msg");
+    const update = async (status, done) => {
+      await rpc("tasma_admin_order_update", {p_key: adminKey, p_id: o.id, p_status: status, p_tracking: f("tracking") || null, p_admin_note: f("note") || null});
+      await showAdmin();
+      if (done) done();
+    };
+    const fileName = `baski-${o.code}.pdf`;
+    btn.disabled = true;
+    try {
+      if (act === "approve") {
+        if (!confirm(`${o.code}: ${o.amount} TL hesabınıza geldi mi? Onaylanınca sipariş baskıya gönderilecekler listesine geçer.`)) return;
+        await update("onaylandi", () => { confetti(); toast("Ödeme onaylandı. Müşteriye WhatsApp'tan haber verebilirsiniz."); });
+      } else if (act === "pdf") {
+        toast("Baskı PDF'i hazırlanıyor…", 30000);
+        downloadBlob(await orderPdf(o), fileName);
+        toast("PDF indirildi.");
+      } else if (act === "mail") {
+        toast("Baskı PDF'i hazırlanıyor…", 30000);
+        downloadBlob(await orderPdf(o), fileName);
+        const m = printerMail(o);
+        location.href = `mailto:${encodeURIComponent(shop?.printer_email || "")}?subject=${encodeURIComponent(m.subject)}&body=${encodeURIComponent(m.body)}`;
+        toast(`PDF indirildi: ${fileName}. Açılan e-postaya ekleyip gönderin.`, 6000);
+        if (o.status === "onaylandi" && confirm("E-postayı gönderdiyseniz sipariş “Baskıda” olarak işaretlensin mi?")) await update("baskida");
+      } else if (act === "share") {
+        toast("Baskı PDF'i hazırlanıyor…", 30000);
+        const m = printerMail(o);
+        await navigator.share({files: [new File([await orderPdf(o)], fileName, {type: "application/pdf"})], title: m.subject,
+          text: `${shop?.printer_email ? `Alıcı: ${shop.printer_email}\n\n` : ""}${m.body}`});
+        document.querySelector(".toast")?.remove();
+        if (o.status === "onaylandi" && confirm("Gönderdiyseniz sipariş “Baskıda” olarak işaretlensin mi?")) await update("baskida");
+      } else if (act === "shipped") {
+        if (!f("tracking") && !confirm("Takip numarası girmeden kargolandı olarak işaretlensin mi?")) return;
+        await update("kargolandi", () => toast("Kargolandı. Müşteriye WhatsApp'tan takip numarasını iletebilirsiniz."));
+      } else if (act === "save") {
+        if (f("status") === "iptal" && o.status !== "iptal" && !confirm(`${o.code} iptal edilsin mi?`)) return;
+        await update(f("status"), () => toast("Kaydedildi."));
+      }
+    } catch (e) {
+      if (e.name !== "AbortError") msg.innerHTML = `<div class="msg err">İşlem yapılamadı: ${esc(e.message)}</div>`;
+    } finally { btn.disabled = false; }
+  };
+}
+
+// TR IBAN: TR + 24 rakam, mod 97 kontrolü
+function validIban(iban) {
+  const s = iban.replace(/\s/g, "").toUpperCase();
+  if (!/^TR\d{24}$/.test(s)) return false;
+  const num = (s.slice(4) + s.slice(0, 4)).replace(/[A-Z]/g, c => c.charCodeAt(0) - 55);
+  let r = 0;
+  for (const ch of num) r = (r * 10 + Number(ch)) % 97;
+  return r === 1;
+}
+
+async function showSettings(newCount, error = "") {
+  const shop = await loadShopAdmin();
+  show(`
+    ${tabsHtml(newCount)}
+    ${shop ? "" : setupHtml("Sipariş sistemi kurulu değil.")}
+    ${error ? `<div class="msg err">${esc(error)}</div>` : ""}
+    ${shop ? `
+    <form id="sf" class="card" style="max-width:560px" novalidate>
+      <h2>Basılı künye satışı</h2>
+      <label class="check"><input type="checkbox" id="s-active"${shop.active ? " checked" : ""}> Satış açık (sitede sipariş alınsın)</label>
+      <label for="s-price">Fiyat (TL)</label><input id="s-price" type="number" inputmode="numeric" min="0" value="${esc(shop.price)}">
+      <label for="s-product">Ürün açıklaması (sitede görünür)</label><textarea id="s-product" rows="3">${esc(shop.product_text || "")}</textarea>
+      <label for="s-iban">IBAN</label><input id="s-iban" autocomplete="off" placeholder="TR00 0000 0000 0000 0000 0000 00" value="${esc((shop.iban || "").replace(/(.{4})/g, "$1 ").trim())}">
+      <label for="s-name">Alıcı adı (hesap sahibi)</label><input id="s-name" value="${esc(shop.account_name || "")}">
+      <label for="s-bank">Banka adı <span class="opt">(isteğe bağlı)</span></label><input id="s-bank" value="${esc(shop.bank_name || "")}">
+      <label for="s-ship">Kargo bilgisi (sitede görünür)</label><input id="s-ship" value="${esc(shop.shipping_text || "")}">
+      <label for="s-printer">Baskıcının e-postası <span class="opt">(yalnızca burada görünür)</span></label>
+      <input id="s-printer" type="email" value="${esc(shop.printer_email || "")}">
+
+      <h2>Ödeme bildirimi</h2>
+      <p class="hint">Müşteri “Ödemeyi yaptım” deyince size anında haber gelir. Telegram, e-posta ya da ikisi birden.</p>
+      <details class="howto"><summary>Telegram nasıl kurulur? (2 dakika)</summary>
+        <ol>
+          <li>Telegram'da <b>@BotFather</b>'ı açın, <b>/newbot</b> yazın, bota bir ad verin.</li>
+          <li>BotFather'ın verdiği <b>token</b>'ı aşağıya yapıştırın.</li>
+          <li>Kendi botunuzu Telegram'da açıp <b>Başlat</b>'a (Start) basın ve bir mesaj yazın.</li>
+          <li>Aşağıdaki <b>Chat ID'yi bul</b> butonuna basın, sonra <b>Kaydet</b> ve <b>Deneme bildirimi gönder</b>.</li>
+        </ol>
+      </details>
+      <label for="s-tg-token">Telegram bot token</label><input id="s-tg-token" autocomplete="off" placeholder="123456789:AA…" value="${esc(shop.telegram_bot_token || "")}">
+      <label for="s-tg-chat">Telegram chat ID</label>
+      <div class="row2" style="align-items:end"><input id="s-tg-chat" inputmode="numeric" value="${esc(shop.telegram_chat_id || "")}">
+        <button class="btn ghost" type="button" id="find-chat" style="margin:0">Chat ID'yi bul</button></div>
+      <details class="howto"><summary>E-posta nasıl kurulur? (Resend, ücretsiz)</summary>
+        <ol>
+          <li><b>resend.com</b>'da ücretsiz hesap açın (bildirim e-postası bu hesabın e-postası olmalı).</li>
+          <li><b>API Keys</b> bölümünden bir anahtar oluşturup aşağıya yapıştırın.</li>
+        </ol>
+      </details>
+      <label for="s-resend">Resend API anahtarı</label><input id="s-resend" autocomplete="off" placeholder="re_…" value="${esc(shop.resend_api_key || "")}">
+      <label for="s-notify">Bildirim e-postası</label><input id="s-notify" type="email" value="${esc(shop.notify_email || "")}">
+
+      <button class="btn" type="submit">Kaydet</button>
+      <button class="btn ghost" type="button" id="notify-test">Deneme bildirimi gönder</button>
+      <p class="hint" style="margin-top:12px">IBAN ve alıcı adı girilmeden satış açılmaz. Değişiklikler siteye hemen yansır.</p>
+    </form>` : ""}`, true);
+  bindTabs();
+  const form = document.getElementById("sf");
+  if (!form) return;
+  // Bota yazılan son mesajdan chat ID'yi bulur (Telegram API tarayıcıdan çağrılabilir)
+  document.getElementById("find-chat").onclick = async () => {
+    const token = document.getElementById("s-tg-token").value.trim();
+    if (!/^\d+:[\w-]+$/.test(token)) return toast("Önce BotFather'ın verdiği token'ı yapıştırın.");
+    try {
+      const r = await (await fetch(`https://api.telegram.org/bot${token}/getUpdates`)).json();
+      if (!r.ok) return toast("Token hatalı görünüyor.");
+      const chat = [...(r.result || [])].reverse().map(u => (u.message || u.channel_post)?.chat).find(Boolean);
+      if (!chat) return toast("Mesaj bulunamadı: botunuzu Telegram'da açıp Başlat'a basın, bir mesaj yazıp tekrar deneyin.", 6000);
+      document.getElementById("s-tg-chat").value = chat.id;
+      toast(`Bulundu: ${chat.first_name || chat.title || chat.id}. Şimdi Kaydet'e basın.`);
+    } catch (e) { toast("Telegram'a ulaşılamadı."); }
+  };
+  const test = document.getElementById("notify-test");
+  test.onclick = async () => {
+    test.disabled = true;
+    try {
+      const r = await rpc("tasma_admin_notify_test", {p_key: adminKey});
+      toast(!r.pg_net ? "Supabase'de pg_net eklentisi açık değil: Database > Extensions'tan pg_net'i açın." :
+        r.sent ? "Deneme bildirimi gönderildi. Telegram / e-postanızı kontrol edin." : "Önce bilgileri girip Kaydet'e basın.", 7000);
+    } catch (e) { toast("Gönderilemedi: " + e.message); }
+    test.disabled = false;
+  };
+  form.addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const g = id => document.getElementById(id).value.trim();
+    const active = document.getElementById("s-active").checked, iban = g("s-iban").replace(/\s/g, "").toUpperCase();
+    if (iban && !validIban(iban)) return showSettings(newCount, "IBAN hatalı görünüyor: TR ile başlayan 26 karakter olmalı ve kontrol hanesi tutmalı.");
+    if (active && (!iban || !g("s-name"))) return showSettings(newCount, "Satışı açmak için IBAN ve alıcı adı gerekli.");
+    const price = parseInt(g("s-price"), 10);
+    if (!(price >= 0)) return showSettings(newCount, "Fiyat geçersiz.");
+    if (g("s-notify") && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(g("s-notify"))) return showSettings(newCount, "Bildirim e-postası geçersiz.");
+    try {
+      await rpc("tasma_admin_shop_set", {p_key: adminKey, p_active: active, p_price: price, p_iban: iban, p_account_name: g("s-name"),
+        p_bank_name: g("s-bank"), p_printer_email: g("s-printer"), p_shipping_text: g("s-ship"), p_product_text: g("s-product"),
+        p_telegram_bot_token: g("s-tg-token"), p_telegram_chat_id: g("s-tg-chat"), p_resend_api_key: g("s-resend"), p_notify_email: g("s-notify")});
+      await showSettings(newCount);
+      toast(active ? "Kaydedildi. Satış açık." : "Kaydedildi. Satış kapalı.");
+    } catch (e) { showSettings(newCount, "Kaydedilemedi: " + e.message); }
+  });
+}
+
+// ---------------------------------------------------------------- yönlendirme
+async function route() {
+  if (SUPABASE_URL.includes("BURAYA") || SUPABASE_KEY.includes("BURAYA")) {
+    return showMessage("Kurulum eksik", "index.html dosyasının başındaki SUPABASE_URL ve SUPABASE_KEY değerlerini doldurun.");
+  }
+  if (params.has("admin")) return showAdminLogin();
+
+  const code = (params.get("k") || "").trim().toUpperCase();
+  if (code) {
+    let tag;
+    try { tag = await rpc("tasma_tag_lookup", {p_code: code}); }
+    catch (e) { return showMessage("Bağlantı hatası", "Sayfayı yenileyip tekrar deneyin."); }
+    if (!tag?.exists) return showMessage("Künye bulunamadı", "Bu QR kod geçerli bir künyeye ait değil.");
+    if (params.has("duzenle") || !tag.phone) return showEdit(code, tag);
+    return showFound(code, tag);
+  }
+
+  const [page, arg, extra] = location.hash.slice(1).split("/").map(decodeURIComponent);
+  if (page === "olustur") return showCreate();
+  if (page === "kunyelerim") return showMine();
+  if (page === "kunye" && arg) return showTagPage(arg, extra === "yeni");
+  if (page === "siparis" && arg) return showOrderForm(arg);
+  if (page === "odeme" && arg) return showPay(arg);
+  showHome();
+}
+
+addEventListener("hashchange", () => { if (!params.has("k") && !params.has("admin")) route(); });
+route();
+</script>
+</body>
+</html>
