@@ -1,10 +1,10 @@
-// Tasma QR: künye tasarımları ve baskı ölçüleri. Web sitesi (index.html) kullanır; ileride Android uygulaması da kullanacak.
+// Tasma QR: rozet tasarımları ve baskı ölçüleri. Web sitesi (index.html) kullanır; ileride Android uygulaması da kullanacak.
 // Gerekenler: qrcode-generator (global `qrcode`) ve shared/tag.css.
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const upTR = s => String(s ?? "").toLocaleUpperCase("tr-TR");
 
-// QR tek bir SVG olarak: yuvarlak künyenin içine de gömülebilir. M seviyesi: küçük künyede modüller iri kalsın diye.
+// QR tek bir SVG olarak: yuvarlak rozetin içine de gömülebilir. M seviyesi: küçük rozette modüller iri kalsın diye.
 function qrSvg(text, attrs = "") {
   const q = qrcode(0, "M");
   q.addData(text); q.make();
@@ -63,7 +63,7 @@ const sideColor = D => D.ring === "#fff" ? "#111" : D.ink;
 
 let tagUid = 0;
 
-// Yuvarlak künye: tek SVG. Üst yayda köpeğin adı, alt yayda “OKUT · SAHİBİMİ ARA”, ortada QR ve kod.
+// Yuvarlak rozet: tek SVG. Üst yayda köpeğin adı, alt yayda “OKUT · SAHİBİMİ ARA”, ortada QR ve kod.
 function roundTagSvg(code, D, link, name) {
   const id = "tq" + (++tagUid), top = name ? upTR(name) : D.top;
   const fsTop = Math.min(11.5, 104 / (top.length * .58)).toFixed(2);
@@ -83,7 +83,7 @@ function roundTagSvg(code, D, link, name) {
   </svg>`;
 }
 
-// Dikdörtgen künye: HTML; ölçü .grid üzerindeki --w/--h ile, iç ölçüler --k ile (40x60 mm = 1).
+// Dikdörtgen rozet: HTML; ölçü .grid üzerindeki --w/--h ile, iç ölçüler --k ile (40x60 mm = 1).
 function rectTagHtml(code, D, link, name) {
   return `<div class="in">
       <div class="top">${icon(D.icon, D.icon === "dog" || D.icon === "nazar" ? "" : sideColor(D))}<span>${esc(D.top)}</span></div>
@@ -106,7 +106,7 @@ function tagHtml(code, design, {link = tagLink(code), name = "", round = true} =
 const SIZES = {
   "y25": "Yuvarlak Ø25 mm (küçük ırk)",
   "y30": "Yuvarlak Ø30 mm",
-  "y35": "Yuvarlak Ø35 mm (standart künye)",
+  "y35": "Yuvarlak Ø35 mm (standart rozet)",
   "y40": "Yuvarlak Ø40 mm (büyük ırk)",
   "k35x50": "Dikdörtgen 35×50 mm",
   "k40x60": "Dikdörtgen 40×60 mm",
@@ -123,7 +123,7 @@ const tagAt = (code, design, size, opts = {}) =>
   `<div class="grid" style="${sizeVars(size)}">${tagHtml(code, design, {...opts, round: dims(size).round})}</div>`;
 
 // ---------------------------------------------------------------- basılı sipariş sayfası
-// A4 vinil sayfa: aynı QR 7 ölçüde, toplam 29 künye. 190×277 mm baskı alanına sığar (10 mm kenar boşluğu).
+// A4 vinil sayfa: aynı QR 7 ölçüde, toplam 29 rozet. 190×277 mm baskı alanına sığar (10 mm kenar boşluğu).
 const ORDER_SHEET = [
   ["k50x75", "k50x75", "k40x60", "k40x60"],
   ["k35x50", "k35x50", "k35x50", "k35x50", "k35x50"],

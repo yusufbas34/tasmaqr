@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Tasma QR</title>
-<meta name="description" content="Köpeğinizin tasmasına QR künye: bulan kişi tek dokunuşla sizi arasın, konumunu göndersin.">
+<meta name="description" content="Köpeğinizin tasmasına QR rozet: bulan kişi tek dokunuşla sizi arasın, konumunu göndersin.">
 <link rel="icon" type="image/svg+xml" href="shared/logo.svg">
 <meta name="theme-color" content="#b8501a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,12 +12,13 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <link rel="stylesheet" href="shared/tag.css">
 <script src="shared/tag.js"></script>
+<script src="shared/intro.js"></script>
 <script>
   // ==================== AYARLAR (Supabase > Project Settings > API) ====================
   // Tasma QR Supabase projesi (supabase/kurulum.sql)
   const SUPABASE_URL = "https://vsurqyzjtxtbhhbtbhgz.supabase.co";
   const SUPABASE_KEY = "sb_publishable_Dz8WxGrendM_qa9UxVbC3g_nvwAnCcH";
-  // Künyelere basılan QR'ın açacağı adres (GitHub Pages)
+  // Rozetlere basılan QR'ın açacağı adres (GitHub Pages)
   const SITE_URL = "https://yusufbas34.github.io/tasmaqr/";
   // =====================================================================================
 </script>
@@ -80,11 +81,66 @@ details p{margin:8px 0 0}
 .lostcheck{background:#fbe9e8;color:var(--err);border-radius:8px;padding:12px;font-weight:600}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 @media (max-width:640px){.hero{grid-template-columns:1fr}.hero h1{font-size:28px}.row2{grid-template-columns:1fr}}
+/* tasmaya asılı rozet */
+.collar{position:relative;width:300px;height:300px;flex:none}
+.collar .strap{position:absolute;left:0;top:0;width:300px;height:120px}
+.collar .hang{position:absolute;left:50%;top:99px;transform-origin:50% 0;animation:swing 3.2s ease-in-out infinite}
+.collar .hang .grid{zoom:1.2;filter:drop-shadow(0 6px 10px #0004)}
+@keyframes swing{0%,100%{transform:translateX(-50%) rotate(7deg)}50%{transform:translateX(-50%) rotate(-7deg)}}
+/* ilk giriş tanıtımı (reels) */
+body.intro-open{overflow:hidden}
+.intro{position:fixed;inset:0;z-index:40;background:#0f1115;color:#fff}
+.intro-reels{height:100vh;height:100dvh;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;scrollbar-width:none}
+.intro-reels::-webkit-scrollbar{display:none}
+.intro-slide{height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;justify-content:center;gap:26px;
+  padding:max(56px,env(safe-area-inset-top)) 22px max(28px,env(safe-area-inset-bottom))}
+.intro-artbox{display:flex;justify-content:center;min-height:0}
+.intro-art{width:100%;max-width:400px;height:auto;max-height:46vh;border-radius:22px;box-shadow:0 20px 60px #0007}
+.intro-collar{display:flex;justify-content:center;align-items:center;background:#f6f1ea;aspect-ratio:1/1;overflow:hidden}
+.intro-collar .collar{zoom:.82}
+.intro-copy{max-width:460px;margin:0 auto;text-align:center}
+.intro-copy h1{font-size:28px;line-height:1.15;margin:0 0 10px;color:#fff}
+.intro-copy p{color:#ffffffcc;font-size:17px;margin:0}
+.intro-copy .btn{margin-top:18px;background:#fff;color:var(--band);font-size:19px}
+.intro-copy .intro-later{margin-top:10px;background:transparent;color:#fff;border:2px solid #ffffff66;font-size:16px;padding:12px}
+.intro-next{margin-top:18px;font:inherit;font-size:15px;font-weight:600;color:#ffffffaa;background:none;border:0;cursor:pointer;animation:nudgeUp 1.6s ease-in-out infinite}
+@keyframes nudgeUp{50%{transform:translateY(-6px)}}
+.intro-skip{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px;z-index:2;font:inherit;font-size:16px;font-weight:700;
+  color:#fff;background:#0006;border:1px solid #ffffff55;border-radius:999px;padding:8px 18px;cursor:pointer}
+.intro-dots{position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:2;display:flex;flex-direction:column;gap:8px}
+.intro-dots span{width:7px;height:7px;border-radius:50%;background:#ffffff55;transition:height .2s}
+.intro-dots span.on{height:22px;border-radius:4px;background:#fff}
+.intro-fan{position:relative;width:100%;max-width:400px;height:280px;margin:0 auto}
+.intro-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.intro-card .grid{zoom:1;filter:drop-shadow(0 12px 24px #0009)}
+.play .intro-card.c0{transform:translate(-112%,-44%) rotate(-12deg) scale(.88)}
+.play .intro-card.c1{transform:translate(-50%,-54%) scale(1.04);z-index:1}
+.play .intro-card.c2{transform:translate(12%,-44%) rotate(12deg) scale(.88)}
+.play .intro-run{animation:introRun 1.4s cubic-bezier(.3,.7,.4,1) both}
+@keyframes introRun{from{transform:translateX(-120px)}}
+.play .intro-pop{animation:introPop .5s 1s both;transform-box:fill-box;transform-origin:20% 100%}
+@keyframes introPop{from{transform:scale(0);opacity:0}}
+.play .intro-blink{animation:introBlink 1s 1.3s 3 both}
+@keyframes introBlink{50%{opacity:.25}}
+.play .intro-collar .hang{animation:introHang 1.1s cubic-bezier(.3,1.4,.5,1) both,swing 3.2s 1.1s ease-in-out infinite}
+@keyframes introHang{from{transform:translateX(-50%) translateY(-160px) rotate(25deg);opacity:0}}
+.intro-scan{animation:introScan 1.6s ease-in-out infinite}
+@keyframes introScan{0%,100%{transform:translateY(-34px)}50%{transform:translateY(34px)}}
+.play .intro-nudge{animation:introNudge 1.2s ease-in-out infinite}
+@keyframes introNudge{50%{transform:translateX(6px)}}
+.intro-ring{transform-box:fill-box;transform-origin:center;animation:introRing 1.4s ease-in-out infinite}
+@keyframes introRing{0%,40%,100%{transform:rotate(0)}10%,30%{transform:rotate(-6deg)}20%{transform:rotate(6deg)}}
+.play .intro-drop{animation:introDrop .7s .5s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes introDrop{from{transform:translateY(-120px);opacity:0}}
+.intro-wave{transform-box:fill-box;transform-origin:center;animation:introWave 1.4s ease-out infinite}
+@keyframes introWave{from{transform:scale(1);opacity:.9}to{transform:scale(3);opacity:0}}
+@media (prefers-reduced-motion:reduce){.intro *,.collar .hang{animation:none!important;transition:none!important}.collar .hang{transform:translateX(-50%)}}
+@media (min-height:760px){.intro-copy h1{font-size:31px}}
 /* bulan kişi ekranı */
 .lost{background:var(--err);color:#fff;border-radius:12px;padding:16px;margin-bottom:20px;font-size:16px;line-height:1.45}
 .lost b{display:block;font-size:22px;letter-spacing:.02em;margin-bottom:4px}
 .lost .reward{display:block;margin-top:8px;background:#fff;color:var(--err);border-radius:8px;padding:8px 10px;font-weight:700}
-/* künye oluşturma ve künyelerim */
+/* rozet oluşturma ve rozetlerim */
 .designs{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .designs button{display:flex;align-items:center;gap:6px;font:inherit;font-size:14px;font-weight:600;padding:6px 12px 6px 6px;border-radius:999px;
   border:2px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
@@ -229,7 +285,7 @@ function showMessage(title, text) {
   show(`<h1>${esc(title)}</h1><p>${esc(text)}</p><a class="btn ghost" href="${esc(BASE)}">Ana sayfa</a>`);
 }
 
-// ---------------------------------------------------------------- bu cihazdaki künyeler ve siparişler
+// ---------------------------------------------------------------- bu cihazdaki rozetler ve siparişler
 const store = {
   get(key, fallback) { try { const v = localStorage.getItem("tasmaqr-" + key); return v === null ? fallback : JSON.parse(v); } catch (e) { return fallback; } },
   set(key, value) { try { localStorage.setItem("tasmaqr-" + key, JSON.stringify(value)); } catch (e) {} },
@@ -310,7 +366,7 @@ function showFound(code, tag) {
       try { saved = !!(await rpc("tasma_report_location", {p_code: code, p_lat: lat, p_lng: lng, p_accuracy: Math.round(accuracy || 0)}))?.ok; }
       catch (e) {}
       btn.remove();
-      box.innerHTML = `<div class="msg ok" style="margin-top:14px"><b>Teşekkürler!</b> Konumunuz alındı${saved ? " ve sahibinin künye sayfasına kaydedildi" : ""}.
+      box.innerHTML = `<div class="msg ok" style="margin-top:14px"><b>Teşekkürler!</b> Konumunuz alındı${saved ? " ve sahibinin rozet sayfasına kaydedildi" : ""}.
         Sahibine hemen haber vermek için mesajla da gönderin:</div>${sendButtons(text)}`;
       confetti();
     }, err => fail(err.code === 1 ? "Konum izni verilmedi." : "Konum alınamadı."),
@@ -318,7 +374,7 @@ function showFound(code, tag) {
   };
 }
 
-// ---------------------------------------------------------------- sahibi: künyeyi bağla / düzenle (PIN ile)
+// ---------------------------------------------------------------- sahibi: rozeti bağla / düzenle (PIN ile)
 function showEdit(code, tag, error = "", v = null) {
   const claim = !tag.phone, own = findTag(code);
   v ||= {name: tag.pet_name || own?.name || "", phone: prettyPhone(tag.phone), lost: !!tag.lost, reward: tag.reward || "",
@@ -326,9 +382,9 @@ function showEdit(code, tag, error = "", v = null) {
   const val = k => `value="${esc(v[k] || "")}"`;
   show(`
     ${petBadge(v.name, code, v.lost)}
-    <h1>${claim ? "Bu künyeyi köpeğinize bağlayın" : "Künye bilgilerini düzenleyin"}</h1>
-    <p>${claim ? "Künye henüz kullanılmıyor. Bilgilerinizi ve künyeyle gelen karttaki PIN'i girin. Bundan sonra QR'ı okutan herkes sizi arayabilecek."
-              : "Değişiklikler QR'ı okutan kişiye hemen yansır. Kaydetmek için künyenin PIN'i gerekir."}</p>
+    <h1>${claim ? "Bu rozeti köpeğinize bağlayın" : "Rozet bilgilerini düzenleyin"}</h1>
+    <p>${claim ? "Rozet henüz kullanılmıyor. Bilgilerinizi ve rozetle gelen karttaki PIN'i girin. Bundan sonra QR'ı okutan herkes sizi arayabilecek."
+              : "Değişiklikler QR'ı okutan kişiye hemen yansır. Kaydetmek için rozetin PIN'i gerekir."}</p>
     ${error ? `<div class="msg err" role="alert">${esc(error)}</div>` : ""}
     <form id="f" novalidate>
       <label for="e-name">Köpeğinizin adı</label>
@@ -348,9 +404,17 @@ function showEdit(code, tag, error = "", v = null) {
       <label for="e-pin">${claim ? "Karttaki PIN" : "PIN"}</label>
       <input id="e-pin" type="text" inputmode="numeric" maxlength="6" placeholder="6 haneli" autocomplete="off" ${val("pin")}>
       ${own?.pin && !claim ? `<span class="hint">PIN bu cihazda kayıtlı olduğu için dolduruldu.</span>` : ""}
-      <button class="btn" type="submit">${claim ? "Künyeyi bağla" : "Kaydet"}</button>
+      <button class="btn" type="submit">${claim ? "Rozeti bağla" : "Kaydet"}</button>
     </form>
+    ${claim ? "" : `<button class="btn ghost" type="button" id="del" style="color:var(--err)">🗑 Rozeti sil</button>`}
     <p class="small"><a href="${esc(tagLink(code))}">Vazgeç</a></p>`, "mid");
+  document.getElementById("del")?.addEventListener("click", async ev => {
+    const pin = document.getElementById("e-pin").value.trim();
+    if (!/^\d{6}$/.test(pin)) return toast("Silmek için önce 6 haneli PIN'i girin.");
+    ev.target.disabled = true;
+    if (await deleteTag(code, pin, document.getElementById("e-name").value.trim())) showMessage("Rozet silindi", "Bu QR artık hiçbir bilgi göstermiyor.");
+    else ev.target.disabled = false;
+  });
   document.getElementById("f").addEventListener("submit", async ev => {
     ev.preventDefault();
     const g = id => document.getElementById(id);
@@ -373,22 +437,38 @@ function showEdit(code, tag, error = "", v = null) {
       return showSaved(code, nv.name, phone, claim, nv.lost);
     }
     if (res?.error === "already") return route(); // biri az önce bağlamış
-    again({bad_pin: claim ? "PIN hatalı. Künyeyle gelen karttaki 6 haneli PIN'i girin." : "PIN hatalı. Künyeyi oluştururken gösterilen ya da kartta yazan 6 haneli PIN'i girin.",
+    again({bad_pin: claim ? "PIN hatalı. Rozetle gelen karttaki 6 haneli PIN'i girin." : "PIN hatalı. Rozeti oluştururken gösterilen ya da kartta yazan 6 haneli PIN'i girin.",
       locked: `Çok fazla yanlış deneme. ${res?.minutes || 15} dakika sonra tekrar deneyin.`,
       bad_phone: "Numara geçersiz. Örnek: 0532 123 45 67", bad_backup: "Yedek numara geçersiz.",
-      missing: "Köpeğinizin adını yazın.", not_found: "Bu künye bulunamadı."}[res?.error] || "Kaydedilemedi, tekrar deneyin.");
+      missing: "Köpeğinizin adını yazın.", not_found: "Bu rozet bulunamadı."}[res?.error] || "Kaydedilemedi, tekrar deneyin.");
   });
 }
 
 function showSaved(code, name, phone, claimed, lost) {
   show(`
     ${petBadge(name, code, lost)}
-    <div class="msg ok">${claimed ? `Künye bağlandı! Bu QR artık ${esc(prettyPhone(phone))} numarasını arar.` : "Kaydedildi."}
+    <div class="msg ok">${claimed ? `Rozet bağlandı! Bu QR artık ${esc(prettyPhone(phone))} numarasını arar.` : "Kaydedildi."}
       ${lost ? "<br><b>Kayıp modu açık:</b> QR'ı okutan kişi kırmızı uyarıyı görecek. Umarız çabucak kavuşursunuz." : ""}</div>
-    <p>PIN'inizi saklayın; bilgileri değiştirmek için gerekecek. Künye bu cihazda <b>Künyelerim</b>'e de eklendi.</p>
-    <a class="btn" href="${esc(BASE)}#kunye/${encodeURIComponent(code)}">Künyemi gör</a>
+    <p>PIN'inizi saklayın; bilgileri değiştirmek için gerekecek. Rozet bu cihazda <b>Rozetlerim</b>'e de eklendi.</p>
+    <a class="btn" href="${esc(BASE)}#kunye/${encodeURIComponent(code)}">Rozetimi gör</a>
     <a class="btn ghost" href="${esc(tagLink(code))}">QR'ı test et</a>`);
   if (!lost) confetti();
+}
+
+// Rozeti sunucudan siler (PIN ile). Yönetimden basılan rozet boşa çıkar, PIN kartıyla yeniden bağlanabilir.
+async function deleteTag(code, pin, name) {
+  if (!confirm(`${name || code} rozeti silinsin mi?\n\nQR artık hiçbir bilgi göstermez; okutmalar ve gönderilen konumlar da silinir. Bu işlem geri alınamaz.`)) return false;
+  let r;
+  try { r = await rpc("tasma_tag_delete", {p_code: code, p_pin: pin}); }
+  catch (e) { toast(e.status === 404 ? "Silme özelliği için veritabanını güncelleyin (kurulum.sql'i yeniden çalıştırın)." : "Bağlantı hatası, tekrar deneyin.", 6000); return false; }
+  if (!r?.ok) {
+    toast({bad_pin: "PIN hatalı.", locked: `Çok fazla yanlış deneme. ${r?.minutes || 15} dakika sonra tekrar deneyin.`, not_found: "Bu rozet zaten silinmiş."}[r?.error] || "Silinemedi.", 5000);
+    if (r?.error === "not_found") removeTag(code);
+    return r?.error === "not_found";
+  }
+  removeTag(code);
+  toast(r.reset ? "Rozet silindi. Aynı PIN kartıyla yeniden bağlanabilir." : "Rozet silindi.", 5000);
+  return true;
 }
 
 // ---------------------------------------------------------------- PDF
@@ -429,7 +509,7 @@ function layoutA4(pdf, shots) {
   return !first;
 }
 
-// Tek künye sayfası (matbaa / etiket yazıcısı): PIN kartı da sığsın
+// Tek rozet sayfası (matbaa / etiket yazıcısı): PIN kartı da sığsın
 const singlePage = size => { const {w, h} = dims(size); return {w: Math.max(w, 46), h: Math.max(h, 32)}; };
 
 function downloadBlob(blob, name) {
@@ -444,69 +524,75 @@ const randomOf = a => a[Math.floor(Math.random() * a.length)];
 
 function showcaseHtml() {
   if (typeof qrcode !== "function") return "";
-  const d = pickRandom(), name = randomOf(SAMPLE_NAMES), link = BASE + "#olustur";
-  return `<div class="pair">${tagAt("ÖRNEK", d, "y40", {link, name})}${tagAt("ÖRNEK", d, "k35x50", {link, name})}</div>`;
+  const d = pickRandom();
+  return collarHtml(tagAt("ÖRNEK", d, "y40", {link: BASE + "#olustur", name: randomOf(SAMPLE_NAMES)}), randomOf(["#b8501a", "#163a7a", "#1f7a4a", "#c62828", "#2b3240"]));
 }
+
+const openIntro = () => showIntro({onCreate: () => { location.hash = "#olustur"; }, onDone: () => store.set("introSeen", true)});
 
 function showHome() {
   const mine = myTags().length;
   show(`
     <div class="hero">
       <div>
-        <h1>Köpeğiniz kaybolursa, onu bulan sizi tek dokunuşla arasın</h1>
-        <p class="lead">Tasmadaki QR künyeyi okutan kişi köpeğinizin adını, notunuzu ve <b>sahibini ara</b> butonunu görür; isterse bulunduğu yeri tek dokunuşla size gönderir. Okutan kişinin uygulama indirmesine gerek yok.</p>
-        <a class="btn cta" href="#olustur">Ücretsiz künyemi oluştur</a>
-        <a class="btn cta alt" href="#talep">Hazır künye iste</a>
-        ${mine ? `<a class="btn cta ghost" href="#kunyelerim">Künyelerim (${mine})</a>` : ""}
+        <h1>Tasmasındaki QR rozet, onu size geri getirsin</h1>
+        <p class="lead">Köpeğinizin tasmasında künye gibi sallanan küçük bir rozet. Bulan kişi telefon kamerasıyla okutur; köpeğinizin adını ve notunuzu görür, sizi <b>tek dokunuşla arar</b> ya da bulunduğu yeri gönderir. Uygulama indirmesine gerek yok.</p>
+        <a class="btn cta" href="#olustur">Ücretsiz rozetimi oluştur</a>
+        <a class="btn cta alt" href="#talep">Hazır rozet iste</a>
+        ${mine ? `<a class="btn cta ghost" href="#kunyelerim">Rozetlerim (${mine})</a>` : ""}
+        <p><button type="button" class="chip" id="intro" style="margin-top:14px">▶ 30 saniyede tanıyın</button></p>
       </div>
-      <div class="showcase" aria-label="Örnek künyeler">
+      <div class="showcase" aria-label="Tasmaya takılı örnek rozet">
         <div id="sample">${showcaseHtml()}</div>
         <button type="button" id="another">🎲 Başka tasarım göster</button>
       </div>
     </div>
 
-    <div class="note">Bir köpeğin tasmasındaki QR'ı okuttuysanız sahibine ulaşma ekranı doğrudan açılır. Bu sayfa künye edinmek isteyenler içindir.</div>
+    <div class="note">Bir köpeğin tasmasındaki rozeti okuttuysanız sahibine ulaşma ekranı doğrudan açılır. Bu sayfa rozet edinmek isteyenler içindir.</div>
 
     <section>
       <h2>Nasıl çalışır?</h2>
       <ol class="steps">
-        <li><b>Künyenizi oluşturun</b>Köpeğinizin adını ve telefonunuzu girin, tasarımı seçin. Bir dakika sürer, ücretsizdir.</li>
-        <li><b>Yazdırıp takın</b>İstediğiniz ölçüde yazdırın, künyeye ya da tasmaya yapıştırın. İsterseniz su geçirmez baskısını sipariş edin.</li>
-        <li><b>Kaybolursa kayıp modunu açın</b>QR'ı okutan kişi kırmızı “KAYIP” uyarısını ve varsa ödül notunuzu görür.</li>
+        <li><b>Rozetinizi oluşturun</b>Köpeğinizin adını ve telefonunuzu girin, tasarımı seçin. Bir dakika sürer, ücretsizdir.</li>
+        <li><b>Tasmaya takın</b>Yazdırıp lamine edin, halkasıyla tasmanın D halkasına takın. İsterseniz su geçirmez basılı rozeti sipariş edin.</li>
+        <li><b>Kaybolursa kayıp modunu açın</b>Rozeti okutan kişi kırmızı “KAYIP” uyarısını ve varsa ödül notunuzu görür.</li>
         <li><b>Bulan kişi size ulaşır</b>Tek dokunuşla sizi arar, WhatsApp'tan yazar ya da konumunu gönderir.</li>
       </ol>
     </section>
 
     <section>
-      <h2>Neden Tasma QR?</h2>
+      <h2>Neden Tasma QR rozeti?</h2>
       <div class="perks">
-        <div><b>Numaranız künyede yazmaz</b>Yoldan geçen herkes numaranızı göremez; yalnızca QR'ı okutan kişi arama ekranında görür.</div>
+        <div><b>Künye gibi takılır, daha fazlasını yapar</b>Klasik künyeye sığmayan bilgileri (not, yedek numara, kayıp durumu) QR taşır; hepsini istediğiniz an değiştirirsiniz.</div>
+        <div><b>Numaranız rozette yazmaz</b>Yoldan geçen herkes numaranızı göremez; yalnızca rozeti okutan kişi arama ekranında görür.</div>
         <div><b>Uygulama gerekmez</b>Her telefonun kamerası okur, sayfa kendiliğinden açılır.</div>
-        <div><b>Konum paylaşımı</b>Bulan kişi tek dokunuşla konumunu gönderir; son konumları künye sayfanızda görürsünüz.</div>
+        <div><b>Konum paylaşımı</b>Bulan kişi tek dokunuşla konumunu gönderir; son konumları rozet sayfanızda görürsünüz.</div>
         <div><b>Kayıp modu ve ödül</b>Köpeğiniz kaybolunca bir dokunuşla açın, bulan kişi durumun acil olduğunu hemen anlasın.</div>
-        <div><b>Sağlık ve karakter notu</b>“İlaç kullanıyor”, “çekingendir, yavaş yaklaşın” gibi bilgileri bulan kişi görür.</div>
-        <div><b>Her ırka bir ölçü</b>Ø25 mm'den büyük ırklar için 50×75 mm'ye; ${Object.keys(DESIGNS).length} farklı tasarım.</div>
+        <div><b>Her boya bir rozet</b>Ø25 mm minik ırklardan Ø40 mm iri ırklara; ${Object.keys(DESIGNS).length} farklı tasarım.</div>
       </div>
     </section>
 
     <section>
       <h2>Sık sorulanlar</h2>
-      <details><summary>Numaram herkese görünür mü?</summary><p>Künyede numaranız yazmaz. QR'ı okutan kişi sizi arayabilsin diye arama ekranında numaranızı görür.</p></details>
-      <details><summary>Telefon numaram değişirse ne olacak?</summary><p>QR'ı okutun, sayfanın altındaki “Bilgileri düzenleyin” bağlantısına dokunun ve PIN'inizle yeni numaranızı girin. Künyeyi yeniden basmanız gerekmez.</p></details>
-      <details><summary>Künyeyi nasıl hazırlarım?</summary><p>Yazdırdığınız künyeyi kesip metal ya da plastik künyenin üzerine yapıştırın, üzerini şeffaf koli bandı veya laminasyonla kaplayın. Suya ve sürtünmeye dayanıklı baskıyı sipariş de edebilirsiniz.</p></details>
-      <details><summary>Konumum kaydediliyor mu?</summary><p>Yalnızca bulan kişi “Konumumu sahibine gönder” butonuna basıp izin verirse kaydedilir ve yalnızca künyenin sahibi görür. QR'ı okutmak tek başına konum göndermez.</p></details>
-      <details><summary>Mikroçipin yerine geçer mi?</summary><p>Hayır. Mikroçip yasal zorunluluktur ve kalıcıdır; Tasma QR, köpeğinizi bulan kişinin size dakikalar içinde ulaşabilmesi için ek bir önlemdir.</p></details>
-      <details><summary>PIN'imi kaybedersem?</summary><p>Künyeyi bu cihazda oluşturduysanız PIN <b>Künyelerim</b>'de yazar. Değilse talep formunun not alanından bize yazın, yardımcı olalım.</p></details>
+      <details><summary>Rozeti tasmaya nasıl takarım?</summary><p>Yazdırdığınız rozeti kesin, iki yüzünü şeffaf laminasyon ya da kalın şeffaf bantla kaplayın, üst kenarına küçük bir delik açıp anahtarlık halkasıyla tasmanın D halkasına takın. Boş bir künye kabının içine de yerleştirebilirsiniz. Hiç uğraşmak istemezseniz su geçirmez basılı rozeti sipariş edin.</p></details>
+      <details><summary>Numaram herkese görünür mü?</summary><p>Rozette numaranız yazmaz. QR'ı okutan kişi sizi arayabilsin diye arama ekranında numaranızı görür.</p></details>
+      <details><summary>Telefon numaram değişirse ne olacak?</summary><p>Rozeti okutun, sayfanın altındaki “Bilgileri düzenleyin” bağlantısına dokunun ve PIN'inizle yeni numaranızı girin. Rozeti yeniden basmanız gerekmez.</p></details>
+      <details><summary>Konumum kaydediliyor mu?</summary><p>Yalnızca bulan kişi “Konumumu sahibine gönder” butonuna basıp izin verirse kaydedilir ve yalnızca rozetin sahibi görür. QR'ı okutmak tek başına konum göndermez.</p></details>
+      <details><summary>Rozeti silebilir miyim?</summary><p>Evet. Rozetinizin sayfasından ya da “Bilgileri düzenleyin” ekranından PIN'inizle silebilirsiniz; QR o andan itibaren hiçbir bilgi göstermez ve okutmalar, konumlar da silinir.</p></details>
+      <details><summary>Mikroçipin yerine geçer mi?</summary><p>Hayır. Mikroçip yasal zorunluluktur ve kalıcıdır; Tasma QR rozeti, köpeğinizi bulan kişinin size dakikalar içinde ulaşabilmesi için ek bir önlemdir.</p></details>
+      <details><summary>PIN'imi kaybedersem?</summary><p>Rozeti bu cihazda oluşturduysanız PIN <b>Rozetlerim</b>'de yazar. Değilse talep formunun not alanından bize yazın, yardımcı olalım.</p></details>
     </section>
 
     <section id="talep">
-      <h2>Hazır künye talep formu</h2>
-      <p>Künyeyi kendiniz oluşturmak istemiyorsanız formu doldurun; QR künyenizi ve size özel PIN kartını e-postayla ya da WhatsApp'tan gönderelim.</p>
+      <h2>Hazır rozet talep formu</h2>
+      <p>Rozeti kendiniz oluşturmak istemiyorsanız formu doldurun; QR rozetinizi ve size özel PIN kartını e-postayla ya da WhatsApp'tan gönderelim.</p>
       <div class="card" id="formbox">${requestFormHtml()}</div>
     </section>`, "home");
   document.getElementById("another").onclick = () => { document.getElementById("sample").innerHTML = showcaseHtml(); };
+  document.getElementById("intro").onclick = openIntro;
   bindRequestForm();
   if (location.hash === "#talep") document.getElementById("talep").scrollIntoView();
+  else if (!store.get("introSeen", false) && !mine) openIntro(); // ilk giriş
 }
 
 function requestFormHtml(error = "", v = {}) {
@@ -522,13 +608,13 @@ function requestFormHtml(error = "", v = {}) {
       <input id="r-email" type="email" inputmode="email" autocomplete="email" placeholder="ornek@mail.com" required ${val("email")}>
       <label for="r-phone">Telefon <span class="opt">(isteğe bağlı)</span></label>
       <input id="r-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" aria-describedby="r-phone-hint" ${val("phone")}>
-      <span id="r-phone-hint" class="hint">Künyeyi WhatsApp'tan isterseniz telefonunuzu girin.</span>
+      <span id="r-phone-hint" class="hint">Rozeti WhatsApp'tan isterseniz telefonunuzu girin.</span>
       <label for="r-pet">Köpeğinizin adı <span class="opt">(isteğe bağlı)</span></label>
       <input id="r-pet" maxlength="20" ${val("pet")}>
       <label for="r-note">Notunuz <span class="opt">(isteğe bağlı: tasarım, ölçü, adet…)</span></label>
       <textarea id="r-note" rows="3" maxlength="500">${esc(v.note || "")}</textarea>
       <div class="hp" aria-hidden="true"><label for="r-web">Web sitesi</label><input id="r-web" tabindex="-1" autocomplete="off"></div>
-      <label class="check"><input type="checkbox" id="r-ok"${v.ok ? " checked" : ""}> Bilgilerimin yalnızca künye talebimin işlenmesi ve benimle iletişim kurulması amacıyla kullanılmasını kabul ediyorum.</label>
+      <label class="check"><input type="checkbox" id="r-ok"${v.ok ? " checked" : ""}> Bilgilerimin yalnızca rozet talebimin işlenmesi ve benimle iletişim kurulması amacıyla kullanılmasını kabul ediyorum.</label>
       <button class="btn" type="submit">Talep gönder</button>
     </form>`;
 }
@@ -547,7 +633,7 @@ function bindRequestForm() {
     if (v.phone && !phone) return fail("Telefon numarası geçersiz (örnek: 0532 123 45 67). İstemiyorsanız boş bırakabilirsiniz.");
     if (!v.ok) return fail("Devam etmek için bilgilendirme onayını işaretleyin.");
     const done = () => {
-      box.innerHTML = `<div class="msg ok" role="status"><b>Talebiniz alındı, teşekkürler ${esc(v.first)}!</b><br>${phone ? `Künyenizi ${esc(prettyPhone(phone))} numarasına WhatsApp'tan göndereceğiz.` : `En kısa sürede ${esc(v.email)} adresinden size ulaşacağız.`}</div>`;
+      box.innerHTML = `<div class="msg ok" role="status"><b>Talebiniz alındı, teşekkürler ${esc(v.first)}!</b><br>${phone ? `Rozetinizi ${esc(prettyPhone(phone))} numarasına WhatsApp'tan göndereceğiz.` : `En kısa sürede ${esc(v.email)} adresinden size ulaşacağız.`}</div>`;
       confetti();
     };
     if (g("r-web").value) return done(); // bot tuzağı: sessizce geç
@@ -565,7 +651,7 @@ function bindRequestForm() {
   });
 }
 
-// ---------------------------------------------------------------- sahibi: kendi künyesini oluşturur
+// ---------------------------------------------------------------- sahibi: kendi rozetini oluşturur
 const backLink = (href, text) => `<a class="back" href="${esc(href)}">← ${esc(text)}</a>`;
 const designChips = sel => `<div class="designs" role="radiogroup" aria-label="Tasarım">${Object.entries(DESIGNS).map(([k, d]) =>
   `<button type="button" role="radio" aria-checked="${k === sel}" data-d="${k}" class="${k === sel ? "on" : ""}"><i style="background:${d.ring}"></i>${esc(d.name)}</button>`).join("")}</div>`;
@@ -576,7 +662,7 @@ function showCreate(error = "", v = {}) {
   const preview = () => `${tagAt("······", v.design, "y35", {link: SITE, name: v.name})}${tagAt("······", v.design, "k35x50", {link: SITE, name: v.name})}`;
   show(`
     ${backLink("#", "Ana sayfa")}
-    <h1>Künyenizi oluşturun</h1>
+    <h1>Rozetinizi oluşturun</h1>
     <p>Köpeğinizin adını ve size ulaşılacak numarayı girin, tasarımı seçin. Sonra istediğiniz ölçüde yazdırabilirsiniz.</p>
     <div class="preview" id="pv">${preview()}</div>
     ${error ? `<div class="msg err" role="alert" style="margin-top:14px">${esc(error)}</div>` : ""}
@@ -585,14 +671,14 @@ function showCreate(error = "", v = {}) {
       <input id="c-name" maxlength="20" autocomplete="off" placeholder="ör. Karabaş" value="${esc(v.name)}">
       <label for="c-phone">QR okutulunca aranacak numara</label>
       <input id="c-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" value="${esc(v.phone)}">
-      <span class="hint">Numaranız künyede yazmaz. QR'ı okutan kişi sizi arayabilsin diye arama ekranında görür. Sonradan değiştirebilirsiniz.</span>
+      <span class="hint">Numaranız rozette yazmaz. QR'ı okutan kişi sizi arayabilsin diye arama ekranında görür. Sonradan değiştirebilirsiniz.</span>
       <label>Tasarım</label>
       ${designChips(v.design)}
-      <button class="btn" type="submit">Künyemi oluştur</button>
+      <button class="btn" type="submit">Rozetimi oluştur</button>
     </form>`, "mid");
   const g = id => document.getElementById(id), pv = g("pv");
   let timer;
-  g("c-name").oninput = () => { clearTimeout(timer); timer = setTimeout(() => { v.name = g("c-name").value.trim(); pv.innerHTML = preview(); }, 150); };
+  g("c-name").oninput = () => { clearTimeout(timer); timer = setTimeout(() => { const el = g("c-name"); if (!el) return; v.name = el.value.trim(); pv.innerHTML = preview(); }, 150); };
   document.querySelector(".designs").onclick = ev => {
     const b = ev.target.closest("[data-d]");
     if (!b) return;
@@ -612,8 +698,8 @@ function showCreate(error = "", v = {}) {
     catch (e) { return showCreate(navigator.onLine === false ? "İnternet bağlantısı yok. Bağlanıp tekrar deneyin." : "Sunucuya ulaşılamadı, biraz sonra tekrar deneyin.", v); }
     if (!res?.ok) {
       return showCreate({bad_phone: "Numara geçersiz. Örnek: 0532 123 45 67", missing: "Köpeğinizin adını yazın.",
-        too_many: "Bugün çok fazla künye oluşturdunuz. Yarın tekrar deneyin ya da Künyelerim'deki künyeyi kullanın.",
-        busy: "Şu an çok yoğun, birkaç dakika sonra tekrar deneyin."}[res?.error] || "Künye oluşturulamadı, tekrar deneyin.", v);
+        too_many: "Bugün çok fazla rozet oluşturdunuz. Yarın tekrar deneyin ya da Rozetlerim'deki rozeti kullanın.",
+        busy: "Şu an çok yoğun, birkaç dakika sonra tekrar deneyin."}[res?.error] || "Rozet oluşturulamadı, tekrar deneyin.", v);
     }
     store.set("lastPhone", v.phone); store.set("lastDesign", v.design);
     saveTag({code: res.code, pin: res.pin, name: v.name, phone, design: v.design, created: Date.now()});
@@ -621,7 +707,7 @@ function showCreate(error = "", v = {}) {
   });
 }
 
-// ---------------------------------------------------------------- sahibi: künyelerim
+// ---------------------------------------------------------------- sahibi: rozetlerim
 const loadStats = async tags => {
   if (!tags.length) return {};
   try {
@@ -645,20 +731,20 @@ function showMine(error = "") {
   const list = myTags(), orders = myOrders();
   show(`
     ${backLink("#", "Ana sayfa")}
-    <h1>Künyelerim</h1>
-    <p>Bu cihazda oluşturduğunuz ya da eklediğiniz künyeler. Tarayıcı verilerini silerseniz liste de silinir; PIN'lerinizi bir yere not edin.</p>
+    <h1>Rozetlerim</h1>
+    <p>Bu cihazda oluşturduğunuz ya da eklediğiniz rozetler. Tarayıcı verilerini silerseniz liste de silinir; PIN'lerinizi bir yere not edin.</p>
     ${list.length ? `<div class="cards">${list.map(t => `
       <a class="mine" href="#kunye/${encodeURIComponent(t.code)}" data-code="${esc(t.code)}">
         ${tagAt(t.code, t.design, "y25", {name: t.name})}
         <div><b>${esc(t.name || t.code)}</b>
           <span>${esc(t.code)} · ${esc(prettyPhone(t.phone))}<br><span data-stat>…</span></span></div>
-      </a>`).join("")}</div>` : `<div class="msg info">Henüz künyeniz yok.</div>`}
-    <a class="btn" href="#olustur">+ Yeni künye oluştur</a>
-    <details style="margin-top:14px"${error ? " open" : ""}><summary>Elimdeki künyeyi ekle (kod ve PIN ile)</summary>
+      </a>`).join("")}</div>` : `<div class="msg info">Henüz rozetiniz yok.</div>`}
+    <a class="btn" href="#olustur">+ Yeni rozet oluştur</a>
+    <details style="margin-top:14px"${error ? " open" : ""}><summary>Elimdeki rozeti ekle (kod ve PIN ile)</summary>
       ${error ? `<div class="msg err" style="margin-top:10px">${esc(error)}</div>` : ""}
       <form id="addf" novalidate>
         <div class="row2">
-          <div><label for="a-code">Künye kodu</label><input id="a-code" autocomplete="off" placeholder="ör. K7F3A9C2" style="text-transform:uppercase"></div>
+          <div><label for="a-code">Rozet kodu</label><input id="a-code" autocomplete="off" placeholder="ör. K7F3A9C2" style="text-transform:uppercase"></div>
           <div><label for="a-pin">PIN</label><input id="a-pin" inputmode="numeric" maxlength="6" autocomplete="off"></div>
         </div>
         <button class="btn ghost" type="submit">Ekle</button>
@@ -672,7 +758,7 @@ function showMine(error = "") {
   document.getElementById("addf").addEventListener("submit", async ev => {
     ev.preventDefault();
     const code = document.getElementById("a-code").value.trim().toUpperCase(), pin = document.getElementById("a-pin").value.trim();
-    if (!code || !/^\d{6}$/.test(pin)) return showMine("Künye kodunu ve 6 haneli PIN'i girin.");
+    if (!code || !/^\d{6}$/.test(pin)) return showMine("Rozet kodunu ve 6 haneli PIN'i girin.");
     let rows;
     try { rows = await rpc("tasma_tag_stats", {p_codes: [code], p_pins: [pin]}); }
     catch (e) { return showMine("Bağlantı hatası, tekrar deneyin."); }
@@ -702,21 +788,21 @@ async function refreshOrders() {
   } catch (e) {}
 }
 
-// ---------------------------------------------------------------- sahibi: tek künye (yazdır, PDF, kayıp modu, konumlar)
+// ---------------------------------------------------------------- sahibi: tek rozet (yazdır, PDF, kayıp modu, konumlar)
 function showTagPage(code, fresh) {
   const t = findTag(code);
   if (!t) {
-    return show(`${backLink("#kunyelerim", "Künyelerim")}<h1>Künye bu cihazda kayıtlı değil</h1>
-      <p>Künyeyi Künyelerim'den kodu ve PIN'i ile ekleyebilirsiniz.</p><a class="btn" href="#kunyelerim">Künyelerim</a>`);
+    return show(`${backLink("#kunyelerim", "Rozetlerim")}<h1>Rozet bu cihazda kayıtlı değil</h1>
+      <p>Rozeti Rozetlerim'den kodu ve PIN'i ile ekleyebilirsiniz.</p><a class="btn" href="#kunyelerim">Rozetlerim</a>`);
   }
   const {w, h} = dims(t.size), fit = perA4({w, h});
   const copies = Math.min(t.copies || 1, fit);
   const copyOpts = [...new Set([1, 2, 4, 6, 10, fit].filter(n => n <= fit))];
   show(`
     <div class="noprint">
-      ${backLink("#kunyelerim", "Künyelerim")}
+      ${backLink("#kunyelerim", "Rozetlerim")}
       ${petBadge(t.name, t.code)}
-      ${fresh ? `<div class="msg ok"><b>Künyeniz hazır!</b> Aşağıdaki PIN'i bir yere not edin: bilgileri değiştirmek ve kayıp modunu açmak için gerekir.</div>` : ""}
+      ${fresh ? `<div class="msg ok"><b>Rozetiniz hazır!</b> Aşağıdaki PIN'i bir yere not edin: bilgileri değiştirmek ve kayıp modunu açmak için gerekir.</div>` : ""}
       <div class="card">
         <div id="lostbox"></div>
         <dl class="kv">
@@ -740,13 +826,17 @@ function showTagPage(code, fresh) {
           <button class="btn" type="button" id="print">Yazdır</button>
           <button class="btn alt" type="button" id="pdf">PDF indir</button>
         </div>
-        <span class="hint">Yazdırırken ölçek <b>%100 / Gerçek boyut</b> olmalı. Künyeyi kesip yapıştırın, üzerini şeffaf bant ya da laminasyonla kaplayın.</span>
+        <span class="hint">Yazdırırken ölçek <b>%100 / Gerçek boyut</b> olmalı. Rozeti kesip yapıştırın, üzerini şeffaf bant ya da laminasyonla kaplayın.</span>
       </div>
       <div id="shopbox"></div>
     </div>
     <div class="printgrid" id="pg" style="${sizeVars(t.size)}">${Array.from({length: copies}, () => tagHtml(t.code, t.design, {name: t.name, round: dims(t.size).round})).join("")}</div>
     <div class="noprint">
-      <p class="small"><a href="#" id="forget">Bu künyeyi bu cihazdan kaldır</a></p>
+      <div class="card"><h2>Rozeti sil</h2>
+        <p>Rozet silinince QR'ı okutan kişi hiçbir bilgi görmez; okutmalar ve konumlar da silinir.</p>
+        <button class="btn danger" type="button" id="delete" style="margin-top:0">🗑 Rozeti sil</button>
+        <p class="small" style="margin-top:14px"><a href="#" id="forget">Silmeden yalnızca bu cihazdaki listeden kaldır</a></p>
+      </div>
     </div>`, "mid");
   if (fresh) confetti();
   const g = id => document.getElementById(id);
@@ -774,9 +864,13 @@ function showTagPage(code, fresh) {
     } catch (e) { toast("PDF oluşturulamadı: " + e.message, 5000); }
     ev.target.disabled = false;
   };
+  g("delete").onclick = async ev => {
+    ev.target.disabled = true;
+    if (await deleteTag(code, t.pin, t.name)) location.hash = "#kunyelerim"; else ev.target.disabled = false;
+  };
   g("forget").onclick = ev => {
     ev.preventDefault();
-    if (!confirm(`${t.name || t.code} künyesi bu cihazdan kaldırılsın mı? Künye çalışmaya devam eder; PIN'iniz yoksa bir daha ekleyemezsiniz.\n\nPIN: ${t.pin}`)) return;
+    if (!confirm(`${t.name || t.code} rozeti bu cihazdan kaldırılsın mı? Rozet çalışmaya devam eder; PIN'iniz yoksa bir daha ekleyemezsiniz.\n\nPIN: ${t.pin}`)) return;
     removeTag(code); location.hash = "#kunyelerim";
   };
   // sunucudan güncel durum: kayıp modu, okutmalar, konumlar
@@ -803,27 +897,27 @@ function showTagPage(code, fresh) {
       } catch (e) { ev.target.disabled = false; toast("İşlem yapılamadı: " + e.message, 5000); }
     };
   });
-  // basılı künye satışı açıksa sipariş kartı
+  // basılı rozet satışı açıksa sipariş kartı
   rpc("tasma_shop_info").then(shop => {
     if (!shop?.active) return;
-    g("shopbox").innerHTML = `<div class="card"><h2>Basılı künye sipariş edin · ${esc(shop.price)} TL</h2>
+    g("shopbox").innerHTML = `<div class="card"><h2>Basılı rozet sipariş edin · ${esc(shop.price)} TL</h2>
       <p>${esc(shop.product_text)} ${esc(shop.shipping_text)}</p>
       <a class="btn alt" href="#siparis/${encodeURIComponent(code)}">Sipariş ver</a></div>`;
   }, () => {});
 }
 
-// ---------------------------------------------------------------- sahibi: basılı künye siparişi (IBAN ile ödeme)
+// ---------------------------------------------------------------- sahibi: basılı rozet siparişi (IBAN ile ödeme)
 async function showOrderForm(code, error = "", v = null) {
   const t = findTag(code);
   if (!t) return showTagPage(code);
   let shop;
   try { shop = await rpc("tasma_shop_info"); } catch (e) { return showMessage("Bağlantı hatası", "Sayfayı yenileyip tekrar deneyin."); }
-  if (!shop?.active) return showMessage("Şu an sipariş alınmıyor", "Künyenizi kendiniz yazdırabilirsiniz. Satış açıldığında burada görünecek.");
+  if (!shop?.active) return showMessage("Şu an sipariş alınmıyor", "Rozetinizi kendiniz yazdırabilirsiniz. Satış açıldığında burada görünecek.");
   v ||= {...store.get("address", {}), phone: store.get("address", {}).phone || prettyPhone(t.phone), design: t.design};
   const val = k => `value="${esc(v[k] || "")}"`;
   show(`
-    ${backLink(`#kunye/${encodeURIComponent(code)}`, "Künyeye dön")}
-    <h1>Basılı künye siparişi</h1>
+    ${backLink(`#kunye/${encodeURIComponent(code)}`, "Rozete dön")}
+    <h1>Basılı rozet siparişi</h1>
     <p>${esc(shop.product_text)} <b>${esc(shop.price)} TL</b>. ${esc(shop.shipping_text)}</p>
     <div class="preview">${tagAt(code, v.design, "y35", {name: t.name})}${tagAt(code, v.design, "k35x50", {name: t.name})}</div>
     ${error ? `<div class="msg err" role="alert" style="margin-top:14px">${esc(error)}</div>` : ""}
@@ -860,7 +954,7 @@ async function showOrderForm(code, error = "", v = null) {
         p_city: nv.city, p_district: nv.district, p_address: nv.address, p_note: nv.note || null, p_device: deviceId()});
     } catch (e) { return showOrderForm(code, "Bağlantı hatası, tekrar deneyin.", nv); }
     if (!res?.ok) {
-      return showOrderForm(code, {closed: "Şu an sipariş alınmıyor.", no_tag: "Bu künye bulunamadı.", missing: "Bilgiler eksik.",
+      return showOrderForm(code, {closed: "Şu an sipariş alınmıyor.", no_tag: "Bu rozet bulunamadı.", missing: "Bilgiler eksik.",
         bad_phone: "Telefon geçersiz.", bad_email: "E-posta geçersiz.", too_many: "Bugün çok fazla sipariş verdiniz.",
         busy: "Şu an çok yoğun, biraz sonra deneyin."}[res?.error] || "Sipariş oluşturulamadı.", nv);
     }
@@ -880,7 +974,7 @@ async function showPay(orderCode) {
   const waiting = o.status === "odeme_bekleniyor";
   const iban = (shop?.iban || "").replace(/(.{4})/g, "$1 ").trim();
   show(`
-    ${backLink("#kunyelerim", "Künyelerim")}
+    ${backLink("#kunyelerim", "Rozetlerim")}
     <h1>Sipariş ${esc(o.code)}</h1>
     <div class="msg ${o.status === "iptal" ? "err" : "info"}"><b>Durum:</b> ${esc(ORDER_STATUS[o.status] || o.status)}${o.tracking ? `<br><b>Kargo takip no:</b> ${esc(o.tracking)}` : ""}</div>
     ${waiting && shop ? `
@@ -895,7 +989,7 @@ async function showPay(orderCode) {
         <p style="margin-top:12px">Açıklamaya sipariş numarasını yazmayı unutmayın. Ödemeyi yaptıktan sonra aşağıdaki butona basın.</p>
         <button class="btn" type="button" id="paid">Ödemeyi yaptım</button>
       </div>` : ""}
-    ${o.status === "odeme_bildirildi" ? `<p>Teşekkürler! Ödemeniz kontrol edildikten sonra künyeleriniz baskıya alınacak. Durumu buradan ve Künyelerim'den takip edebilirsiniz.</p>` : ""}`, "mid");
+    ${o.status === "odeme_bildirildi" ? `<p>Teşekkürler! Ödemeniz kontrol edildikten sonra rozetleriniz baskıya alınacak. Durumu buradan ve Rozetlerim'den takip edebilirsiniz.</p>` : ""}`, "mid");
   document.getElementById("copy")?.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(shop.iban); toast("IBAN kopyalandı."); } catch (e) { toast("Kopyalanamadı; IBAN'ı uzun basıp seçin."); }
   });
@@ -959,7 +1053,7 @@ async function showAdminLogin(error = "") {
   let installed = true;
   try { await rpc("tasma_version"); } catch (e) { installed = !e.status; } // bağlantı hatasında kurulu varsay
   show(`
-    <h1>Künye yönetimi</h1>
+    <h1>Rozet yönetimi</h1>
     ${installed ? "" : setupHtml("Veritabanı kurulu değil.")}
     <p>Kurulumda belirlediğiniz admin şifresini girin.</p>
     ${error ? `<div class="msg err">${esc(error)}</div>` : ""}
@@ -989,7 +1083,7 @@ let paper = pref("paper", "a4", ["a4", "tek"]);
 const designOf = {};
 let adminTab = "tags", reqFilter = "yeni", orderFilter = "odeme_bildirildi", orderBadge = 0;
 
-// Seçili ölçüyü ve kağıt tipini künyelere ve yazdırma sayfasına uygular.
+// Seçili ölçüyü ve kağıt tipini rozetlere ve yazdırma sayfasına uygular.
 function applySize() {
   const grid = document.querySelector(".admingrid"), {w, h} = singlePage(stickerSize);
   if (grid) {
@@ -1011,7 +1105,7 @@ function adminError(text) {
 
 const setGiven = (codes, given) => rpc("tasma_admin_set_given", {p_key: adminKey, p_codes: codes, p_given: given});
 
-// A4: künyeleri gerçek boyutlarıyla sayfaya dizer. Tek: her künye / PIN kartı kendi sayfasında (matbaa, etiket yazıcısı).
+// A4: rozetleri gerçek boyutlarıyla sayfaya dizer. Tek: her rozet / PIN kartı kendi sayfasında (matbaa, etiket yazıcısı).
 async function savePdf(codes) {
   await loadPdfLibs();
   const {jsPDF} = window.jspdf;
@@ -1033,7 +1127,7 @@ async function savePdf(codes) {
     for (const tag of tags) shots.push(await snap(tag.querySelector(".block")));
     if (!layoutA4(pdf, shots)) pdf = null;
   }
-  if (!pdf) throw new Error("Kaydedilecek künye yok");
+  if (!pdf) throw new Error("Kaydedilecek rozet yok");
   const name = codes.length === 1 ? `kunye-${codes[0]}` : `kunyeler-${codes.length}`;
   pdf.save(`${name}-${stickerSize}.pdf`);
 }
@@ -1052,23 +1146,23 @@ async function deliver(codes, how) {
   }
   const fresh = codes.filter(c => document.querySelector(`.tag[data-code="${CSS.escape(c)}"]`)?.dataset.state === "ready");
   if (!fresh.length) return;
-  if (!confirm(`${fresh.length} künye verildi olarak işaretlensin mi? Verilen künyeler bu listede bir daha görünmez.`)) return;
+  if (!confirm(`${fresh.length} rozet verildi olarak işaretlensin mi? Verilen rozetler bu listede bir daha görünmez.`)) return;
   try {
     await setGiven(fresh, true);
     await showAdmin();
     confetti();
-    toast(fresh.length === 1 ? `${fresh[0]} yeni dostuna kavuştu!` : `${fresh.length} künye yeni dostlarına yolculuğa çıktı!`);
+    toast(fresh.length === 1 ? `${fresh[0]} yeni dostuna kavuştu!` : `${fresh.length} rozet yeni dostlarına yolculuğa çıktı!`);
   } catch (e) { adminError("İşaretlenemedi: " + e.message); }
 }
 
 const designOptions = (sel, withRandom) =>
-  (withRandom ? `<option value="${RANDOM}"${sel === RANDOM ? " selected" : ""}>Rastgele (her künyeye farklı)</option>` : "") +
+  (withRandom ? `<option value="${RANDOM}"${sel === RANDOM ? " selected" : ""}>Rastgele (her rozete farklı)</option>` : "") +
   Object.entries(DESIGNS).map(([k, d]) => `<option value="${k}"${k === sel ? " selected" : ""}>${esc(d.name)}</option>`).join("");
 
 function tabsHtml(newCount) {
   const tab = (id, name, n) => `<button data-tab="${id}" class="${adminTab === id ? "on" : ""}">${name}${n ? `<span class="badge">${n}</span>` : ""}</button>`;
   return `<div class="tabs noprint">
-    ${tab("tags", "Künyeler")}${tab("requests", "Talepler", newCount)}${tab("orders", "Siparişler", orderBadge)}${tab("settings", "Ayarlar")}
+    ${tab("tags", "Rozetler")}${tab("requests", "Talepler", newCount)}${tab("orders", "Siparişler", orderBadge)}${tab("settings", "Ayarlar")}
   </div>`;
 }
 
@@ -1109,38 +1203,38 @@ async function showAdmin() {
   show(`
     ${tabsHtml(newReq)}
     <div class="bar noprint">
-      <select id="view" aria-label="Hangi künyeler">
-        <option value="ready">Verilecek künyeler (${count.ready})</option>
-        <option value="out">Verilmiş künyeler (${count.given + count.used})</option>
+      <select id="view" aria-label="Hangi rozetler">
+        <option value="ready">Verilecek rozetler (${count.ready})</option>
+        <option value="out">Verilmiş rozetler (${count.given + count.used})</option>
         <option value="all">Tümü (${rows.length})</option>
       </select>
       <select id="mode" aria-label="Ne çıkarılsın">
-        <option value="">Künye + PIN kartı</option>
-        <option value="only-sticker">Sadece künyeler</option>
+        <option value="">Rozet + PIN kartı</option>
+        <option value="only-sticker">Sadece rozetler</option>
         <option value="only-pin">Sadece PIN kartları</option>
       </select>
       <select id="size" aria-label="Baskı ölçüsü">${Object.entries(SIZES).map(([k, n]) =>
         `<option value="${k}"${k === stickerSize ? " selected" : ""}>${esc(n)} · A4'e ${perA4(dims(k))}</option>`).join("")}</select>
       <select id="paper" aria-label="Kağıt">
         <option value="a4">A4 kağıda diz</option>
-        <option value="tek">Her sayfaya bir künye (matbaa / etiket yazıcısı)</option>
+        <option value="tek">Her sayfaya bir rozet (matbaa / etiket yazıcısı)</option>
       </select>
       <select id="design" aria-label="Tümü için tasarım">${designOptions(defaultDesign, true)}</select>
       <button class="btn" id="dice" title="Hepsine rastgele tasarım">🎲 Karıştır</button>
       <button class="btn" id="print">Listedekileri yazdır</button>
       <button class="btn" id="pdf">Listedekileri PDF kaydet</button>
-      <button class="btn" id="add">10 künye daha üret</button>
+      <button class="btn" id="add">10 rozet daha üret</button>
     </div>
-    <p class="noprint">Talep edene künye verirken tasarımı seçip <b>Yazdır ve ver</b> ya da <b>PDF kaydet ve ver</b>'e basın; künye verildi olarak işaretlenip bu listeden kalkar.
-      Kişi QR'ı okutup köpeğinin adını, numarasını ve PIN'i girdiğinde künye çalışmaya başlar.
+    <p class="noprint">Talep edene rozet verirken tasarımı seçip <b>Yazdır ve ver</b> ya da <b>PDF kaydet ve ver</b>'e basın; rozet verildi olarak işaretlenip bu listeden kalkar.
+      Kişi QR'ı okutup köpeğinin adını, numarasını ve PIN'i girdiğinde rozet çalışmaya başlar.
       Yazdırırken ölçek <b>%100 / Gerçek boyut</b> olmalı.</p>
     <div id="msg"></div>
-    ${list.length ? "" : `<p>Bu listede künye yok.${view === "ready" ? " Yeni künye üretmek için “10 künye daha üret”e basın." : ""}</p>`}
+    ${list.length ? "" : `<p>Bu listede rozet yok.${view === "ready" ? " Yeni rozet üretmek için “10 rozet daha üret”e basın." : ""}</p>`}
     <div class="admingrid">
       ${list.map(r => `
         <div class="tag" data-code="${esc(r.code)}" data-state="${state(r)}">
           <div class="block">${tagHtml(r.code, designOf[r.code], {round})}
-            <div class="pin"><b>${esc(r.code)}</b> künyesinin PIN'i<span>${esc(r.pin)}</span><small>QR'ı okutup köpeğinizi bağlamak ve bilgileri değiştirmek için gerekir. Bu kartı tasmada bırakmayın.</small></div>
+            <div class="pin"><b>${esc(r.code)}</b> rozetinin PIN'i<span>${esc(r.pin)}</span><small>QR'ı okutup köpeğinizi bağlamak ve bilgileri değiştirmek için gerekir. Bu kartı tasmada bırakmayın.</small></div>
           </div>
           <div class="state noprint">
             <div>${label[state(r)]}${r.phone ? `: ${esc(r.pet_name || "")} · ${esc(prettyPhone(r.phone))}` : ""}</div>
@@ -1150,6 +1244,7 @@ async function showAdmin() {
               <button class="mini ghost" data-act="mark">Sadece verildi işaretle</button>` :
               `<button class="mini alt" data-act="pdf">PDF kaydet</button>`}
             ${state(r) === "given" ? `<button class="mini ghost" data-act="undo">Geri al (verilmedi)</button>` : ""}
+            ${state(r) !== "used" ? `<button class="mini ghost" data-act="delete" style="color:var(--err)">🗑 Sil</button>` : ""}
           </div>
         </div>`).join("")}
     </div>`, true);
@@ -1188,6 +1283,12 @@ async function showAdmin() {
     try {
       if (act === "give") return await deliver([code], "print");
       if (act === "givepdf" || act === "pdf") return await deliver([code], "pdf");
+      if (act === "delete") {
+        if (!confirm(`${code} rozeti silinsin mi? Basılıp verildiyse PIN kartı da geçersiz olur.`)) return;
+        await rpc("tasma_admin_delete", {p_key: adminKey, p_codes: [code]});
+        await showAdmin();
+        return toast(`${code} silindi.`);
+      }
       await setGiven([code], act === "mark");
       await showAdmin();
       if (act === "mark") toast(`${code} verildi olarak işaretlendi.`);
@@ -1197,7 +1298,7 @@ async function showAdmin() {
   $("add").onclick = async ev => {
     ev.target.disabled = true;
     try { await rpc("tasma_admin_add", {p_key: adminKey, p_count: 10}); }
-    catch (e) { ev.target.disabled = false; return adminError("Künye üretilemedi: " + e.message); }
+    catch (e) { ev.target.disabled = false; return adminError("Rozet üretilemedi: " + e.message); }
     showAdmin();
   };
 }
@@ -1212,7 +1313,7 @@ function showRequests(rows, requests, newCount) {
     <div class="bar">
       <select id="rfilter" aria-label="Talep durumu">
         <option value="yeni">Yeni talepler (${newCount})</option>
-        <option value="verildi">Künyesi verilenler</option>
+        <option value="verildi">Rozeti verilenler</option>
         <option value="iptal">İptal edilenler</option>
         <option value="all">Tümü (${requests?.length || 0})</option>
       </select>
@@ -1230,16 +1331,16 @@ function showRequests(rows, requests, newCount) {
               ${esc(dateTR(r.created_at))}<br>
               <a href="mailto:${esc(r.email)}">${esc(r.email)}</a>
               ${r.phone ? ` · <a href="tel:${esc(r.phone)}">${esc(prettyPhone(r.phone))}</a> ·
-              <a href="${esc(waHref(r.phone, `Merhaba ${r.first_name}, Tasma QR künyeniz hazır!`))}" target="_blank" rel="noopener"><b>WhatsApp'tan istiyor</b></a>` : " · <span>E-postayla</span>"}
+              <a href="${esc(waHref(r.phone, `Merhaba ${r.first_name}, Tasma QR rozetiniz hazır!`))}" target="_blank" rel="noopener"><b>WhatsApp'tan istiyor</b></a>` : " · <span>E-postayla</span>"}
             </div>
             ${r.note ? `<div class="note">${esc(r.note)}</div>` : ""}
           </div>
           <div class="act">
             <select data-f="status" aria-label="Durum">
-              ${[["yeni", "Yeni"], ["verildi", "Künyesi verildi"], ["iptal", "İptal"]].map(([k, n]) =>
+              ${[["yeni", "Yeni"], ["verildi", "Rozeti verildi"], ["iptal", "İptal"]].map(([k, n]) =>
                 `<option value="${k}"${k === r.status ? " selected" : ""}>${n}</option>`).join("")}
             </select>
-            <input data-f="code" list="ready-codes" placeholder="Verilen künye kodu" value="${esc(r.tag_code || "")}" aria-label="Verilen künye kodu">
+            <input data-f="code" list="ready-codes" placeholder="Verilen rozet kodu" value="${esc(r.tag_code || "")}" aria-label="Verilen rozet kodu">
             <button data-act="save">Kaydet</button>
           </div>
         </div>`).join("")}
@@ -1263,14 +1364,14 @@ function showRequests(rows, requests, newCount) {
     const code = box.querySelector('[data-f="code"]').value.trim().toUpperCase();
     const msg = document.getElementById("msg");
     if (code && !rows.some(r => String(r.code).toUpperCase() === code)) {
-      msg.innerHTML = `<div class="msg err">${esc(code)} kodunda bir künye yok.</div>`; return;
+      msg.innerHTML = `<div class="msg err">${esc(code)} kodunda bir rozet yok.</div>`; return;
     }
     btn.disabled = true;
     try {
       await rpc("tasma_admin_request_update", {p_key: adminKey, p_id: id, p_status: status, p_tag_code: code || null});
       if (status === "verildi" && code && ready.includes(code)) await setGiven([code], true);
       await showAdmin();
-      if (status === "verildi") { confetti(); toast("Talep tamamlandı, künye yolda!"); } else toast("Kaydedildi.");
+      if (status === "verildi") { confetti(); toast("Talep tamamlandı, rozet yolda!"); } else toast("Kaydedildi.");
     } catch (e) {
       btn.disabled = false;
       msg.innerHTML = `<div class="msg err">Kaydedilemedi: ${esc(e.message)}</div>`;
@@ -1278,13 +1379,13 @@ function showRequests(rows, requests, newCount) {
   };
 }
 
-// ---------------------------------------------------------------- yönetim: basılı künye siparişleri
+// ---------------------------------------------------------------- yönetim: basılı rozet siparişleri
 async function loadShopAdmin() {
   try { const r = await rpc("tasma_admin_shop_get", {p_key: adminKey}); return Array.isArray(r) ? r[0] : r; }
   catch (e) { return null; }
 }
 
-// Siparişin A4 baskı PDF'i: aynı QR 7 ölçüde 29 künye (shared/tag.js orderSheetHtml)
+// Siparişin A4 baskı PDF'i: aynı QR 7 ölçüde 29 rozet (shared/tag.js orderSheetHtml)
 async function orderPdf(o) {
   await loadPdfLibs();
   const box = document.createElement("div");
@@ -1303,7 +1404,7 @@ function printerMail(o) {
   const subject = `Baskı siparişi ${o.code}`;
   const body = `Merhaba,
 
-Ekteki A4 sayfayı su geçirmez, UV dayanımlı vinil sticker olarak 1 adet basmanızı rica ederim. Künyeler kesim çizgileriyle birlikte dosyadadır.
+Ekteki A4 sayfayı su geçirmez, UV dayanımlı vinil sticker olarak 1 adet basmanızı rica ederim. Rozetler kesim çizgileriyle birlikte dosyadadır.
 
 Sipariş no: ${o.code}
 Teslimat adresi:
@@ -1321,8 +1422,8 @@ function customerMessage(o) {
   return {
     odeme_bekleniyor: `Merhaba ${first}, Tasma QR siparişiniz (${o.code}) için ${o.amount} TL ödemenizi bekliyoruz.`,
     odeme_bildirildi: `Merhaba ${first}, Tasma QR siparişinizin (${o.code}) ödemesini kontrol ediyoruz.`,
-    onaylandi: `Merhaba ${first}, Tasma QR siparişinizin (${o.code}) ödemesi alındı, künyeleriniz baskıya hazırlanıyor.`,
-    baskida: `Merhaba ${first}, Tasma QR künyeleriniz (${o.code}) baskıda. Kargoya verilince takip numarasını ileteceğiz.`,
+    onaylandi: `Merhaba ${first}, Tasma QR siparişinizin (${o.code}) ödemesi alındı, rozetleriniz baskıya hazırlanıyor.`,
+    baskida: `Merhaba ${first}, Tasma QR rozetleriniz (${o.code}) baskıda. Kargoya verilince takip numarasını ileteceğiz.`,
     kargolandi: `Merhaba ${first}, Tasma QR siparişiniz (${o.code}) kargoya verildi.${o.tracking ? ` Takip no: ${o.tracking}` : ""} Sağlıklı günlerde kullanın!`,
     iptal: `Merhaba ${first}, Tasma QR siparişiniz (${o.code}) iptal edildi.`,
   }[o.status] || `Merhaba ${first}, Tasma QR siparişiniz (${o.code}) hakkında yazıyoruz.`;
@@ -1445,7 +1546,7 @@ async function showSettings(newCount, error = "") {
     ${error ? `<div class="msg err">${esc(error)}</div>` : ""}
     ${shop ? `
     <form id="sf" class="card" style="max-width:560px" novalidate>
-      <h2>Basılı künye satışı</h2>
+      <h2>Basılı rozet satışı</h2>
       <label class="check"><input type="checkbox" id="s-active"${shop.active ? " checked" : ""}> Satış açık (sitede sipariş alınsın)</label>
       <label for="s-price">Fiyat (TL)</label><input id="s-price" type="number" inputmode="numeric" min="0" value="${esc(shop.price)}">
       <label for="s-product">Ürün açıklaması (sitede görünür)</label><textarea id="s-product" rows="3">${esc(shop.product_text || "")}</textarea>
@@ -1540,7 +1641,7 @@ async function route() {
     let tag;
     try { tag = await rpc("tasma_tag_lookup", {p_code: code}); }
     catch (e) { return showMessage("Bağlantı hatası", "Sayfayı yenileyip tekrar deneyin."); }
-    if (!tag?.exists) return showMessage("Künye bulunamadı", "Bu QR kod geçerli bir künyeye ait değil.");
+    if (!tag?.exists) return showMessage("Rozet bulunamadı", "Bu QR kod geçerli bir rozete ait değil.");
     if (params.has("duzenle") || !tag.phone) return showEdit(code, tag);
     return showFound(code, tag);
   }

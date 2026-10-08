@@ -1,4 +1,4 @@
--- Tasma QR veritabanı kurulumu (tek dosya): künyeler, okutma ve konum bildirimleri, talep formu, basılı künye siparişi.
+-- Tasma QR veritabanı kurulumu (tek dosya): rozetler, okutma ve konum bildirimleri, talep formu, basılı rozet siparişi.
 -- Supabase > SQL Editor'da çalıştırın. Tekrar çalıştırmak güvenlidir; mevcut verilere dokunmaz.
 -- Tüm tablo ve fonksiyonlar "tasma_" ile başlar: Araç QR ile aynı Supabase projesinde çakışmadan çalışır.
 --
@@ -55,7 +55,7 @@ revoke all on function public.tasma_admin_check(text) from public, anon, authent
 
 create or replace function public.tasma_version() returns integer language sql immutable as 'select 1';
 
--- ---------------------------------------------------------------- künyeler
+-- ---------------------------------------------------------------- rozetler
 -- source = 'admin': yönetimden üretilip basılan (PIN kartıyla verilir, sahibi QR'ı okutup numarasını bağlar)
 -- source = 'self' : sitede / uygulamada sahibinin kendi oluşturduğu
 create table if not exists public.tasma_tags (
@@ -71,7 +71,7 @@ create table if not exists public.tasma_tags (
   backup_phone text,
   backup_name text,
   device text,
-  given_at timestamptz,       -- yönetim: künye birine verildi
+  given_at timestamptz,       -- yönetim: rozet birine verildi
   created_at timestamptz not null default now(),
   updated_at timestamptz,
   fail_count integer not null default 0,
@@ -104,7 +104,7 @@ create index if not exists tasma_sightings_code_idx on public.tasma_sightings (c
 alter table public.tasma_sightings enable row level security;
 revoke all on public.tasma_sightings from anon, authenticated;
 
--- Yeni künye: kriptografik rastgele kod (K… yönetim, S… kendi oluşturulan) ve 6 haneli PIN
+-- Yeni rozet: kriptografik rastgele kod (K… yönetim, S… kendi oluşturulan) ve 6 haneli PIN
 create or replace function public.tasma_new_tag(p_source text)
 returns public.tasma_tags
 language plpgsql security definer set search_path = public
@@ -126,7 +126,7 @@ begin
 end $$;
 revoke all on function public.tasma_new_tag(text) from public, anon, authenticated;  -- yalnızca içeriden
 
--- Sahibi kendi künyesini oluşturur: {ok:true, code, pin} ya da {ok:false, error}
+-- Sahibi kendi rozetini oluşturur: {ok:true, code, pin} ya da {ok:false, error}
 create or replace function public.tasma_tag_create(p_pet_name text, p_phone text, p_device text default null)
 returns json
 language plpgsql security definer set search_path = public
@@ -199,7 +199,7 @@ as $$
 $$;
 revoke all on function public.tasma_pin_error(text, text) from public, anon, authenticated;  -- yalnızca içeriden
 
--- Künye bilgilerini kaydeder (PIN ile). p_claim: boş künyeyi ilk kez bağlarken true; biri az önce bağladıysa 'already' döner.
+-- Rozet bilgilerini kaydeder (PIN ile). p_claim: boş rozeti ilk kez bağlarken true; biri az önce bağladıysa 'already' döner.
 create or replace function public.tasma_tag_save(p_code text, p_pin text, p_phone text, p_pet_name text, p_notes text,
   p_lost boolean, p_reward text, p_backup_phone text, p_backup_name text, p_claim boolean default false)
 returns json
@@ -249,7 +249,31 @@ begin
   return json_build_object('ok', true, 'lost', coalesce(p_lost, false));
 end $$;
 
--- Bulan kişi konumunu paylaşır. Kötüye kullanım sınırları: künye başına saatte 10, genelde dakikada 60.
+-- Sahibi rozeti siler (PIN ile). Kendi oluşturduğu rozet tamamen silinir; yönetimden basılan rozet ise boşa çıkar
+-- (PIN kartıyla yeniden bağlanabilir). Okutmalar ve konumlar her iki durumda da silinir.
+create or replace function public.tasma_tag_delete(p_code text, p_pin text)
+returns json
+language plpgsql security definer set search_path = public
+as $$
+declare
+  v_code text := upper(trim(coalesce(p_code, '')));
+  v_err text := public.tasma_check_pin(v_code, p_pin);
+  v_source text;
+begin
+  if v_err is not null then return public.tasma_pin_error(v_code, v_err); end if;
+  select source into v_source from tasma_tags where code = v_code;
+  delete from tasma_scans where code = v_code;
+  delete from tasma_sightings where code = v_code;
+  if v_source = 'admin' then
+    update tasma_tags set phone = null, pet_name = null, notes = null, reward = null, lost = false, lost_since = null,
+      backup_phone = null, backup_name = null, updated_at = now() where code = v_code;
+  else
+    delete from tasma_tags where code = v_code;
+  end if;
+  return json_build_object('ok', true, 'reset', v_source = 'admin');
+end $$;
+
+-- Bulan kişi konumunu paylaşır. Kötüye kullanım sınırları: rozet başına saatte 10, genelde dakikada 60.
 create or replace function public.tasma_report_location(p_code text, p_lat double precision, p_lng double precision, p_accuracy integer default null)
 returns json
 language plpgsql security definer set search_path = public
@@ -288,7 +312,7 @@ as $$
   join tasma_tags t on t.code = upper(trim(q.code)) and t.pin = trim(q.pin);
 $$;
 
--- ---------------------------------------------------------------- yönetim: basılan künyeler
+-- ---------------------------------------------------------------- yönetim: basılan rozetler
 create or replace function public.tasma_admin_list(p_key text)
 returns table (code text, pin text, phone text, pet_name text, given_at timestamptz, created_at timestamptz)
 language plpgsql security definer set search_path = public
@@ -310,7 +334,7 @@ begin
   return n;
 end $$;
 
--- Künyeleri verildi / verilmedi olarak işaretler
+-- Rozetleri verildi / verilmedi olarak işaretler
 create or replace function public.tasma_admin_set_given(p_key text, p_codes text[], p_given boolean)
 returns integer
 language plpgsql security definer set search_path = public
@@ -324,6 +348,19 @@ begin
   return n;
 end $$;
 
+-- Yönetim: henüz kimsenin bağlamadığı rozetleri siler (bağlanmış rozetlere dokunmaz)
+create or replace function public.tasma_admin_delete(p_key text, p_codes text[])
+returns integer
+language plpgsql security definer set search_path = public
+as $$
+declare n integer;
+begin
+  perform public.tasma_admin_check(p_key);
+  delete from tasma_tags where code = any (select upper(trim(c)) from unnest(p_codes) c) and source = 'admin' and phone is null;
+  get diagnostics n = row_count;
+  return n;
+end $$;
+
 -- ---------------------------------------------------------------- talep formu
 create table if not exists public.tasma_requests (
   id bigint generated always as identity primary key,
@@ -331,7 +368,7 @@ create table if not exists public.tasma_requests (
   first_name text not null,
   last_name text not null,
   email text not null,
-  phone text,           -- isteğe bağlı: künye WhatsApp'tan istenirse
+  phone text,           -- isteğe bağlı: rozet WhatsApp'tan istenirse
   pet_name text,
   note text,
   status text not null default 'yeni' check (status in ('yeni', 'verildi', 'iptal')),
@@ -387,7 +424,7 @@ begin
    where id = p_id;
 end $$;
 
--- ---------------------------------------------------------------- basılı künye siparişi: IBAN ile ödeme bildirimi
+-- ---------------------------------------------------------------- basılı rozet siparişi: IBAN ile ödeme bildirimi
 create table if not exists public.tasma_shop_settings (
   id integer primary key default 1 check (id = 1),
   active boolean not null default false,          -- IBAN girilip açılana kadar sipariş alınmaz
@@ -397,7 +434,7 @@ create table if not exists public.tasma_shop_settings (
   bank_name text,
   printer_email text,                             -- baskıcı: yalnızca panelde görünür
   shipping_text text not null default 'Kargo ücreti fiyata dahildir.',
-  product_text text not null default 'Su geçirmez vinil sticker sayfası: aynı QR 7 farklı ölçüde 29 künye. Künyeye, tasmaya, kafese yapıştırabilirsiniz.',
+  product_text text not null default 'Su geçirmez QR rozet seti: aynı QR 7 farklı ölçüde 29 adet. Birini tasmaya takın, yedekleri kafese, mama kabına, çantaya yapıştırın.',
   telegram_bot_token text,
   telegram_chat_id text,
   resend_api_key text,
@@ -405,6 +442,8 @@ create table if not exists public.tasma_shop_settings (
   updated_at timestamptz
 );
 insert into public.tasma_shop_settings (id) values (1) on conflict (id) do nothing;
+update public.tasma_shop_settings set product_text = 'Su geçirmez QR rozet seti: aynı QR 7 farklı ölçüde 29 adet. Birini tasmaya takın, yedekleri kafese, mama kabına, çantaya yapıştırın.'
+  where product_text = 'Su geçirmez vinil sticker sayfası: aynı QR 7 farklı ölçüde 29 künye. Künyeye, tasmaya, kafese yapıştırabilirsiniz.';  -- eski varsayılan metin
 alter table public.tasma_shop_settings enable row level security;
 revoke all on public.tasma_shop_settings from anon, authenticated;
 
@@ -620,7 +659,7 @@ begin
     'sent', public.tasma_notify('Tasma QR: deneme bildirimi', 'Bildirimler çalışıyor. Yeni ödeme bildirimleri buraya gelecek.'));
 end $$;
 
--- Siparişler, basılacak künyedeki köpek adıyla birlikte
+-- Siparişler, basılacak rozetteki köpek adıyla birlikte
 create or replace function public.tasma_admin_orders(p_key text)
 returns json
 language plpgsql security definer set search_path = public
@@ -652,11 +691,13 @@ begin
     'tasma_tag_lookup(text)',
     'tasma_tag_save(text, text, text, text, text, boolean, text, text, text, boolean)',
     'tasma_tag_set_lost(text, text, boolean)',
+    'tasma_tag_delete(text, text)',
     'tasma_report_location(text, double precision, double precision, integer)',
     'tasma_tag_stats(text[], text[])',
     'tasma_admin_list(text)',
     'tasma_admin_add(text, integer)',
     'tasma_admin_set_given(text, text[], boolean)',
+    'tasma_admin_delete(text, text[])',
     'tasma_request_create(text, text, text, text, text, text)',
     'tasma_admin_requests(text)',
     'tasma_admin_request_update(text, bigint, text, text)',
