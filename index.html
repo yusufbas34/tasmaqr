@@ -913,10 +913,12 @@ async function showPay(orderCode) {
 
 // ---------------------------------------------------------------- kurulum yardımı
 // Eksik veritabanı kurulumunu telefondan da yapabilmek için SQL'i panoya kopyalar.
-const SQL_EDITOR = `https://supabase.com/dashboard/project/${new URL(SUPABASE_URL).hostname.split(".")[0]}/sql/new`;
+const SUPABASE_REF = new URL(SUPABASE_URL).hostname.split(".")[0];
+const SQL_EDITOR = `https://supabase.com/dashboard/project/${SUPABASE_REF}/sql/new`;
 
 function setupHtml(text) {
-  return `<div class="msg err noprint setup">${esc(text)} Kurmak için: <b>1.</b> SQL'i kopyalayın, <b>2.</b> Supabase SQL Editor'ı açın,
+  return `<div class="msg err noprint setup">${esc(text)} Bu site <b>${esc(SUPABASE_REF)}</b> kodlu Supabase projesine bağlı; SQL'i bu projede çalıştırdığınızdan emin olun
+    (farklı projedeyse index.html'in başındaki SUPABASE_URL ve SUPABASE_KEY'i o projeninkiyle değiştirin). Kurmak için: <b>1.</b> SQL'i kopyalayın, <b>2.</b> Supabase SQL Editor'ı açın,
     <b>3.</b> yapıştırın, en üstteki <b>v_sifre</b> satırına admin şifrenizi yazın ve <b>Run</b>'a basın, <b>4.</b> bu sayfayı yenileyin.
     <div class="bar" style="margin:10px 0 0">
       <button class="btn" type="button" data-sql="supabase/kurulum.sql">1. SQL'i kopyala</button>
@@ -1088,7 +1090,7 @@ async function showAdmin() {
   show("<p>Yükleniyor…</p>");
   let rows;
   try { rows = await rpc("tasma_admin_list", {p_key: adminKey}); }
-  catch (e) { return showAdminLogin(e.status === 403 ? "Şifre hatalı." : e.status ? "Veritabanı kurulu değil ya da güncel değil." : "Bağlantı hatası, tekrar deneyin."); }
+  catch (e) { return showAdminLogin(e.status === 403 ? "Şifre hatalı." : e.status ? `Veritabanı kurulu değil ya da güncel değil (${e.message}).` : "Bağlantı hatası, tekrar deneyin."); }
   if (!Array.isArray(rows)) return showAdminLogin("Beklenmeyen yanıt, tekrar deneyin.");
   if (typeof qrcode !== "function") return showMessage("QR kütüphanesi yüklenemedi", "Sayfayı yenileyip tekrar deneyin.");
   const [requests, orders] = await Promise.all([loadRequests(), loadOrders()]);
