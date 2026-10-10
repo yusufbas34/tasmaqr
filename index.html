@@ -595,6 +595,9 @@ function showHome() {
   else if (!store.get("introSeen", false) && !mine) openIntro(); // ilk giriş
 }
 
+const requestPreview = v => typeof qrcode !== "function" ? "" :
+  tagAt("ÖRNEK", v.design || "klasik", v.size || "y35", {link: SITE, name: v.pet || ""});
+
 function requestFormHtml(error = "", v = {}) {
   const val = k => `value="${esc(v[k] || "")}"`;
   return `
@@ -611,7 +614,12 @@ function requestFormHtml(error = "", v = {}) {
       <span id="r-phone-hint" class="hint">Rozeti WhatsApp'tan isterseniz telefonunuzu girin.</span>
       <label for="r-pet">Köpeğinizin adı <span class="opt">(isteğe bağlı)</span></label>
       <input id="r-pet" maxlength="20" ${val("pet")}>
-      <label for="r-note">Notunuz <span class="opt">(isteğe bağlı: tasarım, ölçü, adet…)</span></label>
+      <label>Rozet tasarımı</label>
+      <div class="preview" id="r-pv">${requestPreview(v)}</div>
+      ${designChips(v.design || "klasik")}
+      <label for="r-size">Ölçü</label>
+      <select id="r-size" class="big">${Object.entries(SIZES).map(([k, n]) => `<option value="${k}"${k === (v.size || "y35") ? " selected" : ""}>${esc(n)}</option>`).join("")}</select>
+      <label for="r-note">Notunuz <span class="opt">(isteğe bağlı: adet, renk tercihi…)</span></label>
       <textarea id="r-note" rows="3" maxlength="500">${esc(v.note || "")}</textarea>
       <div class="hp" aria-hidden="true"><label for="r-web">Web sitesi</label><input id="r-web" tabindex="-1" autocomplete="off"></div>
       <label class="check"><input type="checkbox" id="r-ok"${v.ok ? " checked" : ""}> Bilgilerimin yalnızca rozet talebimin işlenmesi ve benimle iletişim kurulması amacıyla kullanılmasını kabul ediyorum.</label>
@@ -619,14 +627,27 @@ function requestFormHtml(error = "", v = {}) {
     </form>`;
 }
 
-function bindRequestForm() {
-  document.getElementById("rf").addEventListener("submit", async ev => {
+function bindRequestForm(state = {}) {
+  const form = document.getElementById("rf"), pv = document.getElementById("r-pv");
+  const sel = {design: state.design || "klasik", size: state.size || "y35"};
+  const redraw = () => { pv.innerHTML = requestPreview({...sel, pet: document.getElementById("r-pet").value.trim()}); };
+  form.querySelector(".designs").onclick = ev => {
+    const b = ev.target.closest("[data-d]");
+    if (!b) return;
+    sel.design = b.dataset.d;
+    form.querySelectorAll(".designs button").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-checked", x === b); });
+    redraw();
+  };
+  document.getElementById("r-size").onchange = ev => { sel.size = ev.target.value; redraw(); };
+  let timer;
+  document.getElementById("r-pet").oninput = () => { clearTimeout(timer); timer = setTimeout(() => document.getElementById("r-pet") && redraw(), 150); };
+  form.addEventListener("submit", async ev => {
     ev.preventDefault();
     const g = id => document.getElementById(id);
     const v = {first: g("r-first").value.trim(), last: g("r-last").value.trim(), email: g("r-email").value.trim(),
-      phone: g("r-phone").value.trim(), pet: g("r-pet").value.trim(), note: g("r-note").value.trim(), ok: g("r-ok").checked};
+      phone: g("r-phone").value.trim(), pet: g("r-pet").value.trim(), note: g("r-note").value.trim(), ok: g("r-ok").checked, ...sel};
     const box = g("formbox");
-    const fail = msg => { box.innerHTML = requestFormHtml(msg, v); bindRequestForm(); box.querySelector(".msg").scrollIntoView({block: "center"}); };
+    const fail = msg => { box.innerHTML = requestFormHtml(msg, v); bindRequestForm(v); box.querySelector(".msg").scrollIntoView({block: "center"}); };
     if (!v.first || !v.last) return fail("Ad ve soyadınızı yazın.");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) return fail("E-posta adresi geçersiz. Örnek: ornek@mail.com");
     const phone = v.phone ? normalizePhone(v.phone) : null;
@@ -638,9 +659,14 @@ function bindRequestForm() {
     };
     if (g("r-web").value) return done(); // bot tuzağı: sessizce geç
     ev.submitter && (ev.submitter.disabled = true);
+    const args = {p_first_name: v.first, p_last_name: v.last, p_email: v.email, p_phone: phone, p_pet_name: v.pet || null, p_note: v.note || null};
+    const choice = `Tasarım: ${DESIGNS[v.design]?.name || v.design} · Ölçü: ${SIZES[v.size] || v.size}`;
     try {
-      const res = await rpc("tasma_request_create", {p_first_name: v.first, p_last_name: v.last, p_email: v.email, p_phone: phone,
-        p_pet_name: v.pet || null, p_note: v.note || null});
+      // veritabanı henüz güncellenmediyse (eski imza) seçimi notla gönder
+      const res = await rpc("tasma_request_create", {...args, p_design: v.design, p_size: v.size}).catch(e => {
+        if (e.status !== 404) throw e;
+        return rpc("tasma_request_create", {...args, p_note: [v.note, choice].filter(Boolean).join("\n")});
+      });
       if (res?.ok) return done();
       fail({missing: "Ad ve soyadınızı yazın.", bad_email: "E-posta adresi geçersiz.", bad_phone: "Telefon numarası geçersiz.",
         too_many: "Bugün bu bilgilerle zaten talep gönderdiniz; sizinle iletişime geçeceğiz.",
@@ -1334,6 +1360,8 @@ function showRequests(rows, requests, newCount) {
               <a href="${esc(waHref(r.phone, `Merhaba ${r.first_name}, Tasma QR rozetiniz hazır!`))}" target="_blank" rel="noopener"><b>WhatsApp'tan istiyor</b></a>` : " · <span>E-postayla</span>"}
             </div>
             ${r.note ? `<div class="note">${esc(r.note)}</div>` : ""}
+            ${r.design ? `<div class="meta" style="display:flex;gap:10px;align-items:center;margin-top:8px">${tagAt("ÖRNEK", r.design, r.size && SIZES[r.size] ? r.size : "y35", {name: r.pet_name || ""})}
+              <span>Tasarım: <b>${esc(DESIGNS[r.design]?.name || r.design)}</b><br>Ölçü: <b>${esc(SIZES[r.size] || r.size || "-")}</b></span></div>` : ""}
           </div>
           <div class="act">
             <select data-f="status" aria-label="Durum">
@@ -1350,7 +1378,7 @@ function showRequests(rows, requests, newCount) {
   filter.value = reqFilter;
   filter.onchange = () => { reqFilter = filter.value; showRequests(rows, requests, newCount); };
   document.getElementById("csv").onclick = () => {
-    const cols = ["created_at", "first_name", "last_name", "email", "phone", "pet_name", "note", "status", "tag_code"];
+    const cols = ["created_at", "first_name", "last_name", "email", "phone", "pet_name", "design", "size", "note", "status", "tag_code"];
     // Formdan gelen metin Excel'de formül olarak çalışmasın (=, +, -, @ ile başlayanlar). Telefon sunucuda zaten yalnızca rakam ve +.
     const cell = (v, c) => { let t = String(v ?? ""); if (c !== "phone" && /^[=+\-@\t\r]/.test(t)) t = "'" + t; return `"${t.replace(/"/g, '""')}"`; };
     const csv = "﻿" + [cols.join(";"), ...list.map(r => cols.map(c => cell(r[c], c)).join(";"))].join("\r\n");
@@ -1369,6 +1397,8 @@ function showRequests(rows, requests, newCount) {
     btn.disabled = true;
     try {
       await rpc("tasma_admin_request_update", {p_key: adminKey, p_id: id, p_status: status, p_tag_code: code || null});
+      const req = requests.find(x => x.id === id);
+      if (code && req?.design && DESIGNS[req.design]) designOf[code] = req.design; // Rozetler sekmesinde istenen tasarımla basılsın
       if (status === "verildi" && code && ready.includes(code)) await setGiven([code], true);
       await showAdmin();
       if (status === "verildi") { confetti(); toast("Talep tamamlandı, rozet yolda!"); } else toast("Kaydedildi.");

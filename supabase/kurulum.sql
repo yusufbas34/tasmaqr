@@ -375,11 +375,16 @@ create table if not exists public.tasma_requests (
   tag_code text,
   updated_at timestamptz
 );
+-- sürüm 2: talep formunda seçilen tasarım ve ölçü
+alter table public.tasma_requests add column if not exists design text;
+alter table public.tasma_requests add column if not exists size text;
 alter table public.tasma_requests enable row level security;
 revoke all on public.tasma_requests from anon, authenticated;
 
+drop function if exists public.tasma_request_create(text, text, text, text, text, text);  -- sürüm 1 imzası
 create or replace function public.tasma_request_create(p_first_name text, p_last_name text, p_email text,
-  p_phone text default null, p_pet_name text default null, p_note text default null)
+  p_phone text default null, p_pet_name text default null, p_note text default null,
+  p_design text default null, p_size text default null)
 returns json
 language plpgsql security definer set search_path = public
 as $$
@@ -390,7 +395,11 @@ declare
   v_phone text := nullif(left(regexp_replace(coalesce(p_phone, ''), '[^0-9+]', '', 'g'), 16), '');
   v_pet   text := nullif(left(trim(coalesce(p_pet_name, '')), 20), '');
   v_note  text := nullif(left(trim(coalesce(p_note, '')), 500), '');
+  v_design text := nullif(left(lower(trim(coalesce(p_design, ''))), 20), '');
+  v_size  text := nullif(left(lower(trim(coalesce(p_size, ''))), 10), '');
 begin
+  if v_design !~ '^[a-z]{2,20}$' then v_design := null; end if;
+  if v_size !~ '^[a-z][0-9x]{2,8}$' then v_size := null; end if;
   if v_first = '' or v_last = '' then return json_build_object('ok', false, 'error', 'missing'); end if;
   if v_email !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$' then return json_build_object('ok', false, 'error', 'bad_email'); end if;
   if v_phone is not null and v_phone !~ '^\+?[0-9]{10,15}$' then return json_build_object('ok', false, 'error', 'bad_phone'); end if;
@@ -399,8 +408,8 @@ begin
     then return json_build_object('ok', false, 'error', 'too_many'); end if;
   if (select count(*) from tasma_requests where created_at > now() - interval '1 minute') >= 20
     then return json_build_object('ok', false, 'error', 'busy'); end if;
-  insert into tasma_requests (first_name, last_name, email, phone, pet_name, note)
-    values (v_first, v_last, v_email, v_phone, v_pet, v_note);
+  insert into tasma_requests (first_name, last_name, email, phone, pet_name, note, design, size)
+    values (v_first, v_last, v_email, v_phone, v_pet, v_note, v_design, v_size);
   return json_build_object('ok', true);
 end $$;
 
@@ -698,7 +707,7 @@ begin
     'tasma_admin_add(text, integer)',
     'tasma_admin_set_given(text, text[], boolean)',
     'tasma_admin_delete(text, text[])',
-    'tasma_request_create(text, text, text, text, text, text)',
+    'tasma_request_create(text, text, text, text, text, text, text, text)',
     'tasma_admin_requests(text)',
     'tasma_admin_request_update(text, bigint, text, text)',
     'tasma_shop_info()',
