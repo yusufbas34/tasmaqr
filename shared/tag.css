@@ -34,3 +34,6 @@
 .sheet{width:190mm;height:277mm;display:flex;flex-direction:column;gap:3mm;background:#fff}
 .sheet-row{display:flex;gap:3mm;align-items:flex-start}
 .sheet .grid{display:block}
+/* tasmaya takılan fiziksel rozet (kulaklı) */
+.badgebox{flex:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.badgebox .tagbadge{display:block;width:100%;height:100%;overflow:visible}

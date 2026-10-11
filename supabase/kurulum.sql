@@ -378,13 +378,15 @@ create table if not exists public.tasma_requests (
 -- sürüm 2: talep formunda seçilen tasarım ve ölçü
 alter table public.tasma_requests add column if not exists design text;
 alter table public.tasma_requests add column if not exists size text;
+alter table public.tasma_requests add column if not exists kind text;  -- sürüm 3: epoksi | metal | dosya
 alter table public.tasma_requests enable row level security;
 revoke all on public.tasma_requests from anon, authenticated;
 
 drop function if exists public.tasma_request_create(text, text, text, text, text, text);  -- sürüm 1 imzası
+drop function if exists public.tasma_request_create(text, text, text, text, text, text, text, text);  -- sürüm 2 imzası
 create or replace function public.tasma_request_create(p_first_name text, p_last_name text, p_email text,
   p_phone text default null, p_pet_name text default null, p_note text default null,
-  p_design text default null, p_size text default null)
+  p_design text default null, p_size text default null, p_kind text default null)
 returns json
 language plpgsql security definer set search_path = public
 as $$
@@ -397,6 +399,7 @@ declare
   v_note  text := nullif(left(trim(coalesce(p_note, '')), 500), '');
   v_design text := nullif(left(lower(trim(coalesce(p_design, ''))), 20), '');
   v_size  text := nullif(left(lower(trim(coalesce(p_size, ''))), 10), '');
+  v_kind  text := case when p_kind in ('epoksi', 'metal', 'dosya') then p_kind end;
 begin
   if v_design !~ '^[a-z]{2,20}$' then v_design := null; end if;
   if v_size !~ '^[a-z][0-9x]{2,8}$' then v_size := null; end if;
@@ -408,8 +411,8 @@ begin
     then return json_build_object('ok', false, 'error', 'too_many'); end if;
   if (select count(*) from tasma_requests where created_at > now() - interval '1 minute') >= 20
     then return json_build_object('ok', false, 'error', 'busy'); end if;
-  insert into tasma_requests (first_name, last_name, email, phone, pet_name, note, design, size)
-    values (v_first, v_last, v_email, v_phone, v_pet, v_note, v_design, v_size);
+  insert into tasma_requests (first_name, last_name, email, phone, pet_name, note, design, size, kind)
+    values (v_first, v_last, v_email, v_phone, v_pet, v_note, v_design, v_size, v_kind);
   return json_build_object('ok', true);
 end $$;
 
@@ -443,7 +446,7 @@ create table if not exists public.tasma_shop_settings (
   bank_name text,
   printer_email text,                             -- baskıcı: yalnızca panelde görünür
   shipping_text text not null default 'Kargo ücreti fiyata dahildir.',
-  product_text text not null default 'Su geçirmez QR rozet seti: aynı QR 7 farklı ölçüde 29 adet. Birini tasmaya takın, yedekleri kafese, mama kabına, çantaya yapıştırın.',
+  product_text text not null default 'Tasmaya takılan, halka delikli QR rozet. Halkasıyla birlikte kargolanır; hemen tasmanın D halkasına takabilirsiniz.',
   telegram_bot_token text,
   telegram_chat_id text,
   resend_api_key text,
@@ -451,8 +454,11 @@ create table if not exists public.tasma_shop_settings (
   updated_at timestamptz
 );
 insert into public.tasma_shop_settings (id) values (1) on conflict (id) do nothing;
-update public.tasma_shop_settings set product_text = 'Su geçirmez QR rozet seti: aynı QR 7 farklı ölçüde 29 adet. Birini tasmaya takın, yedekleri kafese, mama kabına, çantaya yapıştırın.'
-  where product_text = 'Su geçirmez vinil sticker sayfası: aynı QR 7 farklı ölçüde 29 künye. Künyeye, tasmaya, kafese yapıştırabilirsiniz.';  -- eski varsayılan metin
+update public.tasma_shop_settings set product_text = 'Tasmaya takılan, halka delikli QR rozet. Halkasıyla birlikte kargolanır; hemen tasmanın D halkasına takabilirsiniz.'
+  where product_text in ('Su geçirmez vinil sticker sayfası: aynı QR 7 farklı ölçüde 29 künye. Künyeye, tasmaya, kafese yapıştırabilirsiniz.',
+    'Su geçirmez QR rozet seti: aynı QR 7 farklı ölçüde 29 adet. Birini tasmaya takın, yedekleri kafese, mama kabına, çantaya yapıştırın.');  -- eski varsayılan metinler
+-- sürüm 3: tasmaya takılan fiziksel rozet; epoksi (price) ve metal (price_metal) fiyatları
+alter table public.tasma_shop_settings add column if not exists price_metal integer not null default 250;
 alter table public.tasma_shop_settings enable row level security;
 revoke all on public.tasma_shop_settings from anon, authenticated;
 
@@ -480,6 +486,8 @@ create table if not exists public.tasma_orders (
   updated_at timestamptz
 );
 create index if not exists tasma_orders_created_idx on public.tasma_orders (created_at);
+alter table public.tasma_orders add column if not exists kind text not null default 'epoksi';  -- epoksi | metal | sticker (eski)
+alter table public.tasma_orders add column if not exists size text not null default 'y30';
 alter table public.tasma_orders enable row level security;
 revoke all on public.tasma_orders from anon, authenticated;
 
@@ -541,14 +549,16 @@ returns json
 language sql stable security definer set search_path = public
 as $$
   select json_build_object('active', active and coalesce(iban, '') <> '' and coalesce(account_name, '') <> '',
-    'price', price, 'iban', iban, 'account_name', account_name, 'bank_name', bank_name,
+    'price', price, 'price_metal', price_metal, 'iban', iban, 'account_name', account_name, 'bank_name', bank_name,
     'shipping_text', shipping_text, 'product_text', product_text)
   from tasma_shop_settings where id = 1;
 $$;
 
+drop function if exists public.tasma_order_create(text, text, text, text, text, text, text, text, text, text);  -- sürüm 1 imzası
 create or replace function public.tasma_order_create(
   p_tag_code text, p_design text, p_full_name text, p_phone text, p_email text,
-  p_city text, p_district text, p_address text, p_note text default null, p_device text default null)
+  p_city text, p_district text, p_address text, p_note text default null, p_device text default null,
+  p_kind text default 'epoksi', p_size text default 'y30')
 returns json
 language plpgsql security definer set search_path = public
 as $$
@@ -564,6 +574,8 @@ declare
   v_address text := left(trim(coalesce(p_address, '')), 400);
   v_note text := nullif(left(trim(coalesce(p_note, '')), 300), '');
   v_device text := nullif(left(trim(coalesce(p_device, '')), 64), '');
+  v_kind text := case when p_kind = 'metal' then 'metal' else 'epoksi' end;
+  v_size text := case when p_size in ('y25', 'y30', 'y35') then p_size else 'y30' end;
   v_code text;
   o tasma_orders;
 begin
@@ -590,8 +602,9 @@ begin
     v_code := 'TQ-' || translate(upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 6)), '01', 'XY');
     exit when not exists (select 1 from tasma_orders where code = v_code);
   end loop;
-  insert into tasma_orders (code, tag_code, design, full_name, phone, email, city, district, address, note, amount, device)
-    values (v_code, v_tag, v_design, v_name, v_phone, v_email, v_city, v_district, v_address, v_note, s.price, v_device)
+  insert into tasma_orders (code, tag_code, design, full_name, phone, email, city, district, address, note, amount, device, kind, size)
+    values (v_code, v_tag, v_design, v_name, v_phone, v_email, v_city, v_district, v_address, v_note,
+      case when v_kind = 'metal' then s.price_metal else s.price end, v_device, v_kind, v_size)
     returning * into o;
   return json_build_object('ok', true, 'code', o.code, 'token', o.token, 'amount', o.amount, 'status', o.status);
 end $$;
@@ -632,9 +645,10 @@ begin
   return query select * from tasma_shop_settings where id = 1;
 end $$;
 
+drop function if exists public.tasma_admin_shop_set(text, boolean, integer, text, text, text, text, text, text, text, text, text, text);  -- sürüm 1 imzası
 create or replace function public.tasma_admin_shop_set(p_key text, p_active boolean, p_price integer, p_iban text,
   p_account_name text, p_bank_name text, p_printer_email text, p_shipping_text text, p_product_text text,
-  p_telegram_bot_token text, p_telegram_chat_id text, p_resend_api_key text, p_notify_email text)
+  p_telegram_bot_token text, p_telegram_chat_id text, p_resend_api_key text, p_notify_email text, p_price_metal integer default null)
 returns void
 language plpgsql security definer set search_path = public
 as $$
@@ -643,6 +657,7 @@ begin
   update tasma_shop_settings set
     active = coalesce(p_active, false),
     price = greatest(coalesce(p_price, 150), 0),
+    price_metal = greatest(coalesce(p_price_metal, price_metal), 0),
     iban = nullif(upper(regexp_replace(coalesce(p_iban, ''), '\s', '', 'g')), ''),
     account_name = nullif(trim(coalesce(p_account_name, '')), ''),
     bank_name = nullif(trim(coalesce(p_bank_name, '')), ''),
@@ -707,15 +722,15 @@ begin
     'tasma_admin_add(text, integer)',
     'tasma_admin_set_given(text, text[], boolean)',
     'tasma_admin_delete(text, text[])',
-    'tasma_request_create(text, text, text, text, text, text, text, text)',
+    'tasma_request_create(text, text, text, text, text, text, text, text, text)',
     'tasma_admin_requests(text)',
     'tasma_admin_request_update(text, bigint, text, text)',
     'tasma_shop_info()',
-    'tasma_order_create(text, text, text, text, text, text, text, text, text, text)',
+    'tasma_order_create(text, text, text, text, text, text, text, text, text, text, text, text)',
     'tasma_order_paid(text, uuid)',
     'tasma_order_status(text[], uuid[])',
     'tasma_admin_shop_get(text)',
-    'tasma_admin_shop_set(text, boolean, integer, text, text, text, text, text, text, text, text, text, text)',
+    'tasma_admin_shop_set(text, boolean, integer, text, text, text, text, text, text, text, text, text, text, integer)',
     'tasma_admin_notify_test(text)',
     'tasma_admin_orders(text)',
     'tasma_admin_order_update(text, bigint, text, text, text)'

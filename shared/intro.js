@@ -59,8 +59,8 @@ const INTRO_SLIDES = [
   {
     bg: "linear-gradient(160deg,#163a7a,#0a1838)",
     title: "Tasmasına QR rozetini takın",
-    text: "Size özel QR rozet tasmada küçük bir künye gibi sallanır. Numaranız rozette yazmaz; köpeğin adı ve QR yeter.",
-    art: () => `<div class="intro-art intro-collar">${collarHtml(tagAt("ÖRNEK", "turuncu", "y40", {name: "Zeytin", link: SITE}), "#b8501a")}</div>`,
+    text: "Yapıştırma değil, gerçek rozet: halkasıyla tasmanın D halkasına takılır, künye gibi sallanır. Numaranız rozette yazmaz.",
+    art: () => `<div class="intro-art intro-collar">${collarHtml(badgeAt("ÖRNEK", "turuncu", "y40", {name: "Zeytin", link: SITE, kind: "epoksi"}), "#b8501a")}</div>`,
   },
   {
     bg: "linear-gradient(160deg,#0c5e37,#06291a)",
@@ -112,10 +112,10 @@ const INTRO_SLIDES = [
   {
     bg: "linear-gradient(160deg,#5b2a86,#1a0f2b)",
     title: "Tasarımını seç, 1 dakikada hazır",
-    text: `${Object.keys(DESIGNS).length} tasarım, Ø25'ten Ø40 mm'ye ölçüler. Ücretsiz oluşturun, evde yazdırın ya da su geçirmez basılı rozetinizi sipariş edin.`,
-    art: () => `<div class="intro-fan" role="img" aria-label="Üç farklı rozet tasarımı">
-      ${[["kirmizi", "Bobi"], ["klasik", "Pamuk"], ["sari", "Fındık"]].map(([d, n], i) =>
-        `<div class="intro-card c${i}">${tagAt("ÖRNEK", d, "y40", {name: n, link: SITE})}</div>`).join("")}
+    text: `${Object.keys(DESIGNS).length} tasarım, Ø25, Ø30 ve Ø35 mm ölçüler. Ücretsiz oluşturun; renkli epoksi ya da metal rozetiniz halkasıyla kapınıza gelsin.`,
+    art: () => `<div class="intro-fan" role="img" aria-label="İki epoksi ve bir metal rozet">
+      ${[["kirmizi", "Bobi", "epoksi"], ["klasik", "Pamuk", "metal"], ["sari", "Fındık", "epoksi"]].map(([d, n, kind], i) =>
+        `<div class="intro-card c${i}">${badgeAt("ÖRNEK", d, "y35", {name: n, link: SITE, kind})}</div>`).join("")}
     </div>`,
   },
 ];
