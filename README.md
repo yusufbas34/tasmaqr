@@ -39,3 +39,4 @@ Google Play için: [android/GOOGLE_PLAY.md](android/GOOGLE_PLAY.md). Ayrıntıla
 - `gizlilik.html`: gizlilik politikası (Google Play için)
 - `shared/vendor`, `shared/fonts`: gömülü kütüphaneler ve fontlar (CDN'e bağımlı değil)
 - `android/`: Android uygulaması, `.github/workflows/android.yml`: APK / AAB derlemesi
+- `pazarlama/`: 90 günlük büyüme planı ve takip listesi, Instagram görsel kiti (`kit.html` → `node pazarlama/uret.js`)

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tasma QR Büyüme Planı</title>
+<link rel="stylesheet" href="../shared/fonts.css">
+<style>
+:root{--bg:#f6f1ea;--card:#fff;--fg:#1f1611;--muted:#6a5d54;--line:#e2d8cd;--band:#b8501a;--accent:#ffd400;--navy:#163a7a;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#17110d;--card:#221a14;--fg:#f2e9e1;--muted:#b8a99c;--line:#3a2e25;--band:#f08a4b;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 var(--body)}
+.wrap{max-width:820px;margin:0 auto;padding:24px 16px 56px}
+a{color:var(--band)}
+.back{font-weight:700;text-decoration:none}
+.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--band);color:#fff;border-radius:6px;padding:3px 8px;margin-top:18px}
+h1{font-family:var(--display);font-size:clamp(34px,7vw,52px);line-height:1;margin:10px 0 8px}
+h2{font-family:var(--display);font-size:28px;margin:34px 0 10px;line-height:1.1}
+h3{font-size:18px;margin:18px 0 6px}
+.lead{color:var(--muted);font-size:18px;max-width:64ch}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:18px 0}
+.stats div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stats b{display:block;font-family:var(--display);font-size:30px;line-height:1;color:var(--band)}
+.stats span{font-size:14px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:10px 0}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:15px;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:9px 11px;border-bottom:1px solid var(--line)}
+th{background:color-mix(in srgb,var(--band) 12%,var(--card))}
+ol,ul{padding-left:22px}
+li{margin:4px 0}
+.reel{border-left:5px solid var(--band)}
+.reel b.t{font-family:var(--display);font-size:22px;display:block}
+.small{font-size:14px;color:var(--muted)}
+.warn{border-left:5px solid #c62828}
+@media print{body{background:#fff}.back{display:none}.card,table,.stats div{break-inside:avoid}h2{break-after:avoid}}
+@media (max-width:600px){table,thead,tbody,tr,th,td{display:block}thead{display:none}td{border:0;padding:3px 11px}tr{border-bottom:1px solid var(--line);padding:6px 0}td:first-child{font-weight:700}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="./">← Yapılacaklar listesine dön</a>
+<span class="tag">90 günlük plan</span>
+<h1>Tasma QR Hızlı Büyüme Planı</h1>
+<p class="lead">Google Play'e çıkış, Instagram, veteriner / pet shop / barınak ortaklıkları ve sahada dağıtım: adım adım, işaretleyerek ilerleyin.</p>
+
+<div class="stats">
+  <div><b>11</b><span>rozet tasarımı + metal</span></div>
+  <div><b>📍</b><span>konum ve kayıp modu bildirimi</span></div>
+  <div><b>150 / 250 TL</b><span>epoksi / metal rozet (varsayılan)</span></div>
+  <div><b>0 TL</b><span>kendin oluştur, yazdır</span></div>
+</div>
+<p class="small">Hazırlanma: Ekim 2026. Fiyatlar araştırma anındaki halka açık sayfalardan alınmıştır; uygulamadan önce güncelliğini kontrol edin. Kaynaklar son bölümde.</p>
+
+<h2>1. Kısaca: önümüzdeki 3 öncelik</h2>
+<ol>
+  <li><b>Google Play'e çıkmak.</b> Kişisel hesapta yeni uygulama için yine 12 testçi × 14 gün kapalı test şart (Araç QR'ın testi sayılmaz). Takvimin en uzun kalemi; bugün başlatın. Köpek sahibi arkadaşlar en iyi testçidir.</li>
+  <li><b>Veteriner ve pet shop tezgâhları.</b> Köpek sahibinin düzenli gittiği yer burası. Tezgâhta “Rozetini 1 dakikada yap” kartı ve örnek rozetler. Her okutulan rozet sayfası da uygulamayı tanıtır: ne kadar çok tasmada rozet olursa o kadar çok kişi görür.</li>
+  <li><b>Instagram'da haftada 3 reels + haftada 1 kaydedilecek gönderi.</b> Pati içerikleri çok paylaşılır; duygusal “kayboldu–bulundu” anı, sevimli köpek ve işe yarar bilgi (köpeğin kaybolursa ne yapmalı) birlikte. Kapaklar hazır (<code>pazarlama/instagram</code>).</li>
+</ol>
+
+<h2>2. Pazar ve fiyat</h2>
+<p>Türkiye'de künye çoğunlukla isim ve telefon kazınmış metal ya da plastik bir plaka olarak satılıyor; telefon değişince künye işe yaramaz, numara da herkese açıktır. QR'lı künyeler pazaryerlerinde var, ama çoğu yalnızca bir web profiline yönlendiren basit bir üründür.</p>
+<table>
+  <thead><tr><th>Ürün</th><th>Nasıl çalışıyor</th><th>Görülen fiyat</th></tr></thead>
+  <tbody>
+    <tr><td>Lazer kazımalı künyeler (Çiçeksepeti)</td><td>İsim ve telefon metale kazınır</td><td>~500–750 TL</td></tr>
+    <tr><td>Paslanmaz çelik künye (Dekoliva)</td><td>Lazer baskılı, telefon yazılı</td><td>~400 TL</td></tr>
+    <tr><td>Pet Tag Art künyeleri</td><td>Özel baskı; QR'lı seçenekler var</td><td>~400 TL</td></tr>
+    <tr><td>Yurt dışı toptan QR künye (Alibaba)</td><td>100 adet ve üstü</td><td>~2 USD / adet</td></tr>
+    <tr><td><b>Tasma QR</b></td><td>Ücretsiz oluştur/yazdır; epoksi ya da metal rozet halkasıyla gelir; konum bildirimi, kayıp modu, not, yedek numara</td><td><b>0 TL / 150 TL / 250 TL</b></td></tr>
+  </tbody>
+</table>
+<div class="card"><b>Mesaj:</b> “Künyeye numaranı kazıtma. QR rozet okutulunca seni arar, konumunu gönderir; numaran değişse de rozet aynı kalır. Ücretsiz yap, istersen metal rozetin kapına gelsin.”<br>
+<b>Fiyat önerisi:</b> İlk 50 siparişe kadar 150 / 250 TL'yi değiştirmeyin; perakende lazer künyelerin yarısından ucuz. Sonra “2 köpekli aile seti” ve “metal + yedek epoksi” paketini deneyin. Üretim maliyetini numune teklifine göre (bkz. üretim notu) kontrol edin.</div>
+
+<h2>3. 90 gün hedefleri (öneri)</h2>
+<div class="stats">
+  <div><b>800</b><span>oluşturulan rozet</span></div>
+  <div><b>60</b><span>rozet siparişi</span></div>
+  <div><b>2.000</b><span>Instagram takipçi</span></div>
+  <div><b>10</b><span>veteriner / pet shop ortağı</span></div>
+  <div><b>4,5★</b><span>Play puanı, 30+ yorum</span></div>
+</div>
+<p class="small">Bunlar başlangıç için makul hedeflerdir, garanti değildir. Yönetim panelinden ve Play Console'dan her pazartesi kontrol edin.</p>
+
+<h2>4. Adım adım yapılacaklar</h2>
+<h3>Bu hafta</h3>
+<ul>
+  <li>Play Console'da yeni uygulamayı oluştur, formları doldur (<code>android/GOOGLE_PLAY.md</code>). Yükleme anahtarını GitHub Secrets'a ekle, ilk AAB'yi al.</li>
+  <li>Google Grubu aç (ya da Araç QR grubunu kullan), 15–20 testçi ekle. Kapalı testi yayınla, katılım bağlantısını WhatsApp'tan gönder; 14 gün sayacı buradan başlar.</li>
+  <li>Instagram işletme hesabı aç: kullanıcı adı örn. <b>@tasmaqr</b>; profil fotoğrafı, bio ve öne çıkan kapakları yükle (bölüm 5).</li>
+  <li>Üreticiden Ø30 mm epoksi ve metal birer <b>numune</b> iste; QR'ı 3–4 farklı telefonla okut, fotoğraf ve video çek (reels için en değerli malzeme).</li>
+  <li>Yönetim › Ayarlar: fiyatlar, IBAN, ürün açıklaması, Telegram bildirimi.</li>
+</ul>
+<h3>Hafta 1–2</h3>
+<ul>
+  <li>Panelden 50 rozet üret, PIN kartıyla A4'e bas; 10 tanesini metal/epoksi numune olarak yaptır.</li>
+  <li>Yakındaki 5 veteriner ve 5 pet shopla konuş (bölüm 6). Tezgâh kartı ve örnek rozet bırak.</li>
+  <li>İlk 3 reels: “Kapı açık kaldı”, “Künyeye numara kazıtma”, “Konum bildirimi geldi”.</li>
+  <li>“Köpeğin kaybolursa 5 adım” kaydırmalı gönderisini paylaş; hikâyede “Künyende telefonun yazıyor mu?” anketi.</li>
+  <li>Testçilerden geri bildirim topla; küçük bir düzeltme sürümü yayınla (Google aktif geliştirme görmek ister).</li>
+</ul>
+<h3>Hafta 3–4</h3>
+<ul>
+  <li>14 gün dolunca Üretim erişimi başvurusu; onaydan sonra yayın. Yayın günü testçilerden Play'de yorum ve puan iste; profildeki bağlantıyı Play sayfasına çevir.</li>
+  <li>2 barınak / gönüllü dernekle görüş: <b>sahiplendirilen her köpeğe hediye rozet</b> (bölüm 6).</li>
+  <li>Bir köpek eğitmeni ve bir pet kuaförle iş birliği: müşterisine rozet tanıtımı.</li>
+  <li>Haftada 3 reels'e devam; en çok izlenen kapağın benzerini yap.</li>
+</ul>
+<h3>Ay 2</h3>
+<ul>
+  <li>Ortak işletmelere tezgâh standı yenile; iyi giden ortağa kendi adının geçtiği özel rozet tasarımı teklif et (20 adet ve üstü).</li>
+  <li>Köpek içeriği üreten 3–5 mikro hesapla (2–20 bin takipçi) iş birliği: ücretsiz rozet karşılığı tasmada çekim.</li>
+  <li>Sipariş verenlere teslimden sonra WhatsApp'tan “tasmadaki rozetin fotoğrafını atar mısın?” de; izinle hikâyede paylaş (öne çıkan: DOSTLAR).</li>
+  <li>Köpek parkı ya da hafta sonu sahiplendirme etkinliğinde stant: yerinde rozet oluşturma, QR'ı okutma denemesi.</li>
+</ul>
+<h3>Ay 3</h3>
+<ul>
+  <li>En iyi performanslı reels'i küçük bütçeyle öne çıkar (önce düşük günlük bütçeyle 3–5 gün test, sonra karar). Hedef: şehrin, 25–45 yaş, ilgi alanı köpek / evcil hayvan.</li>
+  <li>Aile seti (2 köpek) ve “metal + yedek epoksi” paketini dene; veterinerlere toplu fiyat (ör. 20 rozet).</li>
+  <li>Play ekran görüntülerini yenile, yorumlara tek tek cevap ver.</li>
+  <li>90 gün değerlendirmesi: hedeflerle karşılaştır, en verimli 2 kanala yüklen.</li>
+</ul>
+
+<h2>5. Instagram</h2>
+<table>
+  <tbody>
+    <tr><th>Ad</th><td>Tasma QR · Köpek QR rozeti</td></tr>
+    <tr><th>Bio</th><td>Köpeğin kaybolursa onu bulan seni arasın 🐾<br>📍 Konum bildirimi · 🚨 Kayıp modu<br>Numaran rozette yazmaz · Ücretsiz yap<br>👇 Rozetini oluştur</td></tr>
+    <tr><th>Bağlantı</th><td>Play yayına kadar: <code>yusufbas34.github.io/tasmaqr</code> · sonra Play Store sayfası</td></tr>
+    <tr><th>Öne çıkanlar</th><td>NASIL? · ROZETLER · KAYIP? · SİPARİŞ · SSS · DOSTLAR (kapaklar hazır)</td></tr>
+    <tr><th>Paylaşım ritmi</th><td><b>Reels:</b> haftada 3 (Pzt/Çar/Cum akşam 20–22, köpek gezdirme sonrası). 7–15 saniye, ilk saniyede derdi göster.<br>
+      <b>Hikâye:</b> her gün 1–3 (anket, yeni tasarım, paketleme, müşteri köpekleri).<br>
+      <b>Kaydırmalı gönderi:</b> haftada 1 (“3 adımda rozet” ve “Köpeğin kaybolursa 5 adım” hazır). Kaydedilen ve paylaşılan gönderiler daha çok kişiye gösterilir; bilgi gönderileri bunun için iyidir.</td></tr>
+  </tbody>
+</table>
+
+<h3>6 reels senaryosu (kapaklar hazır)</h3>
+<div class="card reel"><b class="t">1 · Kapı açık kaldı, köpeğin kaçtı</b>Sahne: kapı aralanır, köpek fırlar (kendi köpeğinizle, güvenli bir yerde canlandırın) → parkta biri köpeği bulur, tasmadaki rozeti okutur → telefonunuz çalar, kavuşma. Yazı: “Bulan kişi seni tek dokunuşla arar.” CTA: “Profildeki bağlantıdan ücretsiz yap.”</div>
+<div class="card reel"><b class="t">2 · Künyeye numaranı kazıtma!</b>Telefon kazınmış eski künye → “Numaran değişti, künye çöp.” → QR rozete geçiş, uygulamada PIN'le numara değiştirme. Yazı: “Rozet aynı, numara yeni.”</div>
+<div class="card reel"><b class="t">3 · Bulan kişi konumunu gönderdi</b>Ekran kaydı: okutan telefonda “Konumumu gönder” → sahibinin telefonuna bildirim → haritada nokta. Gerçek iki telefonla çekin, hızlandırın.</div>
+<div class="card reel"><b class="t">4 · Tek dokunuşla “KAYIP!”</b>Rozet sayfasında “Kayıp modunu aç” → okutan telefonda kırmızı uyarı ve ödül notu. Yazı: “Okutan herkes durumun acil olduğunu anlar.”</div>
+<div class="card reel"><b class="t">5 · Hangisi seninkine yakışır?</b>Tasarımları tek tek köpeğin tasmasına tutun (hızlı geçiş, müzik). “Yoruma yaz” çağrısı: yorumlar erişimi artırır; en çok istenen tasarımı hediye edin.</div>
+<div class="card reel"><b class="t">6 · “Çekingendir, yavaş yaklaşın.”</b>Uygulamada bulan kişiye not yazma → okutan kişinin ekranında notu okuyup köpeğe sakin yaklaşması. Yazı: “Sağlık ve karakter notun, doğru yardımın anahtarı.”</div>
+
+<h3>Açıklama ve etiketler</h3>
+<div class="card">Örnek açıklama: “Köpeğin bir anda gözden kaybolursa onu bulan kişi sana nasıl ulaşacak? 🐾 Tasma QR rozetini tasmaya tak; okutan seni tek dokunuşla arasın, konumunu göndersin. Numaran rozette yazmaz. Ücretsiz yap, istersen metal rozetin kapına gelsin. 👉 Bağlantı profilde.”<br>
+Etiketler (5–8 tane yeter): <b>#köpek #köpeksever #köpekler #evcilhayvan #patidostlar #kayıpköpek #köpektasması #sahiplen</b> + şehir etiketi (ör. #istanbulköpek)</div>
+
+<h2>6. Sahada dağıtım ve ortaklıklar</h2>
+<div class="card warn"><b>Dikkat:</b> Başkasının köpeğine izinsiz rozet takmayın, parklarda toplu el ilanı bırakmayın. Rozeti elden, isteyene, PIN kartıyla birlikte verin. Kayıp ilanlarında sahibinin numarasını onun izni olmadan paylaşmayın.</div>
+<table>
+  <thead><tr><th>Kanal</th><th>Teklif</th><th>Neden işe yarar</th></tr></thead>
+  <tbody>
+    <tr><td>Veteriner klinikleri</td><td>Tezgâhta QR'lı A5 kart ve örnek rozetler; aşı ya da çip randevusunda “rozetini de yap” önerisi. İleride klinik adının geçtiği özel tasarım.</td><td>Köpek sahibi düzenli gelir, veterinerin önerisine güvenir</td></tr>
+    <tr><td>Pet shoplar</td><td>Tasma satılan rafa rozet standı; tasma alan müşteriye indirimli rozet. Satış başına küçük komisyon.</td><td>Tasmayı aldığı anda rozeti düşünür</td></tr>
+    <tr><td>Barınaklar / gönüllü dernekler</td><td>Sahiplendirilen her köpeğe hediye rozet; yeni sahibine ilk günden kayıp önlemi.</td><td>Güçlü hikâye, paylaşılır; sosyal sorumluluk</td></tr>
+    <tr><td>Köpek eğitmenleri, pet kuaför, köpek otelleri</td><td>Müşterisine tanıtım karşılığı ücretsiz rozet ve özel kod; otelde kalan köpeğe rozet önerisi.</td><td>Kaybolma riskinin konuşulduğu yerler</td></tr>
+    <tr><td>Site yönetimleri ve köpek parkları</td><td>Duyuru panosuna A4 afiş; hafta sonu stant.</td><td>Tek seferde çok köpek sahibine ulaşılır</td></tr>
+  </tbody>
+</table>
+<p class="small">İşletmeler için ileride: kendi logolu özel rozet tasarımı (ör. 20 adet ve üstü) ya da yönlendirdikleri her sipariş için komisyon.</p>
+
+<h2>7. Her pazartesi bakılacak 5 rakam</h2>
+<ol>
+  <li>Bu hafta oluşturulan rozet (yönetim paneli)</li>
+  <li>Toplam okutma ve gönderilen konum sayısı (rozetler gerçekten tasmada mı, işe yarıyor mu?)</li>
+  <li>Bekleyen ve onaylanan sipariş, ciro; epoksi / metal oranı</li>
+  <li>Instagram: en çok izlenen reels, en çok kaydedilen gönderi, takipçi artışı</li>
+  <li>Play: yükleme, puan, yorumlar; aktif ortak sayısı</li>
+</ol>
+
+<h2>8. Riskler ve dikkat edilecekler</h2>
+<ul>
+  <li><b>Play kapalı test:</b> 12 testçi 14 gün kesintisiz kalmalı; düşen olursa sayaç bozulur. Fazla testçi ekleyin.</li>
+  <li><b>Vaatler:</b> Tasma QR mikroçipin yerine geçmez; reklamlarda “köpeğiniz kesin bulunur” gibi garanti vermeyin. “Bulan kişi size dakikalar içinde ulaşabilir” deyin.</li>
+  <li><b>Hayvan görüntüleri:</b> Başkasının köpeğini çekerken sahibinden izin alın; kaçma sahnelerini kapalı, güvenli alanda canlandırın, köpeği strese sokmayın.</li>
+  <li><b>Müzik:</b> İşletme hesabında yalnızca Instagram'ın ticari ses kütüphanesindeki müzikleri kullanın.</li>
+  <li><b>Ürün dayanımı:</b> Satıştan önce numuneyi suda, çamurda, güneşte deneyin ve QR'ı okutun. Ø25 mm rozetlerde QR küçüktür; Ø30 mm'yi varsayılan önerin.</li>
+  <li><b>APK ile dağıtım:</b> Google mağaza dışı uygulamalar için geliştirici doğrulamasını yaygınlaştırıyor; APK bağlantısını Play yayına girince Play'e çevirin.</li>
+  <li><b>Marka adı:</b> “Tasma QR” genel bir ad. Tescil düşünürseniz önce TÜRKPATENT'te benzer marka araması yapın.</li>
+  <li><b>KVKK:</b> Gizlilik sayfası hazır; sipariş verilerini gereğinden uzun tutmayın, silme taleplerine 30 gün içinde dönün. Konum verisi yalnızca bulan kişinin isteğiyle alınır; bunu iletişimde de açık söyleyin.</li>
+</ul>
+
+<h2>Kaynaklar</h2>
+<ul class="small">
+  <li>Play Console Yardım, yeni kişisel hesaplar için test şartları: support.google.com/googleplay/android-developer/answer/14151465</li>
+  <li>Fiyatlar: ciceksepeti.com/d/kunye · dekoliva.com (paslanmaz çelik künye) · pettagart.com · turkish.alibaba.com/g/qr-code-pendant.html</li>
+  <li>Dayanıklılık ve lazer kazıma: aplazer.com/blog/laser-engraved-qr-codes · omtechlaser.com/blogs/tips/qr-code-laser-engraving · unitedpetclub.com/en-US/pet-tags/compare</li>
+  <li>Reels kapakları 1080×1920 hazırlandı; yazılar üstte ve ortada, alttaki şerit Instagram arayüzünün altında kalabilir.</li>
+</ul>
+</div>
+</body>
+</html>
