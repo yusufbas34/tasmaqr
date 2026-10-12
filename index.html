@@ -7,9 +7,8 @@
 <meta name="description" content="Köpeğinizin tasmasına QR rozet: bulan kişi tek dokunuşla sizi arasın, konumunu göndersin.">
 <link rel="icon" type="image/svg+xml" href="shared/logo.svg">
 <meta name="theme-color" content="#b8501a">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<link rel="stylesheet" href="shared/fonts.css">
+<script src="shared/vendor/qrcode.js"></script>
 <link rel="stylesheet" href="shared/tag.css">
 <script src="shared/tag.js"></script>
 <script src="shared/intro.js"></script>
@@ -158,6 +157,7 @@ button.product.on{border-color:var(--band);box-shadow:0 0 0 2px var(--band)}
 .designs button.on{border-color:var(--band);box-shadow:0 0 0 2px var(--band)}
 .preview{display:flex;justify-content:center;gap:16px;align-items:center;background:#fff;border-radius:12px;padding:18px;margin-bottom:6px}
 .preview .grid{zoom:1.6}
+@media (max-width:480px){.preview{flex-wrap:wrap;gap:10px;padding:14px}.preview .grid{zoom:1.15}}
 .cards{display:grid;gap:10px}
 .mine{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:#fff;border-radius:12px;padding:12px 14px;color:inherit;text-decoration:none;border-left:5px solid var(--line)}
 .mine.is-lost{border-left-color:var(--err)}
@@ -244,6 +244,10 @@ const BASE = location.origin + location.pathname;
 // Yerelde denerken de basılan QR'lar gerçek siteyi açsın
 const SITE = /^https?:$/.test(location.protocol) && !/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname) ? BASE : SITE_URL;
 const tagLink = code => `${SITE}?k=${encodeURIComponent(code)}`;
+// Android uygulaması (android/): aynı arayüz, MainActivity'nin AndroidBridge'i ile yazdırma, PDF ve bildirimler
+const NATIVE = window.AndroidBridge, APP = !!NATIVE;
+const editLink = code => APP ? `#duzenle/${encodeURIComponent(code)}` : `${tagLink(code)}&duzenle`;
+const tagPageLink = code => `${APP ? "" : BASE}#kunye/${encodeURIComponent(code)}`;
 
 // ---------------------------------------------------------------- yardımcılar
 async function rpc(fn, args = {}) {
@@ -292,7 +296,7 @@ const petBadge = (name, code, lost) => `<div class="pet${lost ? " is-lost" : ""}
   <div class="nm">${name ? esc(upTR(name)) : "TASMA QR"}</div><small>${esc(code)}</small></div>`;
 
 function showMessage(title, text) {
-  show(`<h1>${esc(title)}</h1><p>${esc(text)}</p><a class="btn ghost" href="${esc(BASE)}">Ana sayfa</a>`);
+  show(`<h1>${esc(title)}</h1><p>${esc(text)}</p><a class="btn ghost" href="${esc(APP ? "#" : BASE)}">${APP ? "Rozetlerim" : "Ana sayfa"}</a>`);
 }
 
 // ---------------------------------------------------------------- bu cihazdaki rozetler ve siparişler
@@ -305,10 +309,19 @@ const findTag = code => myTags().find(t => t.code === code);
 function saveTag(tag) {
   const old = findTag(tag.code) || {design: "klasik", size: "y35", copies: 1, created: Date.now()};
   store.set("tags", [{...old, ...tag}, ...myTags().filter(t => t.code !== tag.code)]);
+  syncNative();
 }
-const removeTag = code => store.set("tags", myTags().filter(t => t.code !== code));
+const removeTag = code => { store.set("tags", myTags().filter(t => t.code !== code)); syncNative(); };
 const myOrders = () => store.get("orders", []);
-function saveOrder(o) { store.set("orders", [{...myOrders().find(x => x.code === o.code), ...o}, ...myOrders().filter(x => x.code !== o.code)]); }
+function saveOrder(o) { store.set("orders", [{...myOrders().find(x => x.code === o.code), ...o}, ...myOrders().filter(x => x.code !== o.code)]); syncNative(); }
+// Arka plan bildirimleri (android/…/Notifier.java) hangi rozetlere ve siparişlere bakacağını buradan öğrenir
+function syncNative() {
+  if (!APP) return;
+  try {
+    NATIVE.syncTags?.(JSON.stringify(myTags().map(t => ({code: t.code, pin: t.pin, name: t.name || ""}))));
+    NATIVE.syncOrders?.(JSON.stringify(myOrders().map(o => ({code: o.code, token: o.token, status: o.status}))));
+  } catch (e) {}
+}
 function deviceId() {
   let id = store.get("device", null);
   if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now(); store.set("device", id); }
@@ -358,7 +371,7 @@ function showFound(code, tag) {
     <a class="btn ghost" href="${esc(waHref(phone, hello))}">💬 WhatsApp'tan yaz</a>
     <a class="btn ghost" href="${esc(smsHref(phone, hello))}">✉️ SMS gönder</a>
     ${backup}
-    <p class="small"><a href="${esc(tagLink(code))}&duzenle">Köpeğin sahibi misiniz? Bilgileri düzenleyin</a></p>`);
+    <p class="small"><a href="${esc(editLink(code))}">Köpeğin sahibi misiniz? Bilgileri düzenleyin</a></p>`);
   const btn = document.getElementById("loc"), box = document.getElementById("locbox");
   const sendButtons = text => `<a class="btn" href="${esc(waHref(phone, text))}">WhatsApp'tan gönder</a>
     <a class="btn ghost" href="${esc(smsHref(phone, text))}">SMS ile gönder</a>`;
@@ -417,7 +430,7 @@ function showEdit(code, tag, error = "", v = null) {
       <button class="btn" type="submit">${claim ? "Rozeti bağla" : "Kaydet"}</button>
     </form>
     ${claim ? "" : `<button class="btn ghost" type="button" id="del" style="color:var(--err)">🗑 Rozeti sil</button>`}
-    <p class="small"><a href="${esc(tagLink(code))}">Vazgeç</a></p>`, "mid");
+    <p class="small"><a href="${esc(APP ? tagPageLink(code) : tagLink(code))}">Vazgeç</a></p>`, "mid");
   document.getElementById("del")?.addEventListener("click", async ev => {
     const pin = document.getElementById("e-pin").value.trim();
     if (!/^\d{6}$/.test(pin)) return toast("Silmek için önce 6 haneli PIN'i girin.");
@@ -460,9 +473,25 @@ function showSaved(code, name, phone, claimed, lost) {
     <div class="msg ok">${claimed ? `Rozet bağlandı! Bu QR artık ${esc(prettyPhone(phone))} numarasını arar.` : "Kaydedildi."}
       ${lost ? "<br><b>Kayıp modu açık:</b> QR'ı okutan kişi kırmızı uyarıyı görecek. Umarız çabucak kavuşursunuz." : ""}</div>
     <p>PIN'inizi saklayın; bilgileri değiştirmek için gerekecek. Rozet bu cihazda <b>Rozetlerim</b>'e de eklendi.</p>
-    <a class="btn" href="${esc(BASE)}#kunye/${encodeURIComponent(code)}">Rozetimi gör</a>
+    <a class="btn" href="${esc(tagPageLink(code))}">Rozetimi gör</a>
     <a class="btn ghost" href="${esc(tagLink(code))}">QR'ı test et</a>`);
   if (!lost) confetti();
+}
+
+// Bu cihazdaki bütün rozetleri sunucudan siler, cihazdaki listeyi, adresi ve siparişleri temizler (Play veri silme şartı)
+async function wipeAll() {
+  const tags = myTags();
+  if (!confirm(`Bu ${APP ? "telefondaki" : "cihazdaki"} ${tags.length} rozet sunucudan kalıcı olarak silinsin ve adres, sipariş listesi temizlensin mi?\n\nRozetlerin QR'ı artık hiçbir bilgi göstermez. Bu işlem geri alınamaz.`)) return;
+  let failed = 0;
+  for (const t of tags) {
+    try { const r = await rpc("tasma_tag_delete", {p_code: t.code, p_pin: t.pin}); if (r?.ok || r?.error === "not_found") removeTag(t.code); else failed++; }
+    catch (e) { failed++; }
+  }
+  if (failed) return toast(`${failed} rozet silinemedi (bağlantı ya da PIN hatası). Tekrar deneyin.`, 6000);
+  ["orders", "address", "lastPhone", "lastDesign"].forEach(k => { try { localStorage.removeItem("tasmaqr-" + k); } catch (e) {} });
+  syncNative();
+  toast("Tüm verileriniz silindi.");
+  location.hash = "#"; route();
 }
 
 // Rozeti sunucudan siler (PIN ile). Yönetimden basılan rozet boşa çıkar, PIN kartıyla yeniden bağlanabilir.
@@ -482,6 +511,15 @@ async function deleteTag(code, pin, name) {
 }
 
 // ---------------------------------------------------------------- PDF
+// Uygulamada tarayıcı indirme ve yazdırma yok: Android'in PDF kaydetme/paylaşma ve yazdırma ekranı kullanılır
+function savePdfFile(pdf, name) {
+  if (APP && NATIVE.sharePdf) NATIVE.sharePdf(pdf.output("datauristring").split(",")[1], name);
+  else pdf.save(name);
+}
+function printPage(job) {
+  if (APP && NATIVE.print) NATIVE.print(job, 210, 297); else print();
+}
+
 function loadScript(src) {
   return new Promise((ok, fail) => {
     if (document.querySelector(`script[src="${src}"]`)) return ok();
@@ -492,8 +530,8 @@ function loadScript(src) {
 
 async function loadPdfLibs() {
   await Promise.all([
-    loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"),
-    loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"),
+    loadScript("shared/vendor/html2canvas.min.js"),
+    loadScript("shared/vendor/jspdf.umd.min.js"),
   ]);
   await document.fonts?.ready;
 }
@@ -529,6 +567,7 @@ function downloadBlob(blob, name) {
 }
 
 // ---------------------------------------------------------------- ana sayfa ve talep formu
+const APK_URL = "https://github.com/yusufbas34/tasmaqr/releases/download/apk-son/tasma-qr.apk";
 const SAMPLE_NAMES = ["KARABAŞ", "PAMUK", "ZEYTİN", "FINDIK", "BOBİ", "TARÇIN", "ÇAPKIN", "LOKUM"];
 const randomOf = a => a[Math.floor(Math.random() * a.length)];
 
@@ -550,6 +589,7 @@ function showHome() {
         <a class="btn cta" href="#olustur">Ücretsiz rozetimi oluştur</a>
         <a class="btn cta alt" href="#talep">Hazır rozet iste</a>
         ${mine ? `<a class="btn cta ghost" href="#kunyelerim">Rozetlerim (${mine})</a>` : ""}
+        <a class="btn cta ghost" href="${esc(APK_URL)}">📱 Android uygulaması</a>
         <p><button type="button" class="chip" id="intro" style="margin-top:14px">▶ 30 saniyede tanıyın</button></p>
       </div>
       <div class="showcase" aria-label="Tasmaya takılı örnek rozet">
@@ -721,12 +761,46 @@ const backLink = (href, text) => `<a class="back" href="${esc(href)}">← ${esc(
 const designChips = sel => `<div class="designs" role="radiogroup" aria-label="Tasarım">${Object.entries(DESIGNS).map(([k, d]) =>
   `<button type="button" role="radio" aria-checked="${k === sel}" data-d="${k}" class="${k === sel ? "on" : ""}"><i style="background:${d.ring}"></i>${esc(d.name)}</button>`).join("")}</div>`;
 
+// ---------------------------------------------------------------- uygulama: karşılama, bildirimler, alt bölüm
+function showAppWelcome() {
+  show(`
+    <div class="showcase" style="margin:6px 0 4px">${showcaseHtml()}</div>
+    <h1 style="text-align:center">Tasmasındaki QR rozet, onu size geri getirsin</h1>
+    <p style="text-align:center">Bulan kişi rozeti telefonuyla okutur; köpeğinizin adını ve notunuzu görür, sizi tek dokunuşla arar ya da konumunu gönderir.</p>
+    <a class="btn" href="#olustur">Rozetimi oluştur</a>
+    <a class="btn ghost" href="#kunyelerim">Elimdeki rozeti ekle (kod ve PIN)</a>
+    ${appFooterHtml()}`, "mid");
+  bindAppFooter();
+}
+
+function appFooterHtml() {
+  const on = NATIVE.notificationsEnabled?.();
+  return `<div class="card" style="margin-top:22px">
+      <h2>Bildirimler</h2>
+      <p>Biri köpeğinizin konumunu gönderdiğinde, kayıp modundayken rozet okutulduğunda ve siparişiniz ilerlediğinde haber veririz.</p>
+      <div id="notif"><b>${on ? "✓ Bildirimler açık" : "Bildirimler kapalı"}</b>
+        <button class="btn small" type="button" id="notif-on">${on ? "Ayarları aç" : "Bildirimleri aç"}</button>
+        ${on ? `<button class="btn small ghost" type="button" id="notif-test">Deneme bildirimi</button>` : ""}</div>
+    </div>
+    <p class="small"><a href="#" id="replay">▶ Tanıtımı izle</a> · <a href="${esc(SITE_URL)}gizlilik.html">Gizlilik</a> ·
+      <a href="${esc(SITE_URL)}">Web sitesi</a> · Sürüm ${esc(NATIVE.versionName?.() || "")}</p>`;
+}
+
+function bindAppFooter() {
+  const g = id => document.getElementById(id);
+  g("notif-on").onclick = () => NATIVE.enableNotifications?.();
+  g("notif-test")?.addEventListener("click", () => { if (!NATIVE.testNotification?.()) toast("Bildirim gösterilemedi; ayarlardan izin verin."); });
+  g("replay").onclick = ev => { ev.preventDefault(); openIntro(); };
+}
+// İzin penceresi kapanınca ya da ayarlardan dönünce (MainActivity çağırır)
+window.onNotifChange = () => { if (APP && document.getElementById("notif")) route(); };
+
 function showCreate(error = "", v = {}) {
   v = {design: store.get("lastDesign", "klasik"), name: "", phone: store.get("lastPhone", ""), ...v};
   if (typeof qrcode !== "function") return showMessage("QR kütüphanesi yüklenemedi", "Sayfayı yenileyip tekrar deneyin.");
   const preview = () => `${tagAt("······", v.design, "y35", {link: SITE, name: v.name})}${tagAt("······", v.design, "k35x50", {link: SITE, name: v.name})}`;
   show(`
-    ${backLink("#", "Ana sayfa")}
+    ${backLink("#", APP ? "Rozetlerim" : "Ana sayfa")}
     <h1>Rozetinizi oluşturun</h1>
     <p>Köpeğinizin adını ve size ulaşılacak numarayı girin, tasarımı seçin. Sonra istediğiniz ölçüde yazdırabilirsiniz.</p>
     <div class="preview" id="pv">${preview()}</div>
@@ -795,9 +869,9 @@ const ORDER_STATUS = {
 function showMine(error = "") {
   const list = myTags(), orders = myOrders();
   show(`
-    ${backLink("#", "Ana sayfa")}
+    ${APP ? "" : backLink("#", "Ana sayfa")}
     <h1>Rozetlerim</h1>
-    <p>Bu cihazda oluşturduğunuz ya da eklediğiniz rozetler. Tarayıcı verilerini silerseniz liste de silinir; PIN'lerinizi bir yere not edin.</p>
+    <p>Bu ${APP ? "telefonda" : "cihazda"} oluşturduğunuz ya da eklediğiniz rozetler. ${APP ? "Uygulamayı silerseniz liste de silinir" : "Tarayıcı verilerini silerseniz liste de silinir"}; PIN'lerinizi bir yere not edin.</p>
     ${list.length ? `<div class="cards">${list.map(t => `
       <a class="mine" href="#kunye/${encodeURIComponent(t.code)}" data-code="${esc(t.code)}">
         ${tagAt(t.code, t.design, "y25", {name: t.name})}
@@ -819,7 +893,11 @@ function showMine(error = "") {
       <a class="mine" href="#odeme/${encodeURIComponent(o.code)}" style="grid-template-columns:1fr">
         <div><b>${esc(o.code)} · ${esc(o.amount)} TL</b>
           <span data-order="${esc(o.code)}">${esc(ORDER_STATUS[o.status] || o.status)}${o.tracking ? ` · Takip no: ${esc(o.tracking)}` : ""}</span></div>
-      </a>`).join("")}</div>` : ""}`, "mid");
+      </a>`).join("")}</div>` : ""}
+    ${list.length || orders.length ? `<p class="small"><a href="#" id="wipe" style="color:var(--err)">Tüm verilerimi sil</a></p>` : ""}
+    ${APP ? appFooterHtml() : ""}`, "mid");
+  if (APP) bindAppFooter();
+  document.getElementById("wipe")?.addEventListener("click", ev => { ev.preventDefault(); wipeAll(); });
   document.getElementById("addf").addEventListener("submit", async ev => {
     ev.preventDefault();
     const code = document.getElementById("a-code").value.trim().toUpperCase(), pin = document.getElementById("a-pin").value.trim();
@@ -829,7 +907,7 @@ function showMine(error = "") {
     catch (e) { return showMine("Bağlantı hatası, tekrar deneyin."); }
     const r = rows?.[0];
     if (!r) return showMine("Kod ya da PIN hatalı.");
-    if (!r.phone) { location.href = `${tagLink(code)}&duzenle`; return; } // henüz bağlanmamış: önce bağlasın
+    if (!r.phone) { location.href = editLink(code); return; } // henüz bağlanmamış: önce bağlasın
     saveTag({code, pin, name: r.pet_name, phone: r.phone});
     location.hash = `#kunye/${encodeURIComponent(code)}`;
   });
@@ -877,7 +955,7 @@ function showTagPage(code, fresh) {
           <dt>Okutma</dt><dd id="scans">…</dd>
         </dl>
         <div id="sightings"></div>
-        <a class="btn ghost" href="${esc(tagLink(t.code))}&duzenle">Bilgileri düzenle (ad, numara, not, ödül)</a>
+        <a class="btn ghost" href="${esc(editLink(t.code))}">Bilgileri düzenle (ad, numara, not, ödül)</a>
       </div>
 
       <div class="card">
@@ -916,7 +994,7 @@ function showTagPage(code, fresh) {
   g("size").onchange = () => rerender({size: g("size").value});
   g("copies").onchange = () => rerender({copies: Number(g("copies").value)});
   document.querySelector(".designs").onclick = ev => { const b = ev.target.closest("[data-d]"); if (b) rerender({design: b.dataset.d}); };
-  g("print").onclick = () => { pageStyle(); print(); };
+  g("print").onclick = () => { pageStyle(); printPage(`Tasma QR ${t.code}`); };
   g("pdf").onclick = async ev => {
     ev.target.disabled = true;
     toast("PDF hazırlanıyor…", 60000);
@@ -925,8 +1003,8 @@ function showTagPage(code, fresh) {
       const s = await snap(document.querySelector("#pg .sticker"));
       const pdf = new window.jspdf.jsPDF({unit: "mm", format: "a4"});
       layoutA4(pdf, Array.from({length: copies}, () => s));
-      pdf.save(`kunye-${t.code}-${t.size}.pdf`);
-      toast("PDF indirildi.");
+      savePdfFile(pdf, `rozet-${t.code}-${t.size}.pdf`);
+      if (APP) document.querySelector(".toast")?.remove(); else toast("PDF indirildi."); // uygulamada Android kendi bildirimini gösterir
     } catch (e) { toast("PDF oluşturulamadı: " + e.message, 5000); }
     ev.target.disabled = false;
   };
@@ -1219,7 +1297,7 @@ async function savePdf(codes) {
   }
   if (!pdf) throw new Error("Kaydedilecek rozet yok");
   const name = codes.length === 1 ? `kunye-${codes[0]}` : `kunyeler-${codes.length}`;
-  pdf.save(`${name}-${stickerSize}.pdf`);
+  savePdfFile(pdf, `${name}-${stickerSize}.pdf`);
 }
 
 // Yazdırır ya da PDF kaydeder; ardından verilmemiş olanları verildi olarak işaretlemeyi önerir.
@@ -1787,10 +1865,20 @@ async function route() {
   if (page === "kunye" && arg) return showTagPage(arg, extra === "yeni");
   if (page === "siparis" && arg) return showOrderForm(arg);
   if (page === "odeme" && arg) return showPay(arg);
+  if (page === "duzenle" && arg) { // uygulamada: ?k=KOD&duzenle yerine
+    let tag;
+    try { tag = await rpc("tasma_tag_lookup", {p_code: arg}); } catch (e) { return showMessage("Bağlantı hatası", "İnternetinizi kontrol edip tekrar deneyin."); }
+    return tag?.exists ? showEdit(arg, tag) : showMessage("Rozet bulunamadı", "Bu rozet silinmiş olabilir.");
+  }
+  if (APP) {
+    if (!store.get("introSeen", false)) openIntro();
+    return myTags().length ? showMine() : showAppWelcome();
+  }
   showHome();
 }
 
 addEventListener("hashchange", () => { if (!params.has("k") && !params.has("admin")) route(); });
+syncNative();
 route();
 </script>
 </body>

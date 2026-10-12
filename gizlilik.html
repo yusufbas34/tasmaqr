@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gizlilik Politikası · Tasma QR</title>
+<link rel="icon" type="image/svg+xml" href="shared/logo.svg">
+<link rel="stylesheet" href="shared/fonts.css">
+<style>
+:root{--ink:#111418;--band:#b8501a;--muted:#5d5650;--bg:#f6f1ea;--line:#d6cfc7}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Barlow",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;padding:28px 18px 48px}
+main{max-width:760px;margin:0 auto}
+h1{font-size:28px;margin:0 0 4px}
+h2{font-size:20px;margin:28px 0 8px}
+p,li{font-size:16px;color:#2b2622}
+.meta{color:var(--muted);font-size:14px;margin:0 0 18px}
+.box{background:#fff;border-left:4px solid var(--band);border-radius:8px;padding:12px 14px}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;font-size:15px}
+th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{background:#efe7dd}
+a{color:var(--band)}
+@media (max-width:600px){table,thead,tbody,tr,th,td{display:block}thead{display:none}td{border:0;padding:4px 10px}tr{border-bottom:1px solid var(--line);padding:6px 0}
+  td:first-child{font-weight:700;padding-top:10px}}
+</style>
+</head>
+<body>
+<main>
+<h1>Gizlilik Politikası</h1>
+<p class="meta">Tasma QR uygulaması ve yusufbas34.github.io/tasmaqr sitesi · Son güncelleme: 12 Ekim 2026</p>
+
+<p class="box"><b>Kısaca:</b> Hesap açmazsınız. Telefon numaranız rozetin üstüne yazılmaz; yalnızca biri rozeti okuttuğunda sizi araması ya da size mesaj atması için kullanılır.
+Konum yalnızca köpeğinizi bulan kişi kendi isteğiyle “Konumumu gönder” butonuna basarsa kaydedilir ve yalnızca siz görürsünüz.
+Verilerinizi istediğiniz an silebilirsiniz. Verilerinizi satmıyoruz, reklam ya da takip yapmıyoruz.</p>
+
+<h2>1. Hangi verileri topluyoruz?</h2>
+<table>
+  <thead><tr><th>Veri</th><th>Ne zaman</th><th>Neden</th></tr></thead>
+  <tbody>
+    <tr><td>Rozete bağlı telefon numarası, isteğe bağlı yedek numara ve yedek kişinin adı</td><td>Rozet oluşturduğunuzda ya da bilgileri değiştirdiğinizde</td><td>Rozeti okutan kişinin sizi arayabilmesi / mesaj atabilmesi</td></tr>
+    <tr><td>Köpeğin adı, bulan kişiye notunuz, kayıp durumu ve ödül notu</td><td>Siz girdiğinizde</td><td>Rozeti okutan kişiye gösterilmesi</td></tr>
+    <tr><td>Okutma zamanı (yalnızca rozet kodu ve saat)</td><td>Rozet her okutulduğunda</td><td>Size “kaç kez okutuldu” bilgisini göstermek. Okutan kişinin IP'si, cihazı ya da konumu kaydedilmez.</td></tr>
+    <tr><td>Bulan kişinin konumu (enlem, boylam, doğruluk) ve zamanı</td><td>Yalnızca bulan kişi “Konumumu sahibine gönder” butonuna basıp tarayıcısında izin verirse</td><td>Köpeğin nerede görüldüğünü sahibine göstermek. Yalnızca rozetin PIN'ini bilen sahibi görür; 30 günden eskiler gösterilmez.</td></tr>
+    <tr><td>Rastgele uygulama kimliği</td><td>Rozet oluştururken ve sipariş verirken</td><td>Kötüye kullanımı sınırlamak (ör. bir cihazdan günde en fazla 10 rozet). Cihazınızın gerçek kimliğiyle ilgisi yoktur.</td></tr>
+    <tr><td>Ad soyad, e-posta, telefon, köpeğin adı, seçilen rozet ve not</td><td>Yalnızca hazır rozet talep formunu doldurursanız</td><td>Rozetinizi hazırlamak ve size ulaşmak</td></tr>
+    <tr><td>Ad soyad, telefon, e-posta, adres, sipariş notu, seçilen rozet</td><td>Yalnızca rozet siparişi verirseniz</td><td>Rozeti üretmek, size ulaşmak ve kargolamak</td></tr>
+  </tbody>
+</table>
+<p>Uygulama konum, rehber, fotoğraf, kamera ya da mikrofon izni istemez. Rozetlerinizin PIN'i yalnızca telefonunuzda (sitede tarayıcınızda) saklanır; bilgileri yalnızca PIN'i bilen değiştirebilir ya da silebilir.
+Uygulama bildirim izni ister: rozetiniz için konum gönderildiğinde, kayıp modundayken rozet okutulduğunda ve siparişiniz ilerlediğinde haber vermek için.</p>
+
+<h2>2. Rozeti okutan kişi ne görür?</h2>
+<p>Köpeğin adını, sizin notunuzu, kayıp durumunu ve ödül notunu görür. “Sahibimi ara”, WhatsApp ya da SMS butonuna basınca telefonunun kendi uygulaması açılır ve numaranız o uygulamaya aktarılır. Yedek numara girdiyseniz o da gösterilir.</p>
+
+<h2>3. Verileri kimlerle paylaşıyoruz?</h2>
+<p>Verileri satmıyor, reklam için kullanmıyoruz. Hizmetin çalışması için şu altyapılar kullanılır:</p>
+<ul>
+  <li><b>Supabase:</b> veritabanı (rozet kayıtları, okutmalar, konumlar, talepler ve siparişler). Sunucular Güney Kore'dedir (Seul); bu nedenle verileriniz yurt dışında saklanır. Bağlantılar şifrelidir (HTTPS).</li>
+  <li><b>Telegram ve e-posta (Resend):</b> bir sipariş için ödeme bildirildiğinde sipariş bilgileri yalnızca işletmeciye bildirim olarak gönderilir.</li>
+  <li><b>Üretim firması:</b> sipariş onaylanınca rozetin üretim dosyası (QR, köpeğin adı, rozet kodu) ve gönderim için gereken bilgiler iletilir.</li>
+  <li><b>Kargo firması:</b> gönderim için ad, telefon ve adres.</li>
+  <li><b>GitHub:</b> site ve uygulama dosyaları GitHub Pages'te barındırılır. Elden kurulan (APK) sürüm yeni sürüm olup olmadığını GitHub'a sorar; Google Play sürümü bunu yapmaz.</li>
+</ul>
+<p>Yasal bir zorunluluk olursa (ör. mahkeme kararı) veriler yetkili mercilerle paylaşılabilir.</p>
+
+<h2>4. Ne kadar süre saklıyoruz?</h2>
+<ul>
+  <li>Rozet kayıtları, okutma zamanları ve konumlar: siz silene kadar.</li>
+  <li>Talep ve sipariş kayıtları: tamamlandıktan ya da iptal edildikten sonra en fazla 2 yıl (iade/şikâyet için); daha önce silinmesini isteyebilirsiniz.</li>
+</ul>
+
+<h2 id="silme">5. Verilerimi nasıl silerim?</h2>
+<ul>
+  <li><b>Tek bir rozet:</b> Uygulamada ya da sitede Rozetlerim › rozeti seçin › <b>Rozeti sil</b>. Ya da rozeti okutun › “Bilgileri düzenleyin” › PIN'i girip <b>Rozeti sil</b>. Numaranız, notlarınız, okutma kayıtları ve konumlar sunucudan hemen silinir.</li>
+  <li><b>Her şey:</b> Rozetlerim sayfasının altındaki <b>Tüm verilerimi sil</b>. Bu cihazdaki bütün rozetler sunucudan silinir; adres ve sipariş listesi cihazdan temizlenir.</li>
+  <li>Uygulama ya da PIN artık yoksa veya talep/sipariş kayıtlarınızın silinmesini istiyorsanız: rozet kodunuzu (ör. SAB12CD3) ya da sipariş numaranızı ve kullandığınız telefon/e-postayı yazarak Google Play'deki uygulama sayfasında yer alan geliştirici e-posta adresine yazın. Talebiniz en geç 30 gün içinde yerine getirilir.</li>
+</ul>
+<p>Uygulamayı kaldırmak telefonda saklanan bilgileri (PIN dahil) siler ama sunucudaki rozet kaydını silmez; önce yukarıdaki yollarla silmeniz önerilir.</p>
+
+<h2>6. Çocuklar</h2>
+<p>Hizmet köpek sahiplerine yöneliktir ve 13 yaşından küçük çocuklara yönelik değildir.</p>
+
+<h2>7. Haklarınız (KVKK)</h2>
+<p>6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında verilerinizin işlenip işlenmediğini öğrenme, düzeltilmesini, silinmesini isteme ve itiraz etme haklarınız vardır. Taleplerinizi yukarıdaki iletişim yoluyla iletebilirsiniz.</p>
+
+<h2>8. Değişiklikler</h2>
+<p>Bu metin değişirse bu sayfada güncellenir ve üstteki tarih değiştirilir.</p>
+
+<p><a href="./">← Tasma QR ana sayfa</a></p>
+</main>
+</body>
+</html>

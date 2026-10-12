@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tasma QR logosu: tasma şeridi, ona halkayla asılı kulaklı sarı rozet, içinde QR. Tuval 108x108, güvenli alan 21..87 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:strokeColor="#4A2410" android:strokeWidth="7" android:strokeLineCap="round"
+        android:fillColor="#00000000" android:pathData="M24,30 Q54,46 84,30" />
+    <path android:fillColor="#FFD400" android:pathData="M49,44.71 V40 a5,5 0 0,1 10,0 V44.71 A18,18 0 1,1 49,44.71 z" />
+    <path android:fillColor="#B8501A" android:pathData="M51.80,40 a2.2,2.2 0 1,0 4.40,0 a2.2,2.2 0 1,0 -4.40,0z" />
+    <path android:strokeColor="#E8ECF2" android:strokeWidth="2.4" android:fillColor="#00000000" android:pathData="M50.40,37.5 a3.6,3.6 0 1,0 7.20,0 a3.6,3.6 0 1,0 -7.20,0z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M41.00,62 a13,13 0 1,0 26.00,0 a13,13 0 1,0 -26.00,0z" />
+    <path android:fillColor="#163A7A" android:pathData="M45,53 h6 v6 h-6z M57,53 h6 v6 h-6z M45,65 h6 v6 h-6z M52,53 h2 v2 h-2z M52,57 h2 v3 h-2z M53,61 h3 v2 h-3z M57,61 h2 v2 h-2z M60,61 h3 v3 h-3z M52,65 h2 v2 h-2z M55,64 h2 v4 h-2z M58,66 h2 v2 h-2z M61,65 h2 v2 h-2z M52,69 h3 v2 h-3z M57,69 h6 v2 h-6z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M46,54 h4 v4 h-4z M58,54 h4 v4 h-4z M46,66 h4 v4 h-4z" />
+    <path android:fillColor="#163A7A" android:pathData="M47,55 h2 v2 h-2z M59,55 h2 v2 h-2z M47,67 h2 v2 h-2z" />
+</vector>

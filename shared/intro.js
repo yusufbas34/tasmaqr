@@ -137,7 +137,7 @@ function showIntro({onCreate, onDone} = {}) {
             <h1>${esc(sl.title)}</h1>
             <p>${esc(sl.text)}</p>
             ${i === last ? `<button class="btn intro-go" type="button">Rozetimi oluştur</button>
-              <button class="btn intro-later" type="button">Önce siteyi gezeyim</button>`
+              <button class="btn intro-later" type="button">${typeof APP !== "undefined" && APP ? "Uygulamaya geç" : "Önce siteyi gezeyim"}</button>`
               : `<button class="intro-next" type="button" aria-label="Sonraki">⌃ Yukarı kaydırın</button>`}
           </div>
         </section>`).join("")}

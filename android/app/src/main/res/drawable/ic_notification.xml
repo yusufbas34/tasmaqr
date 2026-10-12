@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bildirim çubuğu simgesi: tek renk (sistem boyar), pati izi -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M6.60,16.2 a5.4,4.6 0 1,0 10.80,0 a5.4,4.6 0 1,0 -10.80,0z M2.50,10.2 a2.3,2.9 0 1,0 4.60,0 a2.3,2.9 0 1,0 -4.60,0z M6.90,5.4 a2.3,3 0 1,0 4.60,0 a2.3,3 0 1,0 -4.60,0z M12.50,5.4 a2.3,3 0 1,0 4.60,0 a2.3,3 0 1,0 -4.60,0z M16.90,10.2 a2.3,2.9 0 1,0 4.60,0 a2.3,2.9 0 1,0 -4.60,0z" />
+</vector>

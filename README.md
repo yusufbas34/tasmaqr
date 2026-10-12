@@ -1,6 +1,6 @@
 # Tasma QR
 
-Köpeklerin tasmasına künye gibi takılan QR rozet. Rozeti okutan kişi köpeğin adını, sahibinin notunu ve **Sahibimi ara** butonunu görür, isterse bulunduğu yeri tek dokunuşla gönderir. Araç QR'ın köpek tasması sürümüdür; önce web sitesi hazırlandı, Android uygulaması sonra gelecek.
+Köpeklerin tasmasına künye gibi takılan QR rozet. Rozeti okutan kişi köpeğin adını, sahibinin notunu ve **Sahibimi ara** butonunu görür, isterse bulunduğu yeri tek dokunuşla gönderir. Araç QR'ın köpek tasması sürümüdür. Web sitesi ve Android uygulaması aynı koddan çalışır.
 
 ## Özellikler
 
@@ -17,6 +17,13 @@ Köpeklerin tasmasına künye gibi takılan QR rozet. Rozeti okutan kişi köpe�
 - **Hazır rozet talep formu** (rozet tipi, tasarım, ölçü) ve **rozet siparişi** (IBAN ile ödeme, Telegram/e-posta bildirimi)
 - **Yönetim** (`?admin`): PIN kartlı rozet üretme/yazdırma, talepler, siparişler, satış ayarları
 
+## Android uygulaması
+
+`android/` klasöründe. Uygulama siteyi uygulama modunda gösterir; yazdırma ve PDF Android'e devredilir, arka planda
+"konum geldi / kayıp modunda rozet okutuldu / sipariş ilerledi" bildirimleri gösterilir.
+`main`'e her gönderimde GitHub Actions APK derler: https://github.com/yusufbas34/tasmaqr/releases/download/apk-son/tasma-qr.apk
+Google Play için: [android/GOOGLE_PLAY.md](android/GOOGLE_PLAY.md). Ayrıntılar: [android/README.md](android/README.md).
+
 ## Kurulum
 
 1. **Veritabanı**: Supabase > SQL Editor'da `supabase/kurulum.sql` dosyasını açın, en üstteki `v_sifre` satırına admin şifrenizi (en az 10 karakter) yazıp **Run**'a basın. Güncelleme geldiğinde dosyayı yeniden çalıştırmanız yeterli (veriler korunur, şifre satırını `BURAYA-SIFRE` bırakırsanız şifre değişmez). Supabase projesi `index.html`'in başındaki `SUPABASE_URL` ve `SUPABASE_KEY` ile seçilir.
@@ -29,3 +36,6 @@ Köpeklerin tasmasına künye gibi takılan QR rozet. Rozeti okutan kişi köpe�
 - `shared/intro.js`: tasmaya asılı rozet görseli ve ilk giriş tanıtımı
 - `shared/tag.js`, `shared/tag.css`: rozet tasarımları ve ölçüleri (Android uygulaması da kullanacak)
 - `supabase/kurulum.sql`: veritabanı (tek dosya, tekrar çalıştırmak güvenli)
+- `gizlilik.html`: gizlilik politikası (Google Play için)
+- `shared/vendor`, `shared/fonts`: gömülü kütüphaneler ve fontlar (CDN'e bağımlı değil)
+- `android/`: Android uygulaması, `.github/workflows/android.yml`: APK / AAB derlemesi
