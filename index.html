@@ -1757,6 +1757,7 @@ async function showSettings(newCount, error = "") {
   show(`
     ${tabsHtml(newCount)}
     ${shop ? "" : setupHtml("Sipariş sistemi kurulu değil.")}
+    ${shop && !("price_metal" in shop) ? setupHtml("Veritabanı güncel değil: metal rozet fiyatı, siparişte rozet tipi/ölçü ve rozet silme için güncel kurulum dosyasını çalıştırın.") : ""}
     ${error ? `<div class="msg err">${esc(error)}</div>` : ""}
     ${shop ? `
     <form id="sf" class="card" style="max-width:560px" novalidate>
@@ -1837,11 +1838,18 @@ async function showSettings(newCount, error = "") {
     if (!(priceMetal >= 0)) return showSettings(newCount, "Metal rozet fiyatı geçersiz.");
     if (!(price >= 0)) return showSettings(newCount, "Fiyat geçersiz.");
     if (g("s-notify") && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(g("s-notify"))) return showSettings(newCount, "Bildirim e-postası geçersiz.");
+    const args = {p_key: adminKey, p_active: active, p_price: price, p_iban: iban, p_account_name: g("s-name"),
+      p_bank_name: g("s-bank"), p_printer_email: g("s-printer"), p_shipping_text: g("s-ship"), p_product_text: g("s-product"),
+      p_telegram_bot_token: g("s-tg-token"), p_telegram_chat_id: g("s-tg-chat"), p_resend_api_key: g("s-resend"), p_notify_email: g("s-notify")};
     try {
-      await rpc("tasma_admin_shop_set", {p_key: adminKey, p_active: active, p_price: price, p_iban: iban, p_account_name: g("s-name"),
-        p_bank_name: g("s-bank"), p_printer_email: g("s-printer"), p_shipping_text: g("s-ship"), p_product_text: g("s-product"),
-        p_telegram_bot_token: g("s-tg-token"), p_telegram_chat_id: g("s-tg-chat"), p_resend_api_key: g("s-resend"), p_notify_email: g("s-notify"), p_price_metal: priceMetal});
-      await showSettings(newCount);
+      let old = false;
+      // Veritabanı eski sürümdeyse (metal fiyatı alanı yok) diğer ayarları yine kaydet, güncelleme uyarısı göster
+      await rpc("tasma_admin_shop_set", {...args, p_price_metal: priceMetal}).catch(async e => {
+        if (e.status !== 404) throw e;
+        old = true;
+        await rpc("tasma_admin_shop_set", args);
+      });
+      await showSettings(newCount, old ? "Ayarlar kaydedildi, ama metal rozet fiyatı kaydedilemedi: veritabanı eski sürümde. Supabase SQL Editor'da güncel supabase/kurulum.sql dosyasını çalıştırın; metal rozet siparişleri de ancak o zaman çalışır." : "");
       toast(active ? "Kaydedildi. Satış açık." : "Kaydedildi. Satış kapalı.");
     } catch (e) { showSettings(newCount, "Kaydedilemedi: " + e.message); }
   });
