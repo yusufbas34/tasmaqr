@@ -1045,13 +1045,18 @@ function showTagPage(code, fresh) {
   rpc("tasma_shop_info").then(shop => {
     if (!shop?.active) return;
     g("shopbox").innerHTML = `<div class="card"><h2>Tasmaya takılan rozetini sipariş et</h2>
-      <p>${esc(shop.product_text)} ${esc(shop.shipping_text)}</p>
+      <p>${esc(productText(shop))} ${esc(shop.shipping_text)}</p>
       ${productCards({code, design: t.design, name: t.name, shop})}
       <a class="btn alt" href="#siparis/${encodeURIComponent(code)}">Sipariş ver</a></div>`;
   }, () => {});
 }
 
 // ---------------------------------------------------------------- tasmaya takılan rozet ürünleri
+// Ürün açıklaması: veritabanında hâlâ eski (sticker sayfası) varsayılan metin duruyorsa yenisi gösterilir
+const PRODUCT_TEXT = "Tasmaya takılan, halka delikli QR rozet. Halkasıyla birlikte kargolanır; hemen tasmanın D halkasına takabilirsiniz.";
+const OLD_PRODUCT_TEXTS = ["Su geçirmez vinil sticker sayfası: aynı QR 7 farklı ölçüde 29 künye. Künyeye, tasmaya, kafese yapıştırabilirsiniz.",
+  "Su geçirmez QR rozet seti: aynı QR 7 farklı ölçüde 29 adet. Birini tasmaya takın, yedekleri kafese, mama kabına, çantaya yapıştırın."];
+const productText = shop => !shop?.product_text || OLD_PRODUCT_TEXTS.includes(shop.product_text.trim()) ? PRODUCT_TEXT : shop.product_text;
 const kindPrice = (shop, kind) => kind === "metal" ? (shop?.price_metal ?? shop?.price) : shop?.price;
 // Ürün kartları: buton (seçilebilir) ya da düz kart. shop verilirse fiyat yazar.
 function productCards({code = "ÖRNEK", design = "turuncu", name = "", sel = null, shop = null, size = "y30"} = {}) {
@@ -1076,7 +1081,7 @@ async function showOrderForm(code, error = "", v = null) {
   show(`
     ${backLink(`#kunye/${encodeURIComponent(code)}`, "Rozete dön")}
     <h1>Tasmaya takılan rozet siparişi</h1>
-    <p>${esc(shop.product_text)} ${esc(shop.shipping_text)}</p>
+    <p>${esc(productText(shop))} ${esc(shop.shipping_text)}</p>
     <div class="preview"><div style="zoom:2">${badgeAt(code, v.design, v.size, {name: t.name, kind: v.kind})}</div></div>
     ${error ? `<div class="msg err" role="alert" style="margin-top:14px">${esc(error)}</div>` : ""}
     <form id="of" novalidate>
@@ -1761,7 +1766,7 @@ async function showSettings(newCount, error = "") {
         <div><label for="s-price">Renkli epoksi rozet (TL)</label><input id="s-price" type="number" inputmode="numeric" min="0" value="${esc(shop.price)}"></div>
         <div><label for="s-price-metal">Metal lazer rozet (TL)</label><input id="s-price-metal" type="number" inputmode="numeric" min="0" value="${esc(shop.price_metal ?? 250)}"></div>
       </div>
-      <label for="s-product">Ürün açıklaması (sitede görünür)</label><textarea id="s-product" rows="3">${esc(shop.product_text || "")}</textarea>
+      <label for="s-product">Ürün açıklaması (sitede görünür)</label><textarea id="s-product" rows="3">${esc(productText(shop))}</textarea>
       <label for="s-iban">IBAN</label><input id="s-iban" autocomplete="off" placeholder="TR00 0000 0000 0000 0000 0000 00" value="${esc((shop.iban || "").replace(/(.{4})/g, "$1 ").trim())}">
       <label for="s-name">Alıcı adı (hesap sahibi)</label><input id="s-name" value="${esc(shop.account_name || "")}">
       <label for="s-bank">Banka adı <span class="opt">(isteğe bağlı)</span></label><input id="s-bank" value="${esc(shop.bank_name || "")}">
