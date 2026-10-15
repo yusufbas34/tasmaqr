@@ -20,6 +20,16 @@ Veri güvenliği formu cevapları ve mağaza metinleri. Görseller `android/stor
 
   Konum, kamera, rehber ve dosya izni yok. Hiçbiri Play'de ek beyan istemez.
 
+## Kısa yol (Araç QR'ı yüklediyseniz)
+
+1. **Anahtar:** Araç QR için oluşturduğunuz `anahtar.txt` ve şifreyle, Tasma QR deposuna aynı 4 gizli değeri ekleyin (2. bölüm; `PLAY_KEY_ALIAS` = `aracqr`). Aynı yükleme anahtarını iki uygulamada kullanmak serbesttir; Play her uygulamayı kendi uygulama imzalama anahtarıyla imzalar.
+2. **Paket:** GitHub › tasmaqr › Actions › **Android** › Run workflow. Bitince imzalı paket şuradan iner:
+   https://github.com/yusufbas34/tasmaqr/releases/download/play-son/tasma-qr-play.aab
+3. **Play Console:** Uygulama oluştur › formlar (4. ve 6. bölüm) › Mağaza girişi (7. bölüm) › Test › Kapalı test › Yeni sürüm › AAB'yi yükle.
+4. **Testçiler:** Kapalı test › Testçiler'e Araç QR'daki grubu (`ara-qr-test@googlegroups.com`) ekleyin, testçilere
+   https://yusufbas34.github.io/tasmaqr/test.html sayfasını gönderin (8. bölümdeki WhatsApp mesajı).
+5. **14 gün sonra:** Üretim erişimi başvurusu (8. bölümdeki cevap taslakları).
+
 ## 1. Yükleme anahtarı oluşturun (bir kez, kendi bilgisayarınızda)
 
 Java yüklü bir bilgisayarda (Android Studio ile gelir):
@@ -39,7 +49,7 @@ Dosyayı metne çevirin:
 - Mac / Linux: `base64 -i tasmaqr-play.jks | tr -d '\n' > anahtar.txt`
 - Windows PowerShell: `[Convert]::ToBase64String([IO.File]::ReadAllBytes("tasmaqr-play.jks")) > anahtar.txt`
 
-Araç QR için oluşturduğunuz anahtarı da kullanabilirsiniz, ama her uygulamaya ayrı anahtar daha güvenlidir.
+Araç QR için oluşturduğunuz anahtarı da kullanabilirsiniz (kısa yol); ayrı anahtar biraz daha güvenlidir ama zorunlu değildir.
 
 ## 2. Anahtarı GitHub'a gizli olarak ekleyin
 
@@ -50,16 +60,20 @@ Dört tane ekleyin:
 |---|---|
 | `PLAY_KEYSTORE_BASE64` | `anahtar.txt` dosyasının tamamı |
 | `PLAY_KEYSTORE_PASSWORD` | keytool'da verdiğiniz şifre |
-| `PLAY_KEY_ALIAS` | `tasmaqr` |
+| `PLAY_KEY_ALIAS` | `tasmaqr` (Araç QR anahtarını kullanıyorsanız `aracqr`) |
 | `PLAY_KEY_PASSWORD` | aynı şifre (keytool ayrı sormadıysa) |
 
 Sonra `anahtar.txt` dosyasını silin.
 
 ## 3. AAB dosyasını alın
 
+Anahtar GitHub'a eklendikten sonra her derlemede imzalı paket şu sabit bağlantıya konur (telefondan da indirilir):
+https://github.com/yusufbas34/tasmaqr/releases/download/play-son/tasma-qr-play.aab
+
 GitHub › Actions › **Android** › Run workflow ile çalıştırın (ya da main'e bir gönderim yapın).
 Bitince çalışmanın sayfasının altında, Artifacts bölümünde **tasma-qr-play-aab** belirir. İndirin; içinden
-`tasma-qr-play.aab` çıkar. Play Console'a bu dosya yüklenir.
+`tasma-qr-play.aab` çıkar. Play Console'a bu dosya yüklenir. Anahtar eklenmemişse dosyanın adı `tasma-qr-play-imzasiz.aab` olur;
+Play bunu kabul etmez, önce imzalayın (8. bölümün sonu).
 
 Sürüm numarası her derlemede otomatik artar, bu yüzden her güncellemede yeni AAB'yi yüklemeniz yeterli.
 
@@ -103,7 +117,7 @@ Araç QR'ın testi bu uygulamaya sayılmaz; aynı testçi grubunu yeniden kullan
 
 Pratik yol:
 
-1. Araç QR için açtığınız Google Grubunu (ya da yeni bir grup, ör. `tasmaqr-test@googlegroups.com`) kullanın. 15-20 kişi olsun; düşen olursa sayı 12'nin altına inmesin. Köpek sahibi arkadaşlar en iyi testçidir.
+1. Araç QR için açtığınız Google Grubunu (`ara-qr-test`) kullanın; aynı kişiler iki uygulamayı da test eder. 15-20 kişi olsun; düşen olursa sayı 12'nin altına inmesin. Köpek sahibi arkadaşlar en iyi testçidir.
 2. Kapalı test kanalında "Testçiler" sekmesine bu grubu yazın.
 3. Console'un verdiği **katılım bağlantısını** (opt-in link) WhatsApp'tan paylaşın. Her kişi şunları yapar:
    - Bağlantıyı Android telefonunda, gruba eklenen Gmail hesabıyla açar ve "Test kullanıcısı ol"a basar.
@@ -205,3 +219,50 @@ Not: Tasma QR mikroçipin yerine geçmez; köpeğinizi bulan kişinin size dakik
 - `icon-512.png`: uygulama simgesi
 - `feature-1024x500.png`: öne çıkan görsel
 - `screen-*.png`: telefon ekran görüntüleri, 1080×1920 (8 adet; Play en az 2, en fazla 8 ister)
+
+## 8. Hazır metinler (kopyala-yapıştır)
+
+### Testçi sayfası
+https://yusufbas34.github.io/tasmaqr/test.html: gruba katılma, test bağlantısı, Play'den indirme ve denenecekler.
+Grup bağlantısı (`ara-qr-test`) ve Play katılım bağlantısı (`play.google.com/apps/testing/io.github.yusufbas34.tasmaqr`) sayfada hazır.
+Katılım bağlantısı, kapalı test sürümü yayınlanınca çalışmaya başlar. Play Console farklı bir bağlantı gösterirse bana gönderin, sayfaya yazayım.
+
+### WhatsApp davet mesajı
+
+```
+Selam! 🐾 Araç QR'dan sonra köpekler için de bir uygulama yaptım: Tasma QR. Köpeğin tasmasına QR rozet takılıyor; köpek kaybolursa bulan kişi rozeti okutup sahibini tek dokunuşla arıyor, istersen konumunu da gönderiyor.
+
+Bunun da Google Play'e çıkması için 14 gün test eden 12 kişi lazım. Araç QR testine katıldıysan grup aynı, sadece test bağlantısına dokunup kurman yeterli:
+👉 https://yusufbas34.github.io/tasmaqr/test.html
+
+Köpeğin olmasa da olur. Çok teşekkürler! 🙏
+```
+
+### Sürüm notu (kapalı test ve ilk yayın)
+
+- **Türkçe:** `İlk sürüm: QR rozet oluşturma, kayıp modu, konum ve okutma bildirimi, 11 tasarım, epoksi ve metal rozet siparişi.`
+- **English:** `First release: create QR pet tags, lost mode, location and scan notifications, 11 designs, epoxy and metal tag orders.`
+
+### Üretim erişimi başvurusu (14 gün sonra) cevap taslakları
+Play Console sorularına kendi deneyiminizle tamamlayın; testte gerçekten olanları yazın.
+
+1. **Testçileri nasıl buldunuz?** `Aile, arkadaşlar ve çevremdeki köpek sahipleri; WhatsApp üzerinden Google Grubu ile davet ettim.`
+2. **Testçi bulmak ne kadar kolaydı?** `Kolaydı; köpek sahipleri kaybolma korkusunu yakından biliyor ve uygulamayı denemek istedi.`
+3. **Testçiler uygulamayı nasıl kullandı?** `Rozet oluşturdular, başka telefonla okutup aramayı ve WhatsApp'ı, konum göndermeyi, kayıp modunu, bildirimleri, bilgi düzenlemeyi, PDF paylaşmayı ve rozet silmeyi test ettiler.`
+4. **Hangi geri bildirimleri aldınız, nasıl topladınız?** `WhatsApp üzerinden topladım. (Buraya gerçek örnekler.)`
+5. **Geri bildirime göre ne değiştirdiniz?** `(Buraya yapılan düzeltmeler; test sırasında yayınlanan güncellemeleri yazın.)`
+6. **Uygulama kime yönelik, ne değer sağlıyor?** `Türkiye'deki köpek sahipleri. Köpek kaybolduğunda onu bulan kişinin, sahibinin numarası künyede yazmadan, sahibine dakikalar içinde ulaşmasını ve konum göndermesini sağlar.`
+7. **İlk yıl beklenen indirme:** `1.000 – 10.000`
+8. **Yayına hazır olduğuna nasıl karar verdiniz?** `14 günlük testte çökme ya da kritik hata kalmadı, testçilerin bildirdiği sorunlar düzeltildi.`
+
+Çökme olup olmadığını Play Console › **Android vitals** bölümünden kontrol edin.
+
+### İmzasız AAB'yi imzalama (GitHub'a anahtar eklemediyseniz)
+GitHub Actions anahtar yoksa `tasma-qr-play-imzasiz.aab` üretir. Java yüklü bir bilgisayarda:
+
+```
+jarsigner -keystore tasmaqr-play.jks -sigalg SHA256withRSA -digestalg SHA-256 -signedjar tasma-qr-play.aab tasma-qr-play-imzasiz.aab tasmaqr
+```
+
+(Araç QR anahtarıyla: `-keystore aracqr-play.jks` ve sondaki ad `aracqr`.)
+Kolay yol: 2. bölümdeki 4 gizli değeri GitHub'a bir kez ekleyin; sonra her derleme imzalı `tasma-qr-play.aab` verir.

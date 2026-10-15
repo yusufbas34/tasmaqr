@@ -36,25 +36,29 @@ jobs:
       - name: APK dosyasını hazırla
         run: cp android/app/build/outputs/apk/github/release/app-github-release.apk tasma-qr.apk
 
-      # Google Play sürümü: kendini güncellemez, gizli anahtarla imzalanır. Play Console'a bu .aab yüklenir.
+      # Google Play sürümü: kendini güncellemez. Gizli anahtar (Secrets) varsa imzalı, yoksa imzasız derlenir;
+      # imzasız paket sonradan yükleme anahtarıyla jarsigner ile imzalanabilir (android/GOOGLE_PLAY.md).
       - name: Google Play paketi (AAB) derle
-        if: env.PLAY_KEYSTORE_BASE64 != ''
         working-directory: android
         env:
           PLAY_KEYSTORE_PASSWORD: ${{ secrets.PLAY_KEYSTORE_PASSWORD }}
           PLAY_KEY_ALIAS: ${{ secrets.PLAY_KEY_ALIAS }}
           PLAY_KEY_PASSWORD: ${{ secrets.PLAY_KEY_PASSWORD }}
         run: |
-          echo "$PLAY_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/play.jks"
-          PLAY_KEYSTORE_FILE="$RUNNER_TEMP/play.jks" ./gradlew --no-daemon bundlePlayRelease
-          cp app/build/outputs/bundle/playRelease/app-play-release.aab ../tasma-qr-play.aab
-          rm -f "$RUNNER_TEMP/play.jks"
+          if [ -n "$PLAY_KEYSTORE_BASE64" ]; then
+            echo "$PLAY_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/play.jks"
+            PLAY_KEYSTORE_FILE="$RUNNER_TEMP/play.jks" ./gradlew --no-daemon bundlePlayRelease
+            rm -f "$RUNNER_TEMP/play.jks"
+            cp app/build/outputs/bundle/playRelease/app-play-release.aab ../tasma-qr-play.aab
+          else
+            ./gradlew --no-daemon bundlePlayRelease
+            cp app/build/outputs/bundle/playRelease/app-play-release.aab ../tasma-qr-play-imzasiz.aab
+          fi
 
       - uses: actions/upload-artifact@v4
-        if: env.PLAY_KEYSTORE_BASE64 != ''
         with:
           name: tasma-qr-play-aab
-          path: tasma-qr-play.aab
+          path: tasma-qr-play*.aab
 
       - uses: actions/upload-artifact@v4
         with:
@@ -71,4 +75,17 @@ jobs:
           gh release create apk-son tasma-qr.apk \
             --title "Tasma QR Android uygulaması (son sürüm)" \
             --notes "Derleme ${{ github.run_number }} · ${{ github.sha }}. Telefona kurmak için tasma-qr.apk dosyasını indirip açın; ilk kurulumda 'bilinmeyen kaynaklara izin ver' istenir." \
+            --target "${{ github.sha }}"
+
+      # İmzalı Play paketi için sabit indirme bağlantısı (anahtar Secrets'ta varsa):
+      # https://github.com/<sahip>/<repo>/releases/download/play-son/tasma-qr-play.aab
+      - name: Play paketi bağlantısını güncelle
+        if: github.ref == 'refs/heads/main' && env.PLAY_KEYSTORE_BASE64 != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete play-son --yes --cleanup-tag || true
+          gh release create play-son tasma-qr-play.aab --prerelease \
+            --title "Tasma QR Google Play paketi (son sürüm)" \
+            --notes "Derleme ${{ github.run_number }} · ${{ github.sha }}. Play Console > Test > Kapalı test > Yeni sürüm oluştur'a bu .aab dosyasını yükleyin." \
             --target "${{ github.sha }}"
