@@ -112,10 +112,11 @@ const PRODUCTS = {
 const BADGE_SIZES = {"y25": "Ø25 mm (minik ırk, kedi)", "y30": "Ø30 mm (küçük-orta ırk)", "y35": "Ø35 mm (orta-büyük ırk)"};
 const TAB = 16; // kulak yüksekliği (birim); gerçek ölçü = çap × 0,16
 
-function badgeSvg(code, design, {link = tagLink(code), name = "", kind = "epoksi", file = false} = {}) {
+// top: üst yazıyı zorlar (isimsiz stok rozet); verilmezse köpeğin adı, ad da yoksa tasarımın yazısı
+function badgeSvg(code, design, {link = tagLink(code), name = "", kind = "epoksi", file = false, top: topText = ""} = {}) {
   const id = "tb" + (++tagUid), metal = kind === "metal";
   const D = metal ? {ring: "none", ink: "#2b3038", accent: "#2b3038", icon: "paw", side: "paw", top: "BENİ BULDUN!"} : DESIGNS[DESIGNS[design] ? design : "klasik"];
-  const top = name ? upTR(name) : D.top;
+  const top = topText ? upTR(topText) : name ? upTR(name) : D.top;
   const fsTop = Math.min(11.5, 104 / (top.length * .58)).toFixed(2);
   const rt = 39.6, rb = 46.4, ink = file && metal ? "#000" : D.ink;
   const font = `font-family="'Barlow Condensed','Arial Narrow',Arial,sans-serif" font-weight="700"`;
@@ -154,9 +155,9 @@ const badgeAt = (code, design, size = "y30", opts = {}) => {
 };
 
 // Üretim dosyası: gerçek mm ölçülü tek başına SVG (kırmızı = kesim, metalde siyah = kazıma)
-function badgeFileSvg(code, design, {link, name, kind, size}) {
+function badgeFileSvg(code, design, {link, name, kind, size, top}) {
   const d = dims(size).w, h = d * (100 + TAB) / 100;
-  return `<?xml version="1.0" encoding="UTF-8"?>\n` + badgeSvg(code, design, {link, name, kind, file: true})
+  return `<?xml version="1.0" encoding="UTF-8"?>\n` + badgeSvg(code, design, {link, name, kind, top, file: true})
     .replace('<svg class="tagbadge"', `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${d}mm" height="${h.toFixed(2)}mm"`)
     .replace(/ href="#/g, ' xlink:href="#')
     .replace(/\saria-hidden="true"/g, "");

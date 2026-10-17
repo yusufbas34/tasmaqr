@@ -215,6 +215,19 @@ form .btn[type=submit]{margin-top:22px}
 .bar .btn{width:auto;margin:0;padding:10px 16px;font-size:15px}
 .bar select,.bar label{font:inherit;font-size:15px;margin:0}
 .bar select{padding:9px;border:2px solid var(--line);border-radius:8px;background:#fff;max-width:100%}
+.stockwrap{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px;align-items:start}
+.stockprev{text-align:center}.stockbig .badgebox{width:150px!important;height:174px!important;margin:0 auto}
+@media (max-width:700px){.stockwrap{grid-template-columns:1fr}}
+.a4page{width:210mm;height:297mm;background:#fff;color:#111;box-sizing:border-box;overflow:hidden}
+.badgesheet{display:grid;gap:3mm;padding:10mm 8.5mm;justify-content:center}
+.badgesheet>div{text-align:center}.badgesheet small{display:block;font:600 2.2mm/1 Arial,sans-serif;color:#777;margin-top:.5mm}
+.pinsheet{display:grid;grid-template-columns:repeat(2,85mm);grid-auto-rows:55mm;padding:11mm 20mm}
+.stockpin{box-sizing:border-box;border:.25mm dashed #9aa0a8;padding:3.5mm 4mm;display:flex;flex-direction:column;font:2.9mm/1.3 Arial,sans-serif}
+.sp-head{display:flex;align-items:center;gap:1.5mm;font-size:3.6mm;color:#163a7a}.sp-head span{margin-left:auto;font-size:2.8mm;color:#333}
+.sp-body{display:flex;gap:3mm;margin-top:2mm;flex:1}.sp-body ol{margin:0;padding-left:4mm;flex:1}.sp-body li{margin-bottom:.8mm}
+.sp-pin{width:24mm;border:.3mm solid #163a7a;border-radius:2mm;text-align:center;align-self:center;padding:1.5mm 0;font-size:2.6mm;color:#163a7a}
+.sp-pin span{display:block;font-size:6mm;font-weight:700;letter-spacing:.12em;color:#111}
+.stockpin small{color:#666;font-size:2.4mm}
 .admingrid{display:flex;flex-wrap:wrap;gap:5mm;align-items:flex-start}
 .tag{break-inside:avoid;page-break-inside:avoid;display:flex;flex-direction:column}
 .state{width:max(var(--w),42mm);font-size:13px;color:#555;padding:6px 2px;background:var(--bg)}
@@ -1356,7 +1369,7 @@ const designOptions = (sel, withRandom) =>
 function tabsHtml(newCount) {
   const tab = (id, name, n) => `<button data-tab="${id}" class="${adminTab === id ? "on" : ""}">${name}${n ? `<span class="badge">${n}</span>` : ""}</button>`;
   return `<div class="tabs noprint">
-    ${tab("tags", "Rozetler")}${tab("requests", "Talepler", newCount)}${tab("orders", "Siparişler", orderBadge)}${tab("settings", "Ayarlar")}
+    ${tab("tags", "Rozetler")}${tab("stock", "Sahibimi Ara (stok)")}${tab("requests", "Talepler", newCount)}${tab("orders", "Siparişler", orderBadge)}${tab("settings", "Ayarlar")}
   </div>`;
 }
 
@@ -1387,6 +1400,7 @@ async function showAdmin() {
   if (adminTab === "requests") return showRequests(rows, requests, newReq);
   if (adminTab === "orders") return showOrders(orders, newReq);
   if (adminTab === "settings") return showSettings(newReq);
+  if (adminTab === "stock") return showStock(rows, newReq);
   const state = r => r.phone ? "used" : r.given_at ? "given" : "ready";
   const count = {ready: 0, given: 0, used: 0};
   rows.forEach(r => count[state(r)]++);
@@ -1530,6 +1544,195 @@ Halka (split ring) ile birlikte paketleyiniz.
     try { await rpc("tasma_admin_add", {p_key: adminKey, p_count: 10}); }
     catch (e) { ev.target.disabled = false; return adminError("Rozet üretilemedi: " + e.message); }
     showAdmin();
+  };
+}
+
+// ---------------------------------------------------------------- yönetim: isimsiz stok rozet (OKUT • SAHİBİMİ ARA)
+// Köpek adı basılmayan, toplu üretilip stoktan satılan rozet. Her parti gerçek (sahipsiz) kodlardan oluşur; alıcı rozeti
+// okutup kutudaki PIN kartıyla köpeğini bağlar. Partiler bu tarayıcıda saklanır (kodlar), PIN'ler her zaman veritabanından gelir.
+const STOCK_TOPS = ["SAHİBİMİ ARA", "BENİ BULDUN!", "KAYBOLDUYSAM OKUT"];
+const loadBatches = () => { try { return JSON.parse(localStorage.getItem("tasmaqr-admin-stok") || "[]"); } catch (e) { return []; } };
+const saveBatches = b => { try { localStorage.setItem("tasmaqr-admin-stok", JSON.stringify(b)); } catch (e) {} };
+let stockForm = {n: 50, kind: "metal", size: "y30", design: "klasik", top: STOCK_TOPS[0]};
+
+const stockBadge = (code, b, file = false) =>
+  badgeAt(code, b.design, b.size, {link: tagLink(code), kind: b.kind, top: b.top, file});
+const csvCell = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+const csvText = rows => "﻿" + rows.map(r => r.map(csvCell).join(";")).join("\r\n");
+const batchName = b => `sahibimi-ara-${b.date.slice(0, 10)}-${b.codes.length}-${b.kind}-${b.size}`;
+
+const pinCardHtml = r => `<div class="stockpin">
+  <div class="sp-head">${icon("paw", "#163a7a", 'width="5mm" height="5mm"')}<b>Tasma QR</b><span>Rozet kodu <b>${esc(r.code)}</b></span></div>
+  <div class="sp-body">
+    <ol><li>Rozetteki QR'ı telefonunuzla okutun.</li><li>Köpeğinizin adını ve telefon numaranızı yazın, aşağıdaki PIN'i girin.</li>
+      <li>Hazır! Köpeğinizi bulan kişi QR'ı okutunca sizi tek dokunuşla arar, konumunu gönderebilir.</li></ol>
+    <div class="sp-pin">PIN<span>${esc(r.pin)}</span></div>
+  </div>
+  <small>Bu kartı saklayın, tasmaya takmayın. Bilgileri sonra da bu PIN ile değiştirirsiniz.</small>
+</div>`;
+
+// Sayfaları (210×297 mm div) tek tek görüntüleyip A4 PDF yapar
+async function pagesPdf(pages, scale) {
+  await loadPdfLibs();
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;left:-30000px;top:0";
+  document.body.append(box);
+  try {
+    const pdf = new window.jspdf.jsPDF({unit: "mm", format: "a4"});
+    for (let i = 0; i < pages.length; i++) {
+      toast(`PDF hazırlanıyor… sayfa ${i + 1}/${pages.length}`, 60000);
+      box.innerHTML = `<div class="a4page">${pages[i]}</div>`;
+      const canvas = await html2canvas(box.firstElementChild, {scale, backgroundColor: "#ffffff", logging: false});
+      if (i) pdf.addPage("a4", "portrait");
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 210, 297, undefined, "FAST");
+    }
+    return pdf;
+  } finally { box.remove(); }
+}
+const chunk = (a, n) => Array.from({length: Math.ceil(a.length / n)}, (_, i) => a.slice(i * n, i * n + n));
+
+function stockFiles(b) {
+  const d = dims(b.size).w, kindName = PRODUCTS[b.kind].name;
+  const design = b.kind === "metal" ? "Metal (tek renk kazıma)" : DESIGNS[b.design]?.name || "";
+  return [
+    {name: "QR-listesi.csv", data: csvText([["sira", "kod", "qr_baglanti", "tip", "olcu", "tasarim", "ust_yazi", "alt_yazi"],
+      ...b.codes.map((c, i) => [i + 1, c, tagLink(c), kindName, BADGE_SIZES[b.size], design, b.top, "OKUT • SAHİBİMİ ARA"])])},
+    {name: "OKUBENI.txt", data: `Tasma QR · "OKUT • SAHİBİMİ ARA" isimsiz rozet üretim paketi (${new Date(b.date).toLocaleDateString("tr-TR")})
+
+Adet      : ${b.codes.length}
+Tip       : ${kindName}
+Ölçü      : Ø${d} mm kulaklı yuvarlak rozet (kulak dahil yükseklik ${(d * 1.16).toFixed(1)} mm, halka deliği Ø${(d * .1).toFixed(1)} mm)
+Tasarım   : ${design}
+Üst yazı  : ${b.top}   Alt yazı: OKUT • SAHİBİMİ ARA
+Köpek adı : BASILMAZ (stok ürün)
+
+${b.kind === "metal" ? "Paslanmaz çelik, fiber lazer. Siyah alanlar kazınır (koyu markalama), kırmızı çizgiler kesim/kenar çizgisidir."
+  : "Alüminyum gövde, UV renkli baskı + şeffaf epoksi kubbe. Kırmızı çizgiler kesim çizgisidir, basılmaz."}
+
+ÖNEMLİ: Her rozetin QR kodu FARKLIDIR. ${b.kind}/ klasöründe dosya adı = rozet kodu.
+QR-listesi.csv'deki bağlantı, o rozetin QR'ının açtığı adrestir.
+Teslimden önce birkaç rozeti telefonla okutup doğru adresi açtığını kontrol ediniz.
+Rozetleri kod sırasıyla (QR-listesi.csv'deki sıra) ayrı poşetlere, halka (split ring) ile birlikte paketleyiniz;
+poşetin üstüne rozet kodunu yazınız/etiketleyiniz.
+`},
+    ...b.codes.map(c => ({name: `${b.kind}/${c}.svg`, data: badgeFileSvg(c, b.design, {link: tagLink(c), kind: b.kind, size: b.size, top: b.top})})),
+  ];
+}
+
+async function showStock(rows, newCount) {
+  const byCode = Object.fromEntries(rows.map(r => [r.code, r]));
+  const batches = loadBatches().map(b => ({...b, codes: b.codes.filter(c => byCode[c])})).filter(b => b.codes.length);
+  const f = stockForm, preview = {...f, design: f.kind === "metal" ? "klasik" : f.design};
+  show(`
+    ${tabsHtml(newCount)}
+    <div id="msg"></div>
+    <div class="stockwrap">
+      <form id="stf" class="card" novalidate>
+        <h2>OKUT • SAHİBİMİ ARA rozeti</h2>
+        <p class="hint">Köpek adı basılmayan, toplu üretilip stoktan (indirimli) satılan rozet. Her rozet ayrı bir koddur; alıcı QR'ı okutup
+          kutudan çıkan PIN kartıyla köpeğini bağlar. Burada oluşturduğunuz partinin fabrika dosyalarını, baskı PDF'ini ve PIN kartlarını indirirsiniz.</p>
+        <div class="row2">
+          <div><label for="st-n">Adet</label><input id="st-n" type="number" inputmode="numeric" min="1" max="500" value="${esc(f.n)}"></div>
+          <div><label for="st-kind">Rozet tipi</label><select id="st-kind" class="big">${Object.entries(PRODUCTS).map(([k, p]) =>
+            `<option value="${k}"${k === f.kind ? " selected" : ""}>${esc(p.name)}</option>`).join("")}</select></div>
+        </div>
+        <div class="row2">
+          <div><label for="st-size">Ölçü</label><select id="st-size" class="big">${Object.entries(BADGE_SIZES).map(([k, n]) =>
+            `<option value="${k}"${k === f.size ? " selected" : ""}>${esc(n)}</option>`).join("")}</select></div>
+          <div><label for="st-top">Üst yazı</label><select id="st-top" class="big">${STOCK_TOPS.map(t =>
+            `<option${t === f.top ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></div>
+        </div>
+        <div id="st-design-box"${f.kind === "metal" ? " hidden" : ""}><label for="st-design">Tasarım (renkli epoksi)</label>
+          <select id="st-design" class="big">${designOptions(f.design, false)}</select></div>
+        <button class="btn" id="st-make" type="submit">Partiyi oluştur</button>
+        <p class="hint">Kodlar veritabanında oluşturulur ve “verildi” olarak işaretlenir (Rozetler sekmesindeki verilecekler listesine karışmaz).</p>
+      </form>
+      <div class="card stockprev">
+        <h2>Önizleme</h2>
+        <div class="stockbig">${stockBadge("ÖRNEK", preview)}</div>
+        <p class="hint">Gerçek boyut (%100 ölçekle):</p>
+        ${stockBadge("ÖRNEK", preview)}
+      </div>
+    </div>
+    <h2>Partiler</h2>
+    ${batches.length ? "" : `<p>Henüz parti yok. Yukarıdan adet ve tipi seçip <b>Partiyi oluştur</b>'a basın.</p>`}
+    <div class="reqs">
+      ${batches.map((b, i) => {
+        const used = b.codes.filter(c => byCode[c].phone).length;
+        return `<div class="req" data-i="${i}">
+          <div>
+            <h3>${b.codes.length} × ${esc(PRODUCTS[b.kind].short)} · ${esc(BADGE_SIZES[b.size])}${b.kind === "metal" ? "" : ` · ${esc(DESIGNS[b.design]?.name || "")}`}</h3>
+            <div class="meta">${esc(new Date(b.date).toLocaleString("tr-TR"))} · üst yazı “${esc(b.top)}” · ${esc(b.codes[0])} … ${esc(b.codes[b.codes.length - 1])}
+              · <b>${used}</b> tanesi sahibine bağlandı</div>
+          </div>
+          <div class="act">
+            <button class="mini" data-act="zip" title="QR listesi (CSV), her rozetin SVG dosyası ve üretim notu. PIN içermez.">📦 Fabrika paketi (ZIP)</button>
+            <button class="mini alt" data-act="badges" title="Rozetler A4'e gerçek boyutta dizilir (kırmızı çizgi = kesim)">🖨 Rozet baskı PDF (A4)</button>
+            <button class="mini alt" data-act="pins" title="85×55 mm kartvizit ölçüsü, A4'e 10 kart">🔑 PIN kartları PDF</button>
+            <button class="mini ghost" data-act="pincsv" title="Yalnızca sizde kalsın, fabrikaya göndermeyin">PIN listesi (CSV)</button>
+            <button class="mini ghost" data-act="forget" title="Parti bu listeden kalkar; kodlar ve PIN'ler silinmez">Listeden kaldır</button>
+          </div>
+        </div>`;
+      }).join("")}
+    </div>
+    <p class="hint">Fabrikaya yalnızca <b>Fabrika paketi</b>'ni gönderin. PIN kartlarını kendiniz basıp her rozetin poşetine <b>aynı kodlu</b> kartı koyun.
+      Partiler bu tarayıcıda listelenir; başka cihazda göremezsiniz ama kodlar ve PIN'ler veritabanında durur (Rozetler › Verilmiş rozetler).</p>`, true);
+  bindTabs();
+  const $ = id => document.getElementById(id);
+  const read = () => {
+    stockForm = {n: Math.min(500, Math.max(1, parseInt($("st-n").value, 10) || 0)), kind: $("st-kind").value, size: $("st-size").value,
+      design: $("st-design").value, top: $("st-top").value};
+    const p = {...stockForm, design: stockForm.kind === "metal" ? "klasik" : stockForm.design};
+    $("st-design-box").hidden = stockForm.kind === "metal";
+    document.querySelectorAll(".stockprev .badgebox").forEach(el => { el.outerHTML = stockBadge("ÖRNEK", p); });
+  };
+  ["st-kind", "st-size", "st-design", "st-top"].forEach(id => $(id).onchange = read);
+  $("stf").onsubmit = async ev => {
+    ev.preventDefault(); read();
+    const btn = $("st-make"), n = stockForm.n;
+    if (!confirm(`${n} adet ${PRODUCTS[stockForm.kind].name} (${BADGE_SIZES[stockForm.size]}) için yeni kod oluşturulsun mu?`)) return;
+    btn.disabled = true;
+    try {
+      const before = new Set(rows.map(r => r.code));
+      for (let left = n; left > 0; left -= 100) await rpc("tasma_admin_add", {p_key: adminKey, p_count: Math.min(100, left)});
+      const fresh = (await rpc("tasma_admin_list", {p_key: adminKey})).filter(r => !before.has(r.code)).map(r => r.code);
+      if (!fresh.length) throw new Error("kod oluşmadı");
+      await setGiven(fresh, true);
+      saveBatches([{date: new Date().toISOString(), ...stockForm, design: stockForm.kind === "metal" ? "klasik" : stockForm.design, codes: fresh}, ...loadBatches()]);
+      await showAdmin();
+      toast(`${fresh.length} rozetlik parti oluşturuldu. Şimdi dosyaları indirin.`, 5000);
+    } catch (e) { btn.disabled = false; adminError("Parti oluşturulamadı: " + e.message); }
+  };
+  document.querySelector(".reqs").onclick = async ev => {
+    const btn = ev.target.closest("button[data-act]");
+    if (!btn) return;
+    const b = batches[btn.closest(".req").dataset.i], act = btn.dataset.act, name = batchName(b);
+    btn.disabled = true;
+    try {
+      if (act === "zip") {
+        downloadBlob(makeZip(stockFiles(b)), `${name}-fabrika.zip`);
+        toast("Fabrika paketi indirildi (PIN içermez).", 4000);
+      } else if (act === "pincsv") {
+        downloadBlob(new Blob([csvText([["sira", "kod", "pin", "qr_baglanti", "durum"],
+          ...b.codes.map((c, i) => [i + 1, c, byCode[c].pin, tagLink(c), byCode[c].phone ? "bağlandı" : "stokta"])])], {type: "text/csv"}), `${name}-PIN-listesi.csv`);
+        toast("PIN listesi indirildi. Bu dosyayı kimseyle paylaşmayın.", 5000);
+      } else if (act === "pins") {
+        const pdf = await pagesPdf(chunk(b.codes.map(c => byCode[c]), 10).map(p => `<div class="pinsheet">${p.map(pinCardHtml).join("")}</div>`), 3);
+        savePdfFile(pdf, `${name}-PIN-kartlari.pdf`);
+        toast("PIN kartları kaydedildi. %100 ölçekle basıp kesik çizgilerden kesin.", 5000);
+      } else if (act === "badges") {
+        const d = dims(b.size).w, h = d * 1.16, cols = Math.floor(193 / (d + 3)), per = cols * Math.floor(280 / (h + 3));
+        const pdf = await pagesPdf(chunk(b.codes, per).map(p => `<div class="badgesheet" style="grid-template-columns:repeat(${cols},${d}mm)">${
+          p.map(c => `<div>${stockBadge(c, b, true)}<small>${esc(c)}</small></div>`).join("")}</div>`), 5);
+        savePdfFile(pdf, `${name}-rozet-baski.pdf`);
+        toast("Rozet baskı PDF'i kaydedildi.", 4000);
+      } else if (act === "forget") {
+        if (!confirm("Parti listeden kaldırılsın mı? Kodlar ve PIN'ler silinmez.")) return;
+        saveBatches(loadBatches().filter(x => x.date !== b.date));
+        return showAdmin();
+      }
+    } catch (e) { document.querySelector(".toast")?.remove(); adminError("İşlem yapılamadı: " + e.message); }
+    finally { btn.disabled = false; }
   };
 }
 
