@@ -560,6 +560,27 @@ function layoutA4(pdf, shots) {
 // Tek rozet sayfası (matbaa / etiket yazıcısı): PIN kartı da sığsın
 const singlePage = size => { const {w, h} = dims(size); return {w: Math.max(w, 46), h: Math.max(h, 32)}; };
 
+// Sıkıştırmasız (store) ZIP: dış kütüphane gerektirmez. files: [{name, data: string | Uint8Array}]
+const CRC_TABLE = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC_TABLE[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function makeZip(files) {
+  const enc = new TextEncoder(), parts = [], central = [];
+  let offset = 0;
+  const u16 = v => [v & 255, (v >>> 8) & 255], u32 = v => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
+  for (const f of files) {
+    const name = enc.encode(f.name), data = typeof f.data === "string" ? enc.encode(f.data) : f.data, crc = crc32(data);
+    // sürüm, UTF-8 bayrağı (0x0800), yöntem 0 (store), saat/tarih 0
+    const common = [...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21), ...u32(crc), ...u32(data.length), ...u32(data.length), ...u16(name.length), ...u16(0)];
+    const local = new Uint8Array([...u32(0x04034b50), ...common]);
+    parts.push(local, name, data);
+    central.push(new Uint8Array([...u32(0x02014b50), ...u16(20), ...common, ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(offset)]), name);
+    offset += local.length + name.length + data.length;
+  }
+  const cdSize = central.reduce((n, p) => n + p.length, 0);
+  const end = new Uint8Array([...u32(0x06054b50), ...u16(0), ...u16(0), ...u16(files.length), ...u16(files.length), ...u32(cdSize), ...u32(offset), ...u16(0)]);
+  return new Blob([...parts, ...central, end], {type: "application/zip"});
+}
+
 function downloadBlob(blob, name) {
   const a = Object.assign(document.createElement("a"), {href: URL.createObjectURL(blob), download: name});
   document.body.append(a); a.click(); a.remove();
@@ -1397,6 +1418,7 @@ async function showAdmin() {
       <button class="btn" id="print">Listedekileri yazdır</button>
       <button class="btn" id="pdf">Listedekileri PDF kaydet</button>
       <button class="btn" id="add">10 rozet daha üret</button>
+      <button class="btn" id="factory" title="Fabrikaya toplu üretim için: QR listesi (CSV) ve her rozetin SVG dosyası">📦 Fabrika paketi (ZIP)</button>
     </div>
     <p class="noprint">Talep edene rozet verirken tasarımı seçip <b>Yazdır ve ver</b> ya da <b>PDF kaydet ve ver</b>'e basın; rozet verildi olarak işaretlenip bu listeden kalkar.
       Kişi QR'ı okutup köpeğinin adını, numarasını ve PIN'i girdiğinde rozet çalışmaya başlar.
@@ -1475,6 +1497,33 @@ async function showAdmin() {
       if (act === "mark") toast(`${code} verildi olarak işaretlendi.`);
     } catch (e) { adminError("İşlem yapılamadı: " + e.message); }
     finally { btn.disabled = false; }
+  };
+  // Toplu üretim paketi: listedeki rozetler için QR listesi ve metal/epoksi SVG'leri. PIN'ler pakete GİRMEZ (fabrika görmemeli).
+  $("factory").onclick = () => {
+    if (!list.length) return adminError("Listede rozet yok.");
+    const size = BADGE_SIZES[stickerSize] ? stickerSize : "y30", d = dims(size).w;
+    const cell = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const csv = "\ufeff" + [["sira", "kod", "qr_baglanti", "kopek_adi", "tasarim"].join(";"),
+      ...list.map((r, i) => [i + 1, r.code, tagLink(r.code), r.pet_name || "", DESIGNS[designOf[r.code]]?.name || ""].map(cell).join(";"))].join("\r\n");
+    const files = [
+      {name: "QR-listesi.csv", data: csv},
+      {name: "OKUBENI.txt", data: `Tasma QR toplu üretim paketi (${new Date().toLocaleDateString("tr-TR")})
+
+${list.length} rozet · Ø${d} mm kulaklı yuvarlak rozet (kulak dahil yükseklik ${(d * 1.16).toFixed(1)} mm)
+
+metal/  : paslanmaz çelik, fiber lazer. Siyah alanlar kazınır (koyu markalama), kırmızı çizgiler kesim/kenar çizgisidir.
+epoksi/ : alüminyum gövde, UV renkli baskı + şeffaf epoksi kubbe. Kırmızı çizgiler basılmaz.
+
+ÖNEMLİ: Her rozetin QR kodu FARKLIDIR. Dosya adı = rozet kodu. QR-listesi.csv'deki bağlantı, o rozetin QR'ının açtığı adrestir.
+Teslimden önce birkaç rozeti telefonla okutup doğru adresi açtığını kontrol ediniz.
+Halka (split ring) ile birlikte paketleyiniz.
+`},
+    ];
+    for (const r of list) for (const kind of ["metal", "epoksi"]) {
+      files.push({name: `${kind}/${r.code}.svg`, data: badgeFileSvg(r.code, designOf[r.code], {link: tagLink(r.code), name: r.pet_name || "", kind, size})});
+    }
+    downloadBlob(makeZip(files), `tasmaqr-fabrika-${list.length}-rozet-${size}.zip`);
+    toast(`${list.length} rozet için paket indirildi (${BADGE_SIZES[size]}). PIN kartlarını “Sadece PIN kartları” ile ayrıca basın.`, 6000);
   };
   $("add").onclick = async ev => {
     ev.target.disabled = true;

@@ -15,7 +15,7 @@ Köpeklerin tasmasına künye gibi takılan QR rozet. Rozeti okutan kişi köpe�
 - **Tasmaya takılan fiziksel rozet**: kulaklı (halka delikli) yuvarlak rozet, iki tip: renkli epoksi (UV baskı + epoksi kubbe) ve metal (paslanmaz çelik, lazer kazıma); Ø25/30/35 mm. Tipe göre fiyat yönetimden ayarlanır
 - **Üretim dosyası**: sipariş başına gerçek mm ölçülü SVG (kırmızı = kesim, metalde siyah = kazıma) ve epoksi için PDF; baskıcıya hazır e-posta metni
 - **Hazır rozet talep formu** (rozet tipi, tasarım, ölçü) ve **rozet siparişi** (IBAN ile ödeme, Telegram/e-posta bildirimi)
-- **Yönetim** (`?admin`): PIN kartlı rozet üretme/yazdırma, talepler, siparişler, satış ayarları
+- **Yönetim** (`?admin`): PIN kartlı rozet üretme/yazdırma, **fabrika paketi** (listedeki rozetler için QR listesi CSV + metal/epoksi SVG, tek ZIP; PIN içermez), talepler, siparişler, satış ayarları
 
 ## Android uygulaması
 
