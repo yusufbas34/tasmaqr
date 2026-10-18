@@ -1,6 +1,6 @@
 # Tasma QR · 3D baskı gövde + QR etiket
 
-Köpek tasmasına halkayla takılan yuvarlak rozet gövdesi. Önündeki çukura QR etiket yapıştırılır, üstü epoksiyle kaplanır.
+Evcil hayvan tasmasına halkayla takılan yuvarlak rozet gövdesi. Önündeki çukura QR etiket yapıştırılır, üstü epoksiyle kaplanır.
 
 ## Dosyalar
 

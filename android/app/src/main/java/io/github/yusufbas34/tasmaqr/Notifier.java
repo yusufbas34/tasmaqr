@@ -104,7 +104,7 @@ public class Notifier extends JobService {
     /** Rozetlerim'deki "Deneme bildirimi" butonu */
     static boolean showTest(Context ctx) {
         return post(ctx, CH_UPDATE, 999, "Bildirimler çalışıyor ✓",
-                "Köpeğiniz için konum gönderildiğinde, kayıp modundayken rozet okutulduğunda ve siparişiniz ilerlediğinde böyle haber vereceğiz.",
+                "Evcil hayvanınız için konum gönderildiğinde, kayıp modundayken rozet okutulduğunda ve siparişiniz ilerlediğinde böyle haber vereceğiz.",
                 open(ctx, null));
     }
 
@@ -124,7 +124,7 @@ public class Notifier extends JobService {
         for (int i = 0; i < rows.length(); i++) {
             JSONObject r = rows.getJSONObject(i);
             String code = r.optString("code"), name = r.isNull("pet_name") ? "" : r.optString("pet_name");
-            String who = name.isEmpty() ? "Köpeğiniz" : name;
+            String who = name.isEmpty() ? "Evcil hayvanınız" : name;
             JSONArray sightings = r.optJSONArray("sightings");
             String lastSighting = sightings != null && sightings.length() > 0 ? sightings.getJSONObject(0).optString("at") : "";
             long total = r.optLong("total");
@@ -224,7 +224,7 @@ public class Notifier extends JobService {
     private static boolean post(Context ctx, String channel, int id, String title, String text, Intent tap) {
         NotificationManager nm = ctx.getSystemService(NotificationManager.class);
         if (nm == null || !enabled(ctx)) return false;
-        nm.createNotificationChannel(new NotificationChannel(CH_FOUND, "Köpeğim bulundu (konum, okutma)", NotificationManager.IMPORTANCE_HIGH));
+        nm.createNotificationChannel(new NotificationChannel(CH_FOUND, "Dostum bulundu (konum, okutma)", NotificationManager.IMPORTANCE_HIGH));
         nm.createNotificationChannel(new NotificationChannel(CH_ORDERS, "Sipariş durumu", NotificationManager.IMPORTANCE_DEFAULT));
         nm.createNotificationChannel(new NotificationChannel(CH_UPDATE, "Uygulama", NotificationManager.IMPORTANCE_DEFAULT));
         PendingIntent pi = PendingIntent.getActivity(ctx, id, tap, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);

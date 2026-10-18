@@ -96,7 +96,7 @@ Sürüm numarası her derlemede otomatik artar, bu yüzden her güncellemede yen
    - Uygulama erişimi: "Tüm işlevler özel erişim olmadan kullanılabilir"
    - Reklamlar: Hayır
    - İçerik derecelendirmesi anketi: Kategori "Yardımcı program / üretkenlik". Şiddet, cinsellik, kumar vb. sorulara hep Hayır. Kullanıcılar birbiriyle iletişim kurabilir mi sorusuna: Hayır (rozeti okutan, telefonun kendi arama/SMS/WhatsApp uygulamasıyla arar; uygulamada sohbet yok).
-   - Hedef kitle: 18 yaş ve üzeri (köpek sahipleri)
+   - Hedef kitle: 18 yaş ve üzeri (evcil hayvan sahipleri)
    - Haber uygulaması: Hayır
    - Veri güvenliği: 6. bölüm
    - Devlet uygulaması: Hayır
@@ -124,7 +124,7 @@ Araç QR'ın testi bu uygulamaya sayılmaz; aynı testçi grubunu yeniden kullan
 
 Pratik yol:
 
-1. Araç QR için açtığınız Google Grubunu (`ara-qr-test`) kullanın; aynı kişiler iki uygulamayı da test eder. 15-20 kişi olsun; düşen olursa sayı 12'nin altına inmesin. Köpek sahibi arkadaşlar en iyi testçidir.
+1. Araç QR için açtığınız Google Grubunu (`ara-qr-test`) kullanın; aynı kişiler iki uygulamayı da test eder. 15-20 kişi olsun; düşen olursa sayı 12'nin altına inmesin. Kedi/köpek sahibi arkadaşlar en iyi testçidir.
 2. Kapalı test kanalında "Testçiler" sekmesine bu grubu yazın.
 3. Console'un verdiği **katılım bağlantısını** (opt-in link) WhatsApp'tan paylaşın. Her kişi şunları yapar:
    - Bağlantıyı Android telefonunda, gruba eklenen Gmail hesabıyla açar ve "Test kullanıcısı ol"a basar.
@@ -141,7 +141,7 @@ Pratik yol:
    - Rozet silme ve Tüm verilerimi sil
 5. Bu sürede en az bir güncelleme yayınlamanız iyi olur. Google "aktif geliştirme" görmek ister; gelen geri bildirimlere göre küçük bir düzeltme yeterli.
 6. 14 gün dolunca Console › Panel'de "Üretim erişimi başvurusu" açılır. Sorulara açık cevap verin:
-   - Testi nasıl yaptınız: köpek sahibi arkadaş grubu, WhatsApp
+   - Testi nasıl yaptınız: kedi ve köpek sahibi arkadaş grubu, WhatsApp
    - Ne geri bildirim aldınız
    - Ne değiştirdiniz
 
@@ -169,14 +169,14 @@ Toplanan veri türleri:
 | Kişisel bilgi › E-posta | Evet (yalnızca siparişte) | Hayır | İsteğe bağlı | Uygulama işlevi, iletişim |
 | Kişisel bilgi › Telefon numarası | Evet | Hayır | Zorunlu (uygulamanın amacı) | Uygulama işlevi |
 | Kişisel bilgi › Adres | Evet (yalnızca siparişte) | Hayır | İsteğe bağlı | Uygulama işlevi (kargo) |
-| Uygulama etkinliği › Diğer kullanıcı tarafından oluşturulan içerik (köpeğin adı, bulan kişiye not, ödül notu) | Evet | Hayır | İsteğe bağlı | Uygulama işlevi |
+| Uygulama etkinliği › Diğer kullanıcı tarafından oluşturulan içerik (hayvanın adı, bulan kişiye not, ödül notu) | Evet | Hayır | İsteğe bağlı | Uygulama işlevi |
 | Uygulama etkinliği › Diğer işlemler (okutma zamanı) | Evet | Hayır | Zorunlu | Uygulama işlevi (okutma sayacı) |
 | Cihaz veya diğer kimlikler | Evet (uygulamanın ürettiği rastgele kimlik) | Hayır | Zorunlu | Dolandırıcılığı önleme, güvenlik |
 
 \* Play'in tanımında hizmet sağlayıcıya (Supabase, Telegram, e-posta servisi, üretim ve kargo firması) sizin adınıza
 veri vermek "paylaşma" sayılmaz. Bu yüzden "Paylaşılıyor" sütunu Hayır.
 
-**Konum hakkında:** Uygulama konum izni istemez ve telefonunuzun konumunu hiçbir zaman göndermez. Konumu, köpeği
+**Konum hakkında:** Uygulama konum izni istemez ve telefonunuzun konumunu hiçbir zaman göndermez. Konumu, hayvanı
 bulan kişi *web sayfasında* kendi isteğiyle gönderir; uygulama yalnızca sahibine bunu gösterir. Bu yüzden formda
 **Konum: toplanmıyor** cevabı doğrudur. İnceleme ekibi sorarsa bu açıklamayı yazın. İsterseniz temkinli olmak için
 "Konum › Kesin konum: toplanıyor, isteğe bağlı, uygulama işlevi" olarak da beyan edebilirsiniz; ikisi de kural dışı değildir.
@@ -185,20 +185,20 @@ Kişiler, fotoğraf, finans, sağlık, mesaj, dosya, takvim, web geçmişi, rekl
 
 ## 7. Mağaza metinleri
 
-**Uygulama adı** (en fazla 30): `Tasma QR: Köpeğim Kayboldu`
+**Uygulama adı** (en fazla 30): `Tasma QR: Evcil Hayvan Künyesi`
 
-**Kısa açıklama** (en fazla 80): `Tasmaya takılan QR rozet: bulan kişi tek dokunuşla sizi arasın, konum göndersin.`
+**Kısa açıklama** (en fazla 80): `Kedi, köpek ve tüm dostlara QR künye: bulan kişi sizi tek dokunuşla arasın.`
 
 **Tam açıklama:**
 
 ```
-Köpeğiniz bir anda gözden kaybolursa onu bulan kişi size nasıl ulaşacak? Tasma QR ile köpeğinizin tasmasına künye gibi takılan bir QR rozet olur. Bulan kişi rozeti telefon kamerasıyla okutur; köpeğinizin adını ve notunuzu görür, sizi tek dokunuşla arar ya da WhatsApp'tan yazar. Uygulama indirmesine gerek yoktur.
+Kediniz, köpeğiniz ya da başka bir dostunuz bir anda gözden kaybolursa onu bulan kişi size nasıl ulaşacak? Tasma QR ile evcil hayvanınızın tasmasına künye gibi takılan bir QR rozet olur. Bulan kişi rozeti telefon kamerasıyla okutur; evcil hayvanınızın adını ve notunuzu görür, sizi tek dokunuşla arar ya da WhatsApp'tan yazar. Uygulama indirmesine gerek yoktur.
 
 ★ Konumunu gönderir, size bildirim gelir
 Bulan kişi "Konumumu gönder"e basınca bulunduğu yer harita bağlantısıyla size iletilir. Uygulama size hemen bildirim gösterir; son konumları rozet sayfanızda görürsünüz.
 
 ★ Kayıp modu ve ödül
-Köpeğiniz kaybolunca tek dokunuşla kayıp modunu açın. Rozeti okutan herkes kırmızı "KAYIP!" uyarısını ve ödül notunuzu görür; rozet her okutulduğunda size haber veririz.
+Evcil hayvanınız kaybolunca tek dokunuşla kayıp modunu açın. Rozeti okutan herkes kırmızı "KAYIP!" uyarısını ve ödül notunuzu görür; rozet her okutulduğunda size haber veririz.
 
 ★ Numaranız rozette yazmaz
 Yoldan geçen herkes numaranızı göremez. Numaranız güvenli sunucuda durur; PIN'inizle istediğiniz an değiştirirsiniz, rozeti yeniden yaptırmanız gerekmez.
@@ -207,15 +207,15 @@ Yoldan geçen herkes numaranızı göremez. Numaranız güvenli sunucuda durur; 
 "Kalp ilacı kullanıyor", "çekingendir, yavaş yaklaşın" gibi bilgileri ve yedek bir numarayı bulan kişi görür.
 
 ★ Tasarımını seç, rozetin kapına gelsin
-11 tasarım, Ø25'ten Ø35 mm'ye ölçüler. Ücretsiz oluşturup evde yazdırın ya da renkli epoksi veya paslanmaz çelik lazer rozetinizi sipariş edin; halkasıyla gelir, tasmanın D halkasına takarsınız.
+12 tasarım, Ø25'ten Ø35 mm'ye ölçüler. Ücretsiz oluşturup evde yazdırın ya da renkli epoksi veya paslanmaz çelik lazer rozetinizi sipariş edin; halkasıyla gelir, tasmanın D halkasına takarsınız.
 
 Hesap açmanız gerekmez. Reklam yok. Verilerinizi istediğiniz an uygulamadan silebilirsiniz.
 
-Not: Tasma QR mikroçipin yerine geçmez; köpeğinizi bulan kişinin size dakikalar içinde ulaşabilmesi için ek bir önlemdir.
+Not: Tasma QR mikroçipin yerine geçmez; evcil hayvanınızı bulan kişinin size dakikalar içinde ulaşabilmesi için ek bir önlemdir.
 ```
 
 **Kategori:** Evcil hayvanlar için uygun bir kategori yok; **Yaşam Tarzı (Lifestyle)** önerilir.
-**Etiketler:** köpek, evcil hayvan, kayıp, QR kod
+**Etiketler:** evcil hayvan, köpek, kedi, kayıp, QR kod
 **İletişim e-postası:** Play bu adresi mağazada herkese gösterir; gizlilik sayfası silme talepleri için bu adresi gösteriyor.
 **Web sitesi:** `https://yusufbas34.github.io/tasmaqr/`
 
@@ -237,35 +237,35 @@ Katılım bağlantısı, kapalı test sürümü yayınlanınca çalışmaya baş
 ### WhatsApp davet mesajı
 
 ```
-Selam! 🐾 Araç QR'dan sonra köpekler için de bir uygulama yaptım: Tasma QR. Köpeğin tasmasına QR rozet takılıyor; köpek kaybolursa bulan kişi rozeti okutup sahibini tek dokunuşla arıyor, istersen konumunu da gönderiyor.
+Selam! 🐾 Araç QR'dan sonra evcil hayvanlar için de bir uygulama yaptım: Tasma QR. Hayvanın tasmasına QR rozet takılıyor; evcil hayvan kaybolursa bulan kişi rozeti okutup sahibini tek dokunuşla arıyor, istersen konumunu da gönderiyor.
 
 Bunun da Google Play'e çıkması için 14 gün test eden 12 kişi lazım. Araç QR testine katıldıysan grup aynı, sadece test bağlantısına dokunup kurman yeterli:
 👉 https://yusufbas34.github.io/tasmaqr/test.html
 
-Köpeğin olmasa da olur. Çok teşekkürler! 🙏
+Hayvanın olmasa da olur. Çok teşekkürler! 🙏
 ```
 
 ### Güncelleme sürüm notu (yeni düzen)
 
-- **Türkçe:** `Yeni düzen: Rozetlerim, Siparişlerim ve Profilim sekmeleri; teslimat bilgilerini kaydetme, arkadaşına öner.`
-- **English:** `New layout: My tags, My orders and Profile tabs; saved delivery details, share with friends.`
+- **Türkçe:** `Artık kedi, köpek ve tüm evcil hayvanlar için. Yeni Kedi yüzü tasarımı; Rozetlerim, Siparişlerim ve Profilim sekmeleri.`
+- **English:** `Now for cats, dogs and all pets. New Cat face design; My tags, My orders and Profile tabs.`
 
 Ekran görüntüleri yeni düzene göre yenilendi (`android/store/screen-5`, `screen-6`, `screen-7`). Mağaza girişinde bu üçünü yenileriyle değiştirin.
 
 ### Sürüm notu (kapalı test ve ilk yayın)
 
-- **Türkçe:** `İlk sürüm: QR rozet oluşturma, kayıp modu, konum ve okutma bildirimi, 11 tasarım, epoksi ve metal rozet siparişi.`
-- **English:** `First release: create QR pet tags, lost mode, location and scan notifications, 11 designs, epoxy and metal tag orders.`
+- **Türkçe:** `İlk sürüm: QR rozet oluşturma, kayıp modu, konum ve okutma bildirimi, 12 tasarım, epoksi ve metal rozet siparişi.`
+- **English:** `First release: create QR pet tags, lost mode, location and scan notifications, 12 designs, epoxy and metal tag orders.`
 
 ### Üretim erişimi başvurusu (14 gün sonra) cevap taslakları
 Play Console sorularına kendi deneyiminizle tamamlayın; testte gerçekten olanları yazın.
 
-1. **Testçileri nasıl buldunuz?** `Aile, arkadaşlar ve çevremdeki köpek sahipleri; WhatsApp üzerinden Google Grubu ile davet ettim.`
-2. **Testçi bulmak ne kadar kolaydı?** `Kolaydı; köpek sahipleri kaybolma korkusunu yakından biliyor ve uygulamayı denemek istedi.`
+1. **Testçileri nasıl buldunuz?** `Aile, arkadaşlar ve çevremdeki evcil hayvan sahipleri; WhatsApp üzerinden Google Grubu ile davet ettim.`
+2. **Testçi bulmak ne kadar kolaydı?** `Kolaydı; evcil hayvan sahipleri kaybolma korkusunu yakından biliyor ve uygulamayı denemek istedi.`
 3. **Testçiler uygulamayı nasıl kullandı?** `Rozet oluşturdular, başka telefonla okutup aramayı ve WhatsApp'ı, konum göndermeyi, kayıp modunu, bildirimleri, bilgi düzenlemeyi, PDF paylaşmayı ve rozet silmeyi test ettiler.`
 4. **Hangi geri bildirimleri aldınız, nasıl topladınız?** `WhatsApp üzerinden topladım. (Buraya gerçek örnekler.)`
 5. **Geri bildirime göre ne değiştirdiniz?** `(Buraya yapılan düzeltmeler; test sırasında yayınlanan güncellemeleri yazın.)`
-6. **Uygulama kime yönelik, ne değer sağlıyor?** `Türkiye'deki köpek sahipleri. Köpek kaybolduğunda onu bulan kişinin, sahibinin numarası künyede yazmadan, sahibine dakikalar içinde ulaşmasını ve konum göndermesini sağlar.`
+6. **Uygulama kime yönelik, ne değer sağlıyor?** `Türkiye'deki evcil hayvan sahipleri. Kedi ya da köpek kaybolduğunda onu bulan kişinin, sahibinin numarası künyede yazmadan, sahibine dakikalar içinde ulaşmasını ve konum göndermesini sağlar.`
 7. **İlk yıl beklenen indirme:** `1.000 – 10.000`
 8. **Yayına hazır olduğuna nasıl karar verdiniz?** `14 günlük testte çökme ya da kritik hata kalmadı, testçilerin bildirdiği sorunlar düzeltildi.`
 

@@ -683,7 +683,7 @@ begin
     'sent', public.tasma_notify('Tasma QR: deneme bildirimi', 'Bildirimler çalışıyor. Yeni ödeme bildirimleri buraya gelecek.'));
 end $$;
 
--- Siparişler, basılacak rozetteki köpek adıyla birlikte
+-- Siparişler, basılacak rozetteki hayvan adıyla birlikte
 create or replace function public.tasma_admin_orders(p_key text)
 returns json
 language plpgsql security definer set search_path = public

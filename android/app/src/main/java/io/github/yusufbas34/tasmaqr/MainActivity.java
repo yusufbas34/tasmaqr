@@ -261,7 +261,7 @@ public class MainActivity extends Activity {
             Notifier.syncOrders(MainActivity.this, json);
         }
 
-        /** Rozetler (kod, PIN, köpeğin adı) değişince web arayüzü bildirir: konum ve okutma kontrolü bunlara bakar. */
+        /** Rozetler (kod, PIN, hayvanın adı) değişince web arayüzü bildirir: konum ve okutma kontrolü bunlara bakar. */
         @JavascriptInterface
         public void syncTags(String json) {
             Notifier.syncTags(MainActivity.this, json);

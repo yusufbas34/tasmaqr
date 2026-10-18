@@ -36,6 +36,12 @@ const ICONS = {
     `<ellipse cx="20" cy="24.5" rx="7" ry="5.5" fill="#f1d3b0"/><circle cx="15" cy="16.5" r="2.1" fill="#222"/><circle cx="25" cy="16.5" r="2.1" fill="#222"/>` +
     `<ellipse cx="20" cy="21.5" rx="2.8" ry="1.9" fill="#222"/><path d="M20 23.4v2.2M17 26.4q3 2.2 6 0" stroke="#222" stroke-width="1" fill="none" stroke-linecap="round"/>` +
     `<path d="M18.8 27.4q1.2 4.2 2.4 0z" fill="#e8607a"/>`},
+  cat: {vb: "0 0 40 34", body: () => `<path d="M8 15L7 2l10 7zM32 15l1-13-10 7z" fill="#5d5f6e"/><path d="M9.5 11.5L9 5l5 3.6zM30.5 11.5L31 5l-5 3.6z" fill="#f2a7b8"/>` +
+    `<ellipse cx="20" cy="19" rx="13" ry="12" fill="#7b7e8f"/><path d="M14 9q6 3 12 0" stroke="#5d5f6e" stroke-width="1.6" fill="none"/>` +
+    `<ellipse cx="20" cy="25" rx="6.5" ry="4.6" fill="#e9e6ef"/>` +
+    `<path d="M11.8 17.6q3.4-3 6.2 0-3.1 2.6-6.2 0zM22 17.6q3.4-3 6.2 0-3.1 2.6-6.2 0z" fill="#9ccc3c"/><ellipse cx="14.9" cy="17.6" rx=".8" ry="1.6" fill="#111"/><ellipse cx="25.1" cy="17.6" rx=".8" ry="1.6" fill="#111"/>` +
+    `<path d="M18.4 22.2h3.2L20 24z" fill="#e8607a"/><path d="M20 24v1.6M17.6 26.6q2.4 1.6 4.8 0" stroke="#333" stroke-width=".9" fill="none" stroke-linecap="round"/>` +
+    `<path d="M3 21.5l9-1.2M3.5 25.5l8.6-2.4M37 21.5l-9-1.2M36.5 25.5l-8.6-2.4" stroke="#333" stroke-width=".7" stroke-linecap="round"/>`},
 };
 const icon = (name, color, attrs = "") => {
   const i = ICONS[name] || ICONS.paw;
@@ -51,6 +57,7 @@ const DESIGNS = {
   sari:    {name: "Sarı (çok görünür)", ring: "#ffd400", ink: "#111", accent: "#111", icon: "paw", side: "paw", top: "BENİ BULDUN!"},
   kemik:   {name: "Kemik", ring: "#7a4a24", ink: "#fff6e8", accent: "#7a4a24", icon: "bone", side: "bone", top: "SAHİBİMİ ARA"},
   kopek:   {name: "Köpek yüzü", ring: "#c98b4f", ink: "#2a1a10", accent: "#7a4a24", icon: "dog", side: "paw", top: "HAV HAV! OKUT"},
+  kedi:    {name: "Kedi yüzü", ring: "#8a6fb3", ink: "#fff", accent: "#4a3a6b", icon: "cat", side: "paw", top: "MİYAV! OKUT"},
   yesil:   {name: "Orman yeşili", ring: "#1f7a4a", ink: "#fff", accent: "#1f7a4a", icon: "bone", side: "paw", top: "BENİ BULDUN!"},
   pembe:   {name: "Pembe kalp", ring: "#e05a8a", ink: "#fff", accent: "#c2185b", icon: "heart", side: "heart", top: "BENİ BULDUN!"},
   gece:    {name: "Gece (koyu)", ring: "#0d1530", ink: "#5ef2ff", accent: "#0d1530", icon: "star", side: "star", top: "BENİ BULDUN!"},
@@ -63,7 +70,7 @@ const sideColor = D => D.ring === "#fff" ? "#111" : D.ink;
 
 let tagUid = 0;
 
-// Yuvarlak rozet: tek SVG. Üst yayda köpeğin adı, alt yayda “OKUT · SAHİBİMİ ARA”, ortada QR ve kod.
+// Yuvarlak rozet: tek SVG. Üst yayda hayvanın adı, alt yayda “OKUT · SAHİBİMİ ARA”, ortada QR ve kod.
 function roundTagSvg(code, D, link, name) {
   const id = "tq" + (++tagUid), top = name ? upTR(name) : D.top;
   const fsTop = Math.min(11.5, 104 / (top.length * .58)).toFixed(2);
@@ -94,7 +101,7 @@ function rectTagHtml(code, D, link, name) {
     </div>`;
 }
 
-// Tasarım metinleri sabit; köpek adı ve kod kaçışlanır.
+// Tasarım metinleri sabit; hayvanın adı ve kod kaçışlanır.
 function tagHtml(code, design, {link = tagLink(code), name = "", round = true} = {}) {
   const d = DESIGNS[design] ? design : "klasik", D = DESIGNS[d];
   const vars = `--ring:${D.ring};--ink:${D.ink};--accent:${D.accent};--line:${D.line || D.ring}`;
@@ -109,10 +116,10 @@ const PRODUCTS = {
   epoksi: {name: "Renkli epoksi rozet", short: "Epoksi", desc: "Alüminyum gövde, UV renkli baskı, üstü şeffaf epoksi kubbe. Seçtiğiniz tasarım birebir basılır; su ve çizilmeye dayanıklı."},
   metal:  {name: "Metal lazer rozet", short: "Metal", desc: "Paslanmaz çelik, QR ve ad lazerle kazınır. Solmaz, paslanmaz; en dayanıklı seçenek. Tek renk (metal üzerine koyu kazıma)."},
 };
-const BADGE_SIZES = {"y25": "Ø25 mm (minik ırk, kedi)", "y30": "Ø30 mm (küçük-orta ırk)", "y35": "Ø35 mm (orta-büyük ırk)"};
+const BADGE_SIZES = {"y25": "Ø25 mm (kedi, minik ırk köpek)", "y30": "Ø30 mm (küçük-orta boy)", "y35": "Ø35 mm (orta-büyük boy)"};
 const TAB = 16; // kulak yüksekliği (birim); gerçek ölçü = çap × 0,16
 
-// top: üst yazıyı zorlar (isimsiz stok rozet); verilmezse köpeğin adı, ad da yoksa tasarımın yazısı
+// top: üst yazıyı zorlar (isimsiz stok rozet); verilmezse hayvanın adı, ad da yoksa tasarımın yazısı
 function badgeSvg(code, design, {link = tagLink(code), name = "", kind = "epoksi", file = false, top: topText = ""} = {}) {
   const id = "tb" + (++tagUid), metal = kind === "metal";
   const D = metal ? {ring: "none", ink: "#2b3038", accent: "#2b3038", icon: "paw", side: "paw", top: "BENİ BULDUN!"} : DESIGNS[DESIGNS[design] ? design : "klasik"];
