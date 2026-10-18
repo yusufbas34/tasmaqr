@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D Baskı Rozet</title>
+<link rel="stylesheet" href="../../shared/fonts.css">
+<link rel="stylesheet" href="../../shared/tag.css">
+<script src="../../shared/vendor/qrcode.js"></script>
+<script src="../../shared/tag.js"></script>
+<style>
+:root{--bg:#f6f1ea;--card:#fff;--ink:#1d2330;--muted:#5d6472;--line:#ddd3c6;--band:#b8501a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15181e;--card:#1f232b;--ink:#eef0f4;--muted:#a3a9b5;--line:#343a45;--band:#f08a4b}}
+:root[data-theme="dark"]{--bg:#15181e;--card:#1f232b;--ink:#eef0f4;--muted:#a3a9b5;--line:#343a45;--band:#f08a4b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Barlow",system-ui,sans-serif}
+main{max-width:1000px;margin:0 auto;padding:24px 16px 60px}
+h1{font-family:"Barlow Condensed",sans-serif;font-size:34px;line-height:1.1;margin:0 0 6px}
+h2{font-family:"Barlow Condensed",sans-serif;font-size:24px;margin:28px 0 10px}
+.lead{color:var(--muted);margin:0 0 18px;max-width:720px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.colors{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.colors figure{margin:0;text-align:center}.colors svg.body{width:100%;max-width:150px;height:auto}
+.colors figcaption{font-weight:700}.colors small{display:block;color:var(--muted);font-weight:400}
+@media (max-width:640px){.colors{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.real{display:flex;gap:6mm;flex-wrap:wrap;align-items:flex-end;margin-top:14px}
+.dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.dl a{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--ink);text-decoration:none}
+.dl a b{color:var(--band)}.dl a span{display:block;color:var(--muted);font-size:14px}
+ol.steps li{margin-bottom:6px}
+table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;margin-right:6px}
+.form{display:grid;grid-template-columns:200px minmax(0,1fr);gap:10px 14px;align-items:start}
+@media (max-width:640px){.form{grid-template-columns:1fr}}
+select,textarea,button{font:inherit}select,textarea{width:100%;padding:9px;border:2px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+button{background:var(--band);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-weight:700;cursor:pointer}
+.hint{color:var(--muted);font-size:14px}
+.sheetwrap{overflow-x:auto;margin-top:14px}
+.sheet{width:210mm;min-height:297mm;background:#fff;padding:10mm;display:flex;flex-wrap:wrap;gap:3mm;align-content:flex-start}
+.sheet .st{width:var(--sd);height:var(--sd)}.sheet .st .sticker{width:100%;height:100%}
+@media print{
+  @page{size:A4;margin:0}
+  body{background:#fff}.noprint{display:none!important}main{padding:0;max-width:none}.sheetwrap{margin:0;overflow:visible}
+  .sheet{page-break-after:always}
+}
+</style>
+</head>
+<body>
+<main>
+  <section class="noprint">
+    <h1>3D baskı gövde + QR etiket</h1>
+    <p class="lead">Rozetin gövdesi 3D yazıcıda basılır. Önündeki çukura su geçirmez QR etiket yapıştırılır, üstüne şeffaf epoksi dökülür.
+      QR'ı yazıcı değil etiket taşıdığı için her zaman net okunur. Aynı gövde 5 renkte basılır, etiketin rengi gövdeye uyar.</p>
+    <div class="card">
+      <div class="colors" id="colors"></div>
+      <p class="hint">Gerçek boyut (%100 ölçekte): Ø30 ve Ø35 mm gövde</p>
+      <div class="real" id="real"></div>
+    </div>
+
+    <h2>Yazıcıya verilecek dosyalar</h2>
+    <div class="dl">
+      <a href="tasmaqr-5-renk-35mm.3mf" download><b>5 renk tabla · Ø35 (3MF)</b><span>Bambu Studio / PrusaSlicer / Orca'da açılır; 5 gövde renkleriyle tek tablada</span></a>
+      <a href="tasmaqr-5-renk-30mm.3mf" download><b>5 renk tabla · Ø30 (3MF)</b><span>Küçük ırklar için</span></a>
+      <a href="govde-35mm.stl" download><b>Gövde · Ø35 (STL)</b><span>35 × 42,6 × 4 mm · ~4,2 g PETG · etiket Ø30</span></a>
+      <a href="govde-30mm.stl" download><b>Gövde · Ø30 (STL)</b><span>30 × 37,6 × 4 mm · ~3,2 g PETG · etiket Ø25</span></a>
+      <a href="etiket-ornek-35mm.pdf" download><b>Örnek etiket sayfası · Ø30 (PDF)</b><span>Ø35 gövdeye: 5 renkten 8'er etiket, A4</span></a>
+      <a href="etiket-ornek-30mm.pdf" download><b>Örnek etiket sayfası · Ø25 (PDF)</b><span>Ø30 gövdeye: 5 renkten 12'şer etiket, A4</span></a>
+      <a href="OKUBENI.md"><b>Baskı ve montaj notu</b><span>Yazıcıya / baskı servisine gönderin</span></a>
+    </div>
+
+    <h2>Renkler</h2>
+    <div class="card"><table id="ctable"><tr><th>Renk</th><th>Filament (PETG)</th><th>Etiket tasarımı</th></tr></table></div>
+
+    <h2>Nasıl yapılır</h2>
+    <div class="card">
+      <ol class="steps">
+        <li><b>Gövde:</b> 3MF dosyasını açıp her gövdeye kendi rengindeki filamenti atayın. Malzeme PETG ya da ASA olsun (PLA suda ve güneşte bozulur).
+          0,2 mm katman, 4 duvar, %100 doluluk. Çukurlu yüz yukarı bakar, destek gerekmez.</li>
+        <li><b>Etiket:</b> Aşağıdan etiket sayfasını su geçirmez vinile (lazer ya da mürekkep püskürtmeli yazıcı vinili) %100 ölçekle basın, üstüne şeffaf laminasyon yapıştırın, daireleri kesin.</li>
+        <li><b>Montaj:</b> Etiketi gövdenin çukuruna aynı renkteki gövdeye yapıştırın. Üstüne çukuru dolduracak kadar (yaklaşık 0,8 mm) UV reçine ya da 2 bileşenli epoksi damlatıp kürleyin.</li>
+        <li><b>Kontrol:</b> Her rozeti telefonla okutun, sonra halkayı (split ring) takıp paketleyin. PIN kartını aynı kodlu poşete koyun.</li>
+      </ol>
+    </div>
+
+    <h2>Etiket sayfası</h2>
+    <div class="card">
+      <div class="form">
+        <label for="size">Gövde ölçüsü</label>
+        <select id="size"><option value="35">Ø35 gövde · Ø30 etiket (A4'e 40)</option><option value="30">Ø30 gövde · Ø25 etiket (A4'e 60)</option></select>
+        <label for="codes">Rozet kodları <span class="hint">(isteğe bağlı)</span></label>
+        <div>
+          <textarea id="codes" rows="4" placeholder="K25A6X4E&#10;K2FAE897&#10;…"></textarea>
+          <p class="hint">Yönetim › Sahibimi Ara (stok) › PIN listesi ya da QR listesi dosyasındaki kodları yapıştırın; kodlar sırayla 5 renge bölünür
+            (ilk beşte biri lacivert, ikinci beşte biri turuncu…). Boş bırakırsanız sitenin ana sayfasını açan örnek etiketler çıkar.</p>
+        </div>
+      </div>
+      <p><button id="print">Etiket sayfasını yazdır</button> <span class="hint">Yazdırırken ölçek %100 / Gerçek boyut, kenar boşluğu yok.</span></p>
+    </div>
+  </section>
+  <div class="sheetwrap" id="sheets"></div>
+</main>
+<script>
+const SITE_URL = "https://yusufbas34.github.io/tasmaqr/";
+const tagLink = code => SITE_URL + "?k=" + encodeURIComponent(code);
+const COLORS = [
+  {key: "klasik", name: "Lacivert", hex: "#163A7A", fil: "Lacivert / koyu mavi"},
+  {key: "turuncu", name: "Turuncu", hex: "#E8742A", fil: "Turuncu"},
+  {key: "kirmizi", name: "Kırmızı", hex: "#C62828", fil: "Kırmızı"},
+  {key: "yesil", name: "Yeşil", hex: "#1F7A4A", fil: "Koyu yeşil"},
+  {key: "pembe", name: "Pembe", hex: "#E05A8A", fil: "Pembe"},
+];
+const TOP = "SAHİBİMİ ARA", RIM = 2.2, CLEAR = .3;
+const sticker = (code, key, link) => tagHtml(code, key, {link, name: TOP, round: true});
+const stickerDia = d => 2 * (d / 2 - RIM - CLEAR);
+
+// Gövdenin üstten görünüşü (govde.py ile aynı ölçüler), içinde etiket
+let uid = 0;
+function bodySvg(d, c, cls = "body", style = "") {
+  const R = d / 2, ec = R + 2.6, er = 5, hr = 2.1, s = stickerDia(d), id = "bm" + (++uid);
+  const disc = roundTagSvg("ÖRNEK", DESIGNS[c.key], SITE_URL, TOP)
+    .replace('<svg class="disc"', `<svg x="${-s / 2}" y="${-s / 2}" width="${s}" height="${s}"`);
+  return `<svg class="${cls}" style="${style}" viewBox="${-R - .2} ${-ec - er - .2} ${d + .4} ${R + ec + er + .4}" aria-label="${c.name} gövde">
+    <mask id="${id}"><rect x="-50" y="-50" width="100" height="100" fill="#fff"/><circle cx="0" cy="${-ec}" r="${hr}" fill="#000"/></mask>
+    <g mask="url(#${id})" fill="${c.hex}"><circle r="${R}"/><circle cy="${-ec}" r="${er}"/><rect x="${-er}" y="${-ec}" width="${2 * er}" height="${ec - R + 3}"/></g>
+    <circle r="${R - RIM}" fill="#000" fill-opacity=".25"/>${disc}
+    <circle r="${R - .25}" fill="none" stroke="#000" stroke-opacity=".18" stroke-width=".5"/></svg>`;
+}
+
+document.getElementById("colors").innerHTML = COLORS.map(c =>
+  `<figure>${bodySvg(35, c)}<figcaption>${c.name}<small>${c.hex}</small></figcaption></figure>`).join("");
+document.getElementById("real").innerHTML = [30, 35].map(d =>
+  bodySvg(d, COLORS[1], "", `width:${d + .4}mm;height:${(d / 2 + d / 2 + 7.6 + .4).toFixed(1)}mm`)).join("");
+document.getElementById("ctable").insertAdjacentHTML("beforeend", COLORS.map(c =>
+  `<tr><td><span class="sw" style="background:${c.hex}"></span>${c.name}</td><td>${c.fil} (${c.hex})</td><td>${DESIGNS[c.key].name}</td></tr>`).join(""));
+
+function renderSheets() {
+  const d = +document.getElementById("size").value, sd = stickerDia(d);
+  const per = Math.floor((190 + 3) / (sd + 3)) * Math.floor((277 + 3) / (sd + 3));
+  const codes = document.getElementById("codes").value.split(/[\s,;"]+/).map(x => x.trim().toUpperCase()).filter(x => /^[A-Z0-9-]{4,}$/.test(x) && x !== "KOD");
+  let items;
+  if (codes.length) {
+    const n = Math.ceil(codes.length / COLORS.length);
+    items = codes.map((code, i) => ({code, c: COLORS[Math.floor(i / n)]}));
+  } else {
+    const each = Math.floor(per / COLORS.length);
+    items = COLORS.flatMap(c => Array.from({length: each}, () => ({code: "ÖRNEK", c, link: SITE_URL})));
+  }
+  const pages = [];
+  for (let i = 0; i < items.length; i += per) pages.push(items.slice(i, i + per));
+  document.getElementById("sheets").innerHTML = pages.map(p => `<div class="sheet" style="--sd:${sd}mm">${
+    p.map(it => `<div class="st">${sticker(it.code, it.c.key, it.link || tagLink(it.code))}</div>`).join("")}</div>`).join("");
+}
+document.getElementById("size").onchange = renderSheets;
+document.getElementById("codes").oninput = renderSheets;
+document.getElementById("print").onclick = () => print();
+const q = new URLSearchParams(location.search);
+if (q.get("olcu")) document.getElementById("size").value = q.get("olcu");
+renderSheets();
+</script>
+</body>
+</html>
