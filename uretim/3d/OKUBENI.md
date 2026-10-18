@@ -10,6 +10,7 @@ Köpek tasmasına halkayla takılan yuvarlak rozet gövdesi. Önündeki çukura 
 | `tasmaqr-5-renk-30mm.3mf` | Ø30 gövde, 5 renk tek tablada |
 | `govde-35mm.stl` | Ø35 × 42,6 (kulak dahil) × 4 mm, ~4,2 g PETG, etiket Ø30 |
 | `govde-30mm.stl` | Ø30 × 37,6 × 4 mm, ~3,2 g PETG, etiket Ø25 |
+| `tabla-5-adet-35mm.stl`, `tabla-5-adet-30mm.stl` | 5 gövde yan yana tek dosyada (renk bilgisi yok; her gövdeye dilimleyicide renk atayın ya da renk başına bir tabla basın) |
 | `etiket-ornek-35mm.pdf`, `etiket-ornek-30mm.pdf` | Örnek etiket sayfası (A4, %100 ölçek) |
 | `govde.py` | Gövdeyi üreten betik (ölçü değiştirmek için) |
 
