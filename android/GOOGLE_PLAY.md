@@ -11,7 +11,7 @@ Veri güvenliği formu cevapları ve mağaza metinleri. Görseller `android/stor
 - **Yeni geri hareketi** (Android 13+ "predictive back") desteklenir.
 - **Gizlilik politikası:** https://yusufbas34.github.io/tasmaqr/gizlilik.html
 - **Veri silme:**
-  - Uygulama içinde iki yol var: rozet sayfasında "Rozeti sil", Rozetlerim'in altında "Tüm verilerimi sil".
+  - Uygulama içinde iki yol var: rozet sayfasında "Rozeti sil", Profilim sekmesinde "Tüm verilerimi sil".
   - Web'de: https://yusufbas34.github.io/tasmaqr/gizlilik.html#silme
 - **İzinler:**
   - İnternet ve ağ durumu
@@ -19,6 +19,13 @@ Veri güvenliği formu cevapları ve mağaza metinleri. Görseller `android/stor
   - Açılışta başlama: bildirim kontrolü telefon yeniden başlayınca da sürsün diye
 
   Konum, kamera, rehber ve dosya izni yok. Hiçbiri Play'de ek beyan istemez.
+- **Uygulama düzeni (Araç QR gibi):** üst bar (geri tuşu + sayfa adı) ve alt sekmeler: **Rozetlerim · Siparişlerim · Profilim**.
+  Profilim'de teslimat bilgileri, bildirimler, "Arkadaşına öner", gizlilik politikası ve "Tüm verilerimi sil" var.
+- **Arkadaşına öner** Play sürümünde Play Store bağlantısını paylaşır (GitHub APK bağlantısı Play sürümünde hiç görünmez).
+- **Ödeme:** Rozet fiziksel bir ürün olduğu için havale/EFT ile satılabilir; Play Faturalandırma zorunlu değildir
+  (Play'in ödeme politikası yalnızca dijital ürün ve abonelikler için geçerlidir).
+- **Tasarım kilidi:** Rozetin tasarımı oluştururken seçilir, ücretsiz baskıda değiştirilemez; yeni tasarım siparişte seçilir
+  ve ödeme onaylanınca rozete işlenir.
 
 ## Kısa yol (Araç QR'ı yüklediyseniz)
 
@@ -237,6 +244,13 @@ Bunun da Google Play'e çıkması için 14 gün test eden 12 kişi lazım. Araç
 
 Köpeğin olmasa da olur. Çok teşekkürler! 🙏
 ```
+
+### Güncelleme sürüm notu (yeni düzen)
+
+- **Türkçe:** `Yeni düzen: Rozetlerim, Siparişlerim ve Profilim sekmeleri; teslimat bilgilerini kaydetme, arkadaşına öner.`
+- **English:** `New layout: My tags, My orders and Profile tabs; saved delivery details, share with friends.`
+
+Ekran görüntüleri yeni düzene göre yenilendi (`android/store/screen-5`, `screen-6`, `screen-7`). Mağaza girişinde bu üçünü yenileriyle değiştirin.
 
 ### Sürüm notu (kapalı test ve ilk yayın)
 

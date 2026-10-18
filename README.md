@@ -4,6 +4,8 @@ Köpeklerin tasmasına künye gibi takılan QR rozet. Rozeti okutan kişi köpe�
 
 ## Özellikler
 
+- **Sayfalar**: sitede üst menü (Ana sayfa · Nasıl çalışır · Rozetler · Hazır rozet · SSS · Rozetlerim) ve alt bölüm; uygulamada üst bar ve alt sekmeler (Rozetlerim · Siparişlerim · Profilim)
+- **Tasarım kilidi**: tasarım rozet oluşturulurken seçilir, ücretsiz baskıda değiştirilemez; yeni tasarım rozet siparişinde seçilir ve ödeme onaylanınca rozete işlenir
 - **İlk giriş tanıtımı**: reels gibi yukarı kaydırılan 5 tam ekran slayt (ana sayfadaki “30 saniyede tanıyın” ile tekrar izlenir)
 - **Bulan kişi ekranı** (`?k=KOD`): sahibini arama, WhatsApp, SMS, yedek numara, sahibinin notu (sağlık, karakter)
 - **Konum gönderme**: bulan kişi izin verirse konumu sahibinin rozet sayfasına kaydedilir ve WhatsApp/SMS mesajına harita bağlantısı eklenir
