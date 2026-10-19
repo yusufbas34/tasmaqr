@@ -1,6 +1,7 @@
-// Tasma QR kullanım kitapçığı: rozeti alan kişiye tanıtım ve kullanım kılavuzu, 4 sayfa.
-// Sayfalar A6 (105×148 mm) ölçüsünde çizilir; A4 baskıda tam 2 kat büyütülür. A4'te sırayla 4 sayfa:
-// çift taraflı basınca 1. yaprak 1-2, 2. yaprak 3-4. Kapak, veteriner ve pet shop tezgâhında görünen yüzdür.
+// Tasma QR kullanım kitapçığı: rozeti alan kişiye tanıtım ve kullanım kılavuzu, 4 sayfa A6 (105×148 mm, A4'ün dörtte biri).
+// Baskı: bir A4'ün tek yüzü ("Fransız katlama"). Alt sıra: 4 | 1, üst sıra: 3 | 2 (180° dönük).
+// Üst yarı arkaya katlanır, sonra sol yarı arkaya katlanır: sayfalar 1-2-3-4 sırasıyla okunan kitapçık olur, kesim gerekmez.
+// Kapak, veteriner ve pet shop tezgâhında görünen yüzdür.
 // opt: {site, phone, instagram, email}
 function kitPages(opt) {
   const site = opt.site, logo = `<img src="shared/logo.svg" alt="">`;
@@ -68,5 +69,6 @@ function kitPages(opt) {
   ];
 }
 
-// A4 baskı düzeni: her sayfa kendi A4 yaprağında, sırayla (çift taraflı baskıda arka arkaya gelir)
-const kitSheets = pages => pages.map(p => `<div class="kit-sheet">${p}</div>`);
+// A4 baskı düzeni (tek yüz): üst sıra 3 | 2 ters, alt sıra 4 | 1
+const kitSheets = pages => [`<div class="kit-sheet">${[2, 1, 3, 0].map((n, i) =>
+  `<div class="cell${i < 2 ? " flip" : ""}">${pages[n]}</div>`).join("")}<i class="fold h"></i><i class="fold v"></i></div>`];
