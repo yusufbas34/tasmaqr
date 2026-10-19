@@ -205,6 +205,16 @@ body.has-tabbar{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
   border:0;border-radius:12px;padding:14px 16px;text-decoration:none;cursor:pointer;text-align:left}
 .settings a::after,.settings button::after{content:"›";margin-left:auto;color:var(--muted);font-size:22px}
 .settings .danger{color:var(--err)}
+.ig-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding:14px;border-radius:12px;color:#fff;font-weight:700;font-size:17px;text-decoration:none;
+  background:linear-gradient(45deg,#f9a72b,#e1306c 50%,#833ab4);box-shadow:0 6px 18px #e1306c40}
+.ig-btn small{font-weight:600;opacity:.9}
+.ig-band{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-radius:18px;padding:20px 22px;color:#fff;
+  background:linear-gradient(110deg,#f9a72b,#e1306c 45%,#833ab4);box-shadow:0 12px 30px #e1306c33}
+.ig-band > div{display:flex;gap:14px;align-items:center}
+.ig-band svg{width:40px;height:40px;flex:none}
+.ig-band b{display:block;font-family:"Barlow Condensed","Barlow",sans-serif;font-size:26px}
+.ig-band span{color:#ffffffe6}
+.ig-band .btn{width:auto;display:inline-block;margin:0;background:#fff;color:#c1305f;box-shadow:none;padding:12px 22px}
 /* fiziksel rozet ürünleri */
 .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:4px}
 .product{display:flex;gap:14px;align-items:center;text-align:left;font:inherit;color:inherit;background:#fff;border:2px solid var(--line);
@@ -664,7 +674,8 @@ function showSaved(code, name, phone, claimed, lost) {
       ${lost ? "<br><b>Kayıp modu açık:</b> QR'ı okutan kişi kırmızı uyarıyı görecek. Umarız çabucak kavuşursunuz." : ""}</div>
     <p>PIN'inizi saklayın; bilgileri değiştirmek için gerekecek. Rozet bu cihazda <b>Rozetlerim</b>'e de eklendi.</p>
     <a class="btn" href="${esc(tagPageLink(code))}">Rozetimi gör</a>
-    <a class="btn ghost" href="${esc(tagLink(code))}">QR'ı test et</a>`);
+    <a class="btn ghost" href="${esc(tagLink(code))}">QR'ı test et</a>
+    ${claimed ? igButton() : ""}`);
   if (!lost) confetti();
 }
 
@@ -793,6 +804,9 @@ const openIntro = () => showIntro({onCreate: () => { location.hash = "#olustur";
 // ---------------------------------------------------------------- çerçeve: sitede üst menü + alt bölüm, uygulamada üst bar + alt sekmeler
 const PLAY = (() => { try { return APP && NATIVE.distribution?.() === "play"; } catch (e) { return false; } })();
 const PLAY_URL = "https://play.google.com/store/apps/details?id=io.github.yusufbas34.tasmaqr";
+const IG_URL = "https://www.instagram.com/tasmaqr";
+const IG_ICON = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>`;
+const igButton = () => `<a class="ig-btn" href="${IG_URL}" target="_blank" rel="noopener">${IG_ICON} Instagram'da takip edin <small>@tasmaqr</small></a>`;
 const SITE_NAV = [["", "Ana sayfa"], ["nasil", "Nasıl çalışır"], ["urunler", "Rozetler"], ["talep", "Hazır rozet"], ["sss", "SSS"], ["kunyelerim", "Rozetlerim"]];
 
 // kind: "site" | "app" | "none"; site: nav = seçili menü; uygulama: tab = seçili sekme (yoksa sekmeler gizlenir), title, back
@@ -818,6 +832,7 @@ function setChrome({kind = "none", nav = null, tab = null, title = "Tasma QR", b
         <p>Evcil hayvanınızın tasmasına takılan QR rozet. Bulan kişi tek dokunuşla sizi arar, yerini gönderir.</p></div>
       <div><h3>Ürün</h3><a href="#nasil">Nasıl çalışır</a><a href="#urunler">Rozetler ve fiyatlar</a><a href="#talep">Hazır rozet iste</a><a href="#olustur">Ücretsiz rozet oluştur</a></div>
       <div><h3>Destek</h3><a href="#sss">Sık sorulanlar</a><a href="#kunyelerim">Rozetlerim</a><a href="${esc(APK_URL)}">Android uygulaması</a><a href="gizlilik.html">Gizlilik politikası</a></div>
+      <div><h3>Takip edin</h3><a href="${IG_URL}" target="_blank" rel="noopener">📷 Instagram · @tasmaqr</a><p style="margin-top:6px">Kayıp ilanları, ipuçları ve yeni tasarımlar.</p></div>
       <div class="copy">© ${new Date().getFullYear()} Tasma QR · Mikroçipin yerine geçmez; evcil hayvanınızı bulan kişinin size dakikalar içinde ulaşması için ek bir önlemdir.</div></div>`;
   }
   if (inApp) {
@@ -887,6 +902,9 @@ function showHome() {
     </section>
 
     <section><div class="finder-note"><span style="font-size:22px">🐾</span><div><b>Kayıp bir dost mu buldunuz?</b> Tasmasındaki rozeti telefon kameranızla okutun; sahibine ulaşma ekranı doğrudan açılır. Bu sayfa rozet edinmek isteyenler içindir.</div></div></section>
+
+    <section><div class="ig-band"><div>${IG_ICON}<div><b>Instagram'da takip edin</b><span>Kayıp ilanları, ipuçları, yeni tasarımlar ve dostlarımızdan kareler.</span></div></div>
+      <a class="btn" href="${IG_URL}" target="_blank" rel="noopener">@tasmaqr</a></div></section>
 
     <div class="cta-band"><div><h2>Bir dakikada rozetinizi oluşturun</h2><p>Ücretsiz. İsterseniz kendiniz yazdırın, isterseniz dayanıklı rozetinizi sipariş edin.</p></div>
       <a class="btn" href="#olustur">Hemen başla</a></div>`, "wide");
@@ -1169,6 +1187,7 @@ function showProfile(saved = false) {
     <div class="settings">
       <button type="button" id="replay">▶ Nasıl çalışır?</button>
       <button type="button" id="share">👋 Arkadaşına öner</button>
+      <a href="${IG_URL}" target="_blank" rel="noopener">📷 Instagram'da takip edin · @tasmaqr</a>
       <a href="${esc(SITE_URL)}">🌐 Web sitesi</a>
       <a href="${esc(SITE_URL)}gizlilik.html">🔒 Gizlilik politikası</a>
       <button type="button" id="wipe" class="danger">🗑 Tüm verilerimi sil</button>
@@ -2134,7 +2153,7 @@ async function showKit(newCount) {
   show(`${tabsHtml(newCount)}<p>Yükleniyor…</p>`, true);
   loadCss("shared/kitap.css");
   try { await loadScript("shared/kitap.js"); } catch (e) { return show(`${tabsHtml(newCount)}<div class="msg err">Kitapçık yüklenemedi, sayfayı yenileyin.</div>`, true); }
-  const opt = {site: SITE_URL, phone: pref("kit-phone", ""), instagram: pref("kit-ig", ""), email: pref("kit-mail", "")};
+  const opt = {site: SITE_URL, phone: pref("kit-phone", ""), instagram: pref("kit-ig", "tasmaqr"), email: pref("kit-mail", "")};
   const pages = kitPages(opt);
   show(`
     ${tabsHtml(newCount)}
@@ -2237,7 +2256,7 @@ async function showCard(newCount) {
   show(`${tabsHtml(newCount)}<p>Yükleniyor…</p>`, true);
   loadCss("shared/kitap.css");
   try { await loadScript("shared/kitap.js"); } catch (e) { return show(`${tabsHtml(newCount)}<div class="msg err">Kartvizit yüklenemedi, sayfayı yenileyin.</div>`, true); }
-  const opt = {site: SITE_URL, name: pref("card-name", ""), title: pref("card-title", ""), phone: pref("kit-phone", ""), email: pref("kit-mail", ""), instagram: pref("kit-ig", "")};
+  const opt = {site: SITE_URL, name: pref("card-name", ""), title: pref("card-title", ""), phone: pref("kit-phone", ""), email: pref("kit-mail", ""), instagram: pref("kit-ig", "tasmaqr")};
   const {front, back} = cardFaces(opt);
   const sheet = face => `<div class="bc-sheet">${face.repeat(10)}</div>`;
   const v = k => esc(opt[k] || "");

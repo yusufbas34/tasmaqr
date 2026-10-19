@@ -88,7 +88,7 @@ code{background:var(--card);border:1px solid var(--line);border-radius:6px;paddi
   <header class="top"><div class="in">
     <a class="brand" href="../"><img src="../shared/logo.svg" alt="">Tasma QR</a>
     <nav aria-label="Bölümler"><a href="#bugun">Bugün</a><a href="#takvim">İlk hafta</a><a href="#plan">Plan</a><a href="#gorseller">Görseller</a>
-      <a href="buyume-plani.html">Planın tamamı</a><a href="Tasma-QR-Buyume-Plani.pdf">PDF</a></nav>
+      <a href="https://www.instagram.com/tasmaqr" target="_blank" rel="noopener">📷 @tasmaqr</a><a href="buyume-plani.html">Planın tamamı</a><a href="Tasma-QR-Buyume-Plani.pdf">PDF</a></nav>
   </div></header>
 
   <div class="hero">
@@ -107,7 +107,7 @@ code{background:var(--card);border:1px solid var(--line);border-radius:6px;paddi
       <h2>Bugün: Instagram'ı açıyoruz 🎉</h2>
       <p>Sırayla yapın; toplam 30–40 dakika. Profil boş görünmesin diye ilk gün 3 gönderi paylaşılır.</p>
       <ol class="steps">
-        <li><div><b>İşletme hesabı açın: @tasmaqr</b><small>Ayarlar › Hesap türü › Profesyonel › İşletme. Kategori: <b>Evcil Hayvan Ürünleri</b>.</small></div></li>
+        <li><div><b>Hesap açıldı ✓ <a href="https://www.instagram.com/tasmaqr" target="_blank" rel="noopener" style="color:#ffe08a">instagram.com/tasmaqr</a></b><small>İşletme hesabı olduğundan emin olun: Ayarlar › Hesap türü › Profesyonel › İşletme. Kategori: <b>Evcil Hayvan Ürünleri</b>.</small></div></li>
         <li><div><b>Profil fotoğrafı, ad ve bio</b><small>Profil fotoğrafı aşağıdaki galeride; ad ve bio metnini kopyalayın. Bağlantı: siteniz.</small></div></li>
         <li><div><b>3 gönderiyi şu sırayla paylaşın</b><small>1) 12 tasarım → 2) Kediler de kaybolur → 3) Açılış gönderisi (4 kare). Son paylaşılan en başta görünür.</small></div></li>
         <li><div><b>Açılış hikâyesi</b><small>“Bugün açıldık” hikâyesine bağlantı çıkartması ekleyin, arkadaşlarınıza paylaşmalarını rica edin.</small></div></li>
@@ -250,7 +250,7 @@ const PLAN = [
     ["h8", "İşletme paketi: isimsiz stok rozet, PIN kartı, A7 kullanım kitapçığı", "Yönetim › Sahibimi Ara (stok) ve Kullanım kitapçığı"],
   ]},
   {id: "hafta0", tag: "Bu hafta", title: "Başlangıç", items: [
-    ["w0d", "Instagram işletme hesabını aç (@tasmaqr)", "Bugün: profil, bio, 3 gönderi, açılış hikâyesi, öne çıkanlar"],
+    ["w0d", "Instagram işletme hesabını aç (@tasmaqr)", "instagram.com/tasmaqr · profil, bio, 3 gönderi, açılış hikâyesi, öne çıkanlar"],
     ["w0g", "Supabase'de son kurulum.sql'i çalıştır", "PIN ekranı ve PIN kilidi için"],
     ["w0a", "Play Console'da uygulamayı oluştur, formları doldur", "Yeni ad: Tasma QR: Evcil Hayvan Künyesi"],
     ["w0b", "Yükleme anahtarını GitHub Secrets'a ekle, AAB al", ""],
@@ -314,7 +314,7 @@ document.getElementById("list").addEventListener("change", ev => {
   try { localStorage.setItem(LS, JSON.stringify(done)); } catch (e) {}
   setStatus("Kaydedildi");
 });
-const PREP = {h1: "2026-10-12", h2: "2026-10-12", h3: "2026-10-18", h4: "2026-10-19", h5: "2026-10-12", h6: "2026-10-18", h7: "2026-10-19", h8: "2026-10-19"};
+const PREP = {h1: "2026-10-12", h2: "2026-10-12", h3: "2026-10-18", h4: "2026-10-19", h5: "2026-10-12", h6: "2026-10-18", h7: "2026-10-19", h8: "2026-10-19", w0d: "2026-10-19"};
 try { const v = localStorage.getItem(LS); done = {...PREP, ...(v ? JSON.parse(v) || {} : {})}; } catch (e) { done = {...PREP}; }
 render();
 setStatus("Bu tarayıcıda saklanıyor");

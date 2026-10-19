@@ -211,6 +211,8 @@ Yoldan geçen herkes numaranızı göremez. Numaranız güvenli sunucuda durur; 
 
 Hesap açmanız gerekmez. Reklam yok. Verilerinizi istediğiniz an uygulamadan silebilirsiniz.
 
+Instagram: @tasmaqr
+
 Not: Tasma QR mikroçipin yerine geçmez; evcil hayvanınızı bulan kişinin size dakikalar içinde ulaşabilmesi için ek bir önlemdir.
 ```
 
@@ -218,6 +220,7 @@ Not: Tasma QR mikroçipin yerine geçmez; evcil hayvanınızı bulan kişinin si
 **Etiketler:** evcil hayvan, köpek, kedi, kayıp, QR kod
 **İletişim e-postası:** Play bu adresi mağazada herkese gösterir; gizlilik sayfası silme talepleri için bu adresi gösteriyor.
 **Web sitesi:** `https://yusufbas34.github.io/tasmaqr/`
+**Instagram:** `https://www.instagram.com/tasmaqr` (tam açıklamanın sonuna “Instagram: @tasmaqr” satırı eklendi)
 
 **İlk sürüm notu:** `İlk sürüm: QR rozet oluşturma, kayıp modu, konum bildirimi, renkli epoksi ve metal rozet siparişi.`
 
