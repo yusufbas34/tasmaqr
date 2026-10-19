@@ -49,8 +49,26 @@
 .kp .contact{position:absolute;left:7mm;right:7mm;bottom:7mm;border-top:.25mm solid #ddd3c6;padding-top:2.2mm;display:flex;justify-content:space-between;gap:3mm;font-size:2.5mm}
 .kp .contact div{display:grid;gap:.5mm}
 .kp .micro{font-size:2.1mm;color:#9aa0a8}
-/* baskı yaprağı: A4 dikey; üst ve alt yarıda birer kitapçık açılımı (A5 yatay = iki A6) */
-.kit-sheet{width:210mm;height:297mm;display:grid;grid-template-rows:148.5mm 148.5mm;background:#fff;break-after:page;page-break-after:always;overflow:hidden}
+/* kapak (raf yüzü) */
+.kp.hero{background:radial-gradient(120% 80% at 50% 0%,#e8742a 0%,#b8501a 55%,#7e3410 100%);color:#fff}
+.kp.hero .brandline{color:#fff}
+.kp.hero .brandline img{background:#fff;border-radius:50%;padding:.4mm}
+.kp .kicker{display:inline-block;margin-top:5mm;background:#fff;color:var(--o);font-weight:800;font-size:2.4mm;letter-spacing:.16em;text-transform:uppercase;border-radius:9mm;padding:1.1mm 3mm}
+.kp .big{font-size:14mm;line-height:.9;margin:2.6mm 0 2mm;letter-spacing:-.01em;text-shadow:0 .6mm 0 #0002}
+.kp .big span{color:#ffe08a}
+.kp .sub{font-size:3mm;color:#ffffffe6;max-width:78mm}
+.kp .sub b{color:#fff}
+.kp .glow{position:absolute;left:50%;top:70mm;width:70mm;height:70mm;margin-left:-35mm;border-radius:50%;background:radial-gradient(circle,#fff6 0%,#fff0 68%)}
+.kp.hero .collarbox{top:95mm;zoom:.68}
+.kp .burst{position:absolute;right:6mm;top:73mm;width:21mm;height:21mm;background:#ffe08a;color:#7e3410;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;text-align:center;transform:rotate(12deg);box-shadow:0 .8mm 2mm #0003;
+  font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:3.3mm;line-height:1;text-transform:uppercase;outline:.5mm dashed #7e341066;outline-offset:-1.6mm}
+.kp .tryit{position:absolute;left:5mm;right:5mm;bottom:5mm;background:#fff;color:var(--ink);border-radius:3mm;padding:2.4mm;display:flex;gap:2.6mm;align-items:center;box-shadow:0 1mm 3mm #0003}
+.kp .tryit svg{width:17mm;height:17mm;flex:none}
+.kp .tryit b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:4.2mm;line-height:1.05;color:var(--o)}
+.kp .tryit span{display:block;font-size:2.35mm;color:var(--mut);margin-top:.8mm;font-weight:600}
+.kp .tryit small{display:block;font-size:2.1mm;color:#9aa0a8;margin-top:.6mm}
+/* baskı yaprağı: A4 dikey, bir sayfa; A6 çizim tam 2 kat büyütülür (105×148,5 → 210×297) */
+.kit-sheet{width:210mm;height:297mm;overflow:hidden;background:#fff;break-after:page;page-break-after:always}
 .kit-sheet:last-child{break-after:auto;page-break-after:auto}
-.kit-sheet .spread{display:flex}
-.kit-sheet .spread .kp{height:148.5mm}
+.kit-sheet .kp{zoom:2;height:148.5mm}

@@ -1,6 +1,6 @@
-// Tasma QR kullanım kitapçığı: rozeti alan kişiye tanıtım ve kullanım kılavuzu. 4 sayfa A6 (105×148 mm).
-// Baskı: A4 dikey, çift taraflı (uzun kenardan çevir). Her yüzde aynı açılımdan 2 tane (üst/alt); ön yüz 4 | 1, arka yüz 2 | 3.
-// Kâğıt ortadan yatay kesilir, her yarı ortadan katlanınca sayfalar 1-2-3-4 sırasıyla okunur: bir A4'ten 2 kitapçık.
+// Tasma QR kullanım kitapçığı: rozeti alan kişiye tanıtım ve kullanım kılavuzu, 4 sayfa.
+// Sayfalar A6 (105×148 mm) ölçüsünde çizilir; A4 baskıda tam 2 kat büyütülür. A4'te sırayla 4 sayfa:
+// çift taraflı basınca 1. yaprak 1-2, 2. yaprak 3-4. Kapak, veteriner ve pet shop tezgâhında görünen yüzdür.
 // opt: {site, phone, instagram, email}
 function kitPages(opt) {
   const site = opt.site, logo = `<img src="shared/logo.svg" alt="">`;
@@ -10,15 +10,18 @@ function kitPages(opt) {
   const contact = rows.length ? rows.map(r => `<span>${r}</span>`).join("") : `<span>Sorularınız için uygulamadaki iletişim bilgilerinden bize ulaşın.</span>`;
   const badge = (design, name, size = "y40") => badgeAt("ÖRNEK", design, size, {link: site, name});
   return [
-    // 1 · kapak
-    `<div class="kp cover"><div class="pad">
-      ${brand}
-      <div class="tagline" style="margin-top:6mm">Kullanım kılavuzu</div>
-      <h1 class="title">Rozetiniz<br><em>hazır!</em></h1>
-      <p class="lead">Kaybolursa onu bulan kişi bu rozeti telefonuyla okutur; sizi tek dokunuşla arar, yerini gönderir. Kurulum bir dakika sürer.</p>
+    // 1 · kapak: tezgâhta / rafta dikkat çeken yüz
+    `<div class="kp hero"><div class="pad">
+      <div class="brandline">${logo}Tasma QR</div>
+      <div class="kicker">Kedi · Köpek · Tüm dostlar</div>
+      <h1 class="big">Kaybolursa<br><span>sizi arasın.</span></h1>
+      <p class="sub">Tasmaya takılan akıllı QR rozet. Bulan kişi okutur, sizi <b>tek dokunuşla arar</b>, yerini gönderir.</p>
     </div>
-    <div class="collarbox">${collarHtml(badge("turuncu", "DOSTUM"), "#163a7a")}</div>
-    <div class="band">Uygulama gerekmez · Numaranız rozette yazmaz</div></div>`,
+    <div class="glow"></div>
+    <div class="collarbox">${collarHtml(badge("klasik", "DOSTUM"), "#1d2330")}</div>
+    <div class="burst"><span>Uygulama<br>gerekmez</span></div>
+    <div class="tryit">${qrSvg(site)}<div><b>Telefonunla okut, hemen dene!</b>
+      <span>✓ Numaranız rozette yazmaz &nbsp;✓ Konum gönderme &nbsp;✓ Kayıp modu</span><small>İçinde: kurulum ve kullanım kılavuzu</small></div></div></div>`,
 
     // 2 · kurulum
     `<div class="kp"><div class="pad">
@@ -65,8 +68,5 @@ function kitPages(opt) {
   ];
 }
 
-// A4 baskı düzeni: ön yüz ve arka yüz; her yüzde aynı açılımdan 2 kitapçık (üst ve alt yarı)
-const kitSheets = pages => [[3, 0], [1, 2]].map(([l, r]) => {
-  const spread = `<div class="spread">${pages[l]}${pages[r]}</div>`;
-  return `<div class="kit-sheet">${spread}${spread}</div>`;
-});
+// A4 baskı düzeni: her sayfa kendi A4 yaprağında, sırayla (çift taraflı baskıda arka arkaya gelir)
+const kitSheets = pages => pages.map(p => `<div class="kit-sheet">${p}</div>`);

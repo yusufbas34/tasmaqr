@@ -19,7 +19,7 @@ Evcil hayvanların tasmasına künye gibi takılan QR rozet. Rozeti okutan kişi
 - **Üretim dosyası**: sipariş başına gerçek mm ölçülü SVG (kırmızı = kesim, metalde siyah = kazıma) ve epoksi için PDF; baskıcıya hazır e-posta metni
 - **Hazır rozet talep formu** (rozet tipi, tasarım, ölçü) ve **rozet siparişi** (IBAN ile ödeme, Telegram/e-posta bildirimi)
 - **Yönetim** (`?admin`): PIN kartlı rozet üretme/yazdırma, **fabrika paketi** (listedeki rozetler için QR listesi CSV + metal/epoksi SVG, tek ZIP; PIN içermez), talepler, siparişler, satış ayarları
-- **Kullanım kitapçığı** sekmesi: rozeti alan kişiye 4 sayfalık A6 tanıtım ve kullanım kılavuzu (kurulum, kayıp olursa, bilgileri güncelleme, bakım). A4'ün iki yüzüne 2 kitapçık basılır; yazdır, A4 baskı PDF'i ve A6 dijital PDF
+- **Kullanım kitapçığı** sekmesi: rozeti alan kişiye 4 sayfalık tanıtım ve kullanım kılavuzu (kurulum, kayıp olursa, bilgileri güncelleme, bakım). Kapak tezgâhta dikkat çeken yüzdür; A4'te sırayla 4 sayfa (çift taraflı baskıda arka arkaya), ayrıca A6 dijital PDF
 - **Sahibimi Ara (stok)** sekmesi: hayvan adı basılmayan “OKUT • SAHİBİMİ ARA” rozeti için toplu parti (adet, tip, ölçü, tasarım, üst yazı). Parti başına fabrika paketi (QR listesi CSV + SVG + üretim notu, PIN yok), A4 rozet baskı PDF'i, 85×55 mm PIN kartları PDF'i (A4'e 10) ve yalnızca sizde kalacak PIN listesi CSV
 
 ## Android uygulaması

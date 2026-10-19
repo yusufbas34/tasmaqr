@@ -2068,8 +2068,8 @@ async function showKit(newCount) {
     <div class="noprint">
       <div class="card" style="max-width:760px">
         <h2>Kullanım kitapçığı</h2>
-        <p>Rozeti verdiğiniz kişiye giden 4 sayfalık tanıtım ve kullanım kılavuzu (A6, 105×148 mm): kurulum, kayıp olursa ne yapmalı,
-          bilgileri güncelleme, bakım. Bir A4 kâğıdın iki yüzüne <b>2 kitapçık</b> basılır (A4'te 8 sayfa); ortadan kesip katlayın.</p>
+        <p>Rozeti verdiğiniz kişiye giden 4 sayfalık tanıtım ve kullanım kılavuzu: kurulum, kayıp olursa ne yapmalı, bilgileri güncelleme, bakım.
+          <b>Kapak</b> veteriner ve pet shop tezgâhında görünen yüzdür. A4'te sırayla 4 sayfa basılır; çift taraflı baskıda arka arkaya gelir (2 yaprak).</p>
         <div class="row2">
           <div><label for="kt-phone">Telefon / WhatsApp</label><input id="kt-phone" type="tel" placeholder="0532 123 45 67" value="${esc(opt.phone)}"></div>
           <div><label for="kt-ig">Instagram <span class="opt">(isteğe bağlı)</span></label><input id="kt-ig" placeholder="tasmaqr" value="${esc(opt.instagram)}"></div>
@@ -2078,18 +2078,18 @@ async function showKit(newCount) {
         <span class="hint">Arka kapakta destek bilgisi olarak yazar.</span>
         <div class="bar" style="margin:16px 0 0">
           <button class="btn" type="button" id="kt-save">Bilgileri uygula</button>
-          <button class="btn" type="button" id="kt-print">🖨 Yazdır (A4'e 2 kitapçık)</button>
-          <button class="btn alt" type="button" id="kt-pdf">PDF indir (A4 baskı düzeni)</button>
+          <button class="btn" type="button" id="kt-print">🖨 Yazdır (A4, 4 sayfa)</button>
+          <button class="btn alt" type="button" id="kt-pdf">PDF indir (A4, 4 sayfa)</button>
           <button class="btn alt" type="button" id="kt-pdf6">PDF indir (A6, dijital paylaşım)</button>
         </div>
-        <details class="howto"><summary>Nasıl basılır, kesilir ve katlanır?</summary><ol>
-          <li>Yazıcıda <b>A4, dikey</b>, ölçek <b>%100 / Gerçek boyut</b>, <b>çift taraflı · uzun kenardan çevir</b> seçin. Tek taraflı yazıcıda 1. sayfayı basın, kâğıdı aynı yönde çevirip 2. sayfayı basın.</li>
-          <li>Kâğıdı tam ortadan (148,5 mm) yatay kesin: iki A5 parça çıkar.</li>
-          <li>Her parçayı ortadan katlayın; “Rozetiniz hazır!” kapağı önde kalır. İki kitapçık hazır.</li>
-          <li>Rozetin poşetine PIN kartıyla birlikte koyun. 160–200 g/m² mat kuşe kâğıt en iyi sonucu verir.</li></ol></details>
+        <details class="howto"><summary>Nasıl basılır?</summary><ol>
+          <li>Yazıcıda <b>A4, dikey</b>, ölçek <b>%100 / Gerçek boyut</b>, kenar boşluğu <b>yok</b>, <b>çift taraflı · uzun kenardan çevir</b> seçin.</li>
+          <li>Sayfa 1 ve 2 ilk yaprağın önüne ve arkasına, sayfa 3 ve 4 ikinci yaprağın önüne ve arkasına gelir.</li>
+          <li>Tek taraflı yazıcıda önce 1 ve 3'ü basın, kâğıtları çevirip aynı sırayla yeniden yerleştirin, sonra 2 ve 4'ü basın.</li>
+          <li>Yaprakları sol üstten zımbalayın ya da ortadan katlayıp poşete koyun. Kapak tezgâhta öne bakacak şekilde durur. 160–200 g/m² mat kuşe önerilir.</li></ol></details>
         <div id="msg"></div>
       </div>
-      <div class="kitprev">${pages.map((p, i) => `<figure>${p}<figcaption>Sayfa ${i + 1}${i === 0 ? " · ön kapak" : i === 3 ? " · arka kapak" : ""}</figcaption></figure>`).join("")}</div>
+      <div class="kitprev">${pages.map((p, i) => `<figure>${p}<figcaption>Sayfa ${i + 1}${i === 0 ? " · kapak (tezgâh yüzü)" : i === 3 ? " · arka kapak" : ""}</figcaption></figure>`).join("")}</div>
     </div>
     <div id="kitprint">${kitSheets(pages).join("")}</div>`, true);
   bindTabs();
@@ -2104,14 +2104,14 @@ async function showKit(newCount) {
     await new Promise(done => { addEventListener("afterprint", done, {once: true}); print(); });
     document.body.classList.remove("kitprint"); st.textContent = old;
   };
-  const pdfOf = async (els, w, h, name) => {
+  const pdfOf = async (els, w, h, name, scale = 3.5) => {
     toast("PDF hazırlanıyor…", 120000);
     try {
       await loadPdfLibs();
       const pdf = new window.jspdf.jsPDF({unit: "mm", format: [w, h], orientation: "portrait"});
       for (let i = 0; i < els.length; i++) {
         toast(`PDF hazırlanıyor… ${i + 1}/${els.length}`, 120000);
-        const c = await html2canvas(els[i], {scale: 3.5, backgroundColor: "#ffffff", logging: false});
+        const c = await html2canvas(els[i], {scale, backgroundColor: "#ffffff", logging: false});
         if (i) pdf.addPage([w, h], "portrait");
         pdf.addImage(c.toDataURL("image/jpeg", .92), "JPEG", 0, 0, w, h, undefined, "FAST");
       }
@@ -2121,8 +2121,9 @@ async function showKit(newCount) {
   };
   // ekran dışı kopya: önizlemedeki küçültme olmadan gerçek ölçüde görüntülenir
   const offscreen = html => { const box = document.createElement("div"); box.style.cssText = "position:fixed;left:-40000px;top:0"; box.innerHTML = html; document.body.append(box); return box; };
-  $("kt-pdf").onclick = async ev => { ev.target.disabled = true; const box = offscreen(kitSheets(pages).join(""));
-    await pdfOf([...box.querySelectorAll(".kit-sheet")], 210, 297, "tasmaqr-kullanim-kitapcigi-A4.pdf"); box.remove(); ev.target.disabled = false; };
+  // A4: sayfalar A6 ölçüsünde çizilip görüntü olarak A4'e tam sayfa yerleşir (oran aynı)
+  $("kt-pdf").onclick = async ev => { ev.target.disabled = true; const box = offscreen(pages.join(""));
+    await pdfOf([...box.querySelectorAll(".kp")], 210, 297, "tasmaqr-kullanim-kitapcigi-A4.pdf", 7); box.remove(); ev.target.disabled = false; };
   $("kt-pdf6").onclick = async ev => { ev.target.disabled = true; const box = offscreen(pages.join(""));
     await pdfOf([...box.querySelectorAll(".kp")], 105, 148, "tasmaqr-kullanim-kitapcigi-A6.pdf"); box.remove(); ev.target.disabled = false; };
 }
