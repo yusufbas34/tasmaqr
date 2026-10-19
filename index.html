@@ -2069,8 +2069,8 @@ async function showKit(newCount) {
       <div class="card" style="max-width:760px">
         <h2>Kullanım kitapçığı</h2>
         <p>Rozeti verdiğiniz kişiye giden 4 sayfalık tanıtım ve kullanım kılavuzu: kurulum, kayıp olursa ne yapmalı, bilgileri güncelleme, bakım.
-          <b>Kapak</b> veteriner ve pet shop tezgâhında görünen yüzdür. Sayfa ölçüsü A6 (A4'ün dörtte biri, 105×148 mm). 4 sayfa bir A4'ün <b>tek yüzüne</b>
-          basılır; iki kez katlayınca sayfalar sırayla okunan kitapçık olur, kesim gerekmez.</p>
+          <b>Kapak</b> veteriner ve pet shop tezgâhında görünen yüzdür. Sayfa ölçüsü A7 (74×105 mm; katlı hali PIN kartı / rozet poşeti boyunda).
+          Bir A4'ün önüne ve arkasına <b>4 kitapçık</b> basılır; 4'e kesip her parçayı bir kez katlayınca sıralı kitapçık olur.</p>
         <div class="row2">
           <div><label for="kt-phone">Telefon / WhatsApp</label><input id="kt-phone" type="tel" placeholder="0532 123 45 67" value="${esc(opt.phone)}"></div>
           <div><label for="kt-ig">Instagram <span class="opt">(isteğe bağlı)</span></label><input id="kt-ig" placeholder="tasmaqr" value="${esc(opt.instagram)}"></div>
@@ -2079,15 +2079,16 @@ async function showKit(newCount) {
         <span class="hint">Arka kapakta destek bilgisi olarak yazar.</span>
         <div class="bar" style="margin:16px 0 0">
           <button class="btn" type="button" id="kt-save">Bilgileri uygula</button>
-          <button class="btn" type="button" id="kt-print">🖨 Yazdır (A4, katlanır kitapçık)</button>
-          <button class="btn alt" type="button" id="kt-pdf">PDF indir (A4, katlanır kitapçık)</button>
+          <button class="btn" type="button" id="kt-print">🖨 Yazdır (A4'ten 4 kitapçık)</button>
+          <button class="btn alt" type="button" id="kt-pdf">PDF indir (A4'ten 4 kitapçık)</button>
           <button class="btn alt" type="button" id="kt-pdf6">PDF indir (A6, dijital paylaşım)</button>
         </div>
-        <details class="howto" open><summary>Nasıl basılır ve katlanır?</summary><ol>
-          <li>Yazıcıda <b>A4, dikey</b>, ölçek <b>%100 / Gerçek boyut</b>, kenar boşluğu <b>yok</b>, <b>tek taraflı</b> seçin. Üst sıradaki sayfaların ters çıkması normaldir.</li>
-          <li>Baskılı yüz size bakarken kâğıdı <b>yatay ortadan</b> katlayın: üst yarı <b>arkaya</b> gitsin.</li>
-          <li>Sonra <b>dikey ortadan</b> katlayın: sol yarı <b>arkaya</b> gitsin. Önde turuncu kapak kalır.</li>
-          <li>Kitapçık hazır: kapağı açınca 2 ve 3, arkasında 4. sayfa. Kenarlardaki küçük çizgiler katlama yerleridir. 80–120 g/m² kâğıt kolay katlanır.</li></ol></details>
+        <details class="howto" open><summary>Nasıl basılır, kesilir ve katlanır?</summary><ol>
+          <li>Yazıcıda <b>A4, yatay</b>, ölçek <b>%100 / Gerçek boyut</b>, kenar boşluğu <b>yok</b>, <b>arkalı önlü · kısa kenardan çevir</b> seçin.
+            Tek taraflı yazıcıda 1. sayfayı basın, kâğıdı ters çevirip (üst kenar yine üstte) 2. sayfayı basın.</li>
+          <li>Kenarlardaki <b>düz çizgilerden</b> keserek kâğıdı 4 parçaya ayırın (her parça 148×105 mm).</li>
+          <li>Her parçayı <b>kesikli çizgiden</b> ortadan katlayın; turuncu kapak önde kalsın. 4 kitapçık hazır: kapağı açınca 2 ve 3, arkada 4. sayfa.</li>
+          <li>Rozet poşetine PIN kartıyla birlikte koyun. 120–170 g/m² kuşe kâğıt hem dayanıklı hem kolay katlanır.</li></ol></details>
         <div id="msg"></div>
       </div>
       <div class="kitprev">${pages.map((p, i) => `<figure>${p}<figcaption>Sayfa ${i + 1}${i === 0 ? " · kapak (tezgâh yüzü)" : i === 3 ? " · arka kapak" : ""}</figcaption></figure>`).join("")}</div>
@@ -2100,7 +2101,7 @@ async function showKit(newCount) {
     let st = $("pagestyle");
     if (!st) { st = Object.assign(document.createElement("style"), {id: "pagestyle"}); document.head.append(st); }
     const old = st.textContent;
-    st.textContent = "@page{size:A4 portrait;margin:0}";
+    st.textContent = "@page{size:A4 landscape;margin:0}";
     document.body.classList.add("kitprint");
     await new Promise(done => { addEventListener("afterprint", done, {once: true}); print(); });
     document.body.classList.remove("kitprint"); st.textContent = old;
@@ -2126,8 +2127,34 @@ async function showKit(newCount) {
     await Promise.all([...box.querySelectorAll("img")].map(i => i.decode().catch(() => {})));  // logo yüklenmeden görüntü alınmasın
     return box;
   };
-  $("kt-pdf").onclick = async ev => { ev.target.disabled = true; const box = await offscreen(kitSheets(pages).join(""));
-    await pdfOf([...box.querySelectorAll(".kit-sheet")], 210, 297, "tasmaqr-kullanim-kitapcigi-A4.pdf", 3.5); box.remove(); ev.target.disabled = false; };
+  // A4 PDF: her sayfanın görüntüsü bir kez alınır, A7 boyutunda 4 açılıma yerleştirilir; kesim ve katlama işaretleri vektör çizgi
+  $("kt-pdf").onclick = async ev => {
+    ev.target.disabled = true;
+    const box = await offscreen(pages.join(""));
+    toast("PDF hazırlanıyor…", 120000);
+    try {
+      await loadPdfLibs();
+      const imgs = [];
+      for (const el of box.querySelectorAll(".kp")) imgs.push((await html2canvas(el, {scale: 4, backgroundColor: "#ffffff", logging: false})).toDataURL("image/jpeg", .92));
+      const pdf = new window.jspdf.jsPDF({unit: "mm", format: "a4", orientation: "landscape"});
+      const W = 74.25, H = 105;
+      KIT_FACES.forEach(([l, r], face) => {
+        if (face) pdf.addPage("a4", "landscape");
+        for (let i = 0; i < 4; i++) {
+          const x = (i % 2) * 2 * W, y = Math.floor(i / 2) * H;
+          pdf.addImage(imgs[l], "JPEG", x, y, W, H, undefined, "FAST");
+          pdf.addImage(imgs[r], "JPEG", x + W, y, W, H, undefined, "FAST");
+        }
+        pdf.setDrawColor(102).setLineWidth(.25).setLineDashPattern([], 0);
+        [[0, 105, 4, 105], [293, 105, 297, 105], [148.5, 0, 148.5, 4], [148.5, 206, 148.5, 210]].forEach(a => pdf.line(...a));
+        pdf.setDrawColor(150).setLineDashPattern([1, 1], 0);
+        [74.25, 222.75].forEach(x => { pdf.line(x, 0, x, 3); pdf.line(x, 207, x, 210); });
+      });
+      savePdfFile(pdf, "tasmaqr-kullanim-kitapcigi-A4-4lu.pdf");
+      toast("PDF kaydedildi.");
+    } catch (e) { document.querySelector(".toast")?.remove(); adminError("PDF oluşturulamadı: " + e.message); }
+    box.remove(); ev.target.disabled = false;
+  };
   $("kt-pdf6").onclick = async ev => { ev.target.disabled = true; const box = await offscreen(pages.join(""));
     await pdfOf([...box.querySelectorAll(".kp")], 105, 148, "tasmaqr-kullanim-kitapcigi-A6.pdf"); box.remove(); ev.target.disabled = false; };
 }

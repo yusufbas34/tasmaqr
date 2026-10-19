@@ -1,6 +1,7 @@
-// Tasma QR kullanım kitapçığı: rozeti alan kişiye tanıtım ve kullanım kılavuzu, 4 sayfa A6 (105×148 mm, A4'ün dörtte biri).
-// Baskı: bir A4'ün tek yüzü ("Fransız katlama"). Alt sıra: 4 | 1, üst sıra: 3 | 2 (180° dönük).
-// Üst yarı arkaya katlanır, sonra sol yarı arkaya katlanır: sayfalar 1-2-3-4 sırasıyla okunan kitapçık olur, kesim gerekmez.
+// Tasma QR kullanım kitapçığı: rozeti alan kişiye tanıtım ve kullanım kılavuzu, 4 sayfa.
+// Sayfalar A6 (105×148 mm) ölçüsünde çizilir, baskıda A7'ye (74×105 mm) küçültülür: bir A4'ten 4 kitapçık.
+// Baskı: A4 yatay, arkalı önlü (kısa kenardan çevir). Ön yüzde 4 kez 4 | 1, arka yüzde 4 kez 2 | 3.
+// A4 işaretlerden 4 parçaya kesilir, her parça ortadan katlanınca sayfalar 1-2-3-4 sırasıyla okunur.
 // Kapak, veteriner ve pet shop tezgâhında görünen yüzdür.
 // opt: {site, phone, instagram, email}
 function kitPages(opt) {
@@ -69,6 +70,9 @@ function kitPages(opt) {
   ];
 }
 
-// A4 baskı düzeni (tek yüz): üst sıra 3 | 2 ters, alt sıra 4 | 1
-const kitSheets = pages => [`<div class="kit-sheet">${[2, 1, 3, 0].map((n, i) =>
-  `<div class="cell${i < 2 ? " flip" : ""}">${pages[n]}</div>`).join("")}<i class="fold h"></i><i class="fold v"></i></div>`];
+// A4 baskı düzeni: [ön yüz, arka yüz]; her yüzde 2×2 açılım, açılım = iki A7 sayfa
+const KIT_FACES = [[3, 0], [1, 2]];
+const kitSheets = pages => KIT_FACES.map(([l, r]) => {
+  const spread = `<div class="spread"><div class="pg">${pages[l]}</div><div class="pg">${pages[r]}</div></div>`;
+  return `<div class="kit-sheet">${spread.repeat(4)}<i class="cut h"></i><i class="cut v"></i>${[74.25, 222.75].map(x => `<i class="foldm" style="left:${x}mm"></i>`).join("")}</div>`;
+});

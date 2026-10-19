@@ -8,10 +8,10 @@
 .kp .pad{position:absolute;inset:7mm 7mm 8mm}
 .kp .brandline{display:flex;align-items:center;gap:1.5mm;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:4mm}
 .kp .brandline img{width:6mm;height:6mm}
-.kp .tagline{font-size:2.2mm;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--o)}
+.kp .tagline{font-size:2.7mm;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--o)}
 .kp .h-sec{font-size:7.6mm;margin:1mm 0 4mm}
 .kp .lead{font-size:3.3mm;color:var(--mut)}
-.kp .pno{position:absolute;bottom:3.2mm;left:0;right:0;text-align:center;font-size:2mm;color:#9aa0a8;letter-spacing:.1em}
+.kp .pno{position:absolute;bottom:3.2mm;left:0;right:0;text-align:center;font-size:2.6mm;color:#9aa0a8;letter-spacing:.1em}
 /* kapak */
 .kp.cover{background:var(--c)}
 .kp.cover .title{font-size:12mm;line-height:.98;margin:5mm 0 2mm}
@@ -41,19 +41,19 @@
 .kp .klost ol{margin:0;padding-left:3.8mm;display:grid;gap:1mm}
 /* arka kapak */
 .kp .fill{display:grid;grid-template-columns:1fr 1fr;gap:2mm;margin:2mm 0 3mm}
-.kp .fill div{border:.3mm solid #c9c0b5;border-radius:1.6mm;padding:1.4mm 2mm 5.6mm;font-size:2.2mm;color:var(--mut);background:#fff}
+.kp .fill div{border:.3mm solid #c9c0b5;border-radius:1.6mm;padding:1.4mm 2mm 5.6mm;font-size:2.7mm;color:var(--mut);background:#fff}
 .kp .qrrow{display:flex;gap:3mm;align-items:center;background:#fff;border-radius:2.4mm;padding:2.4mm;box-shadow:0 .5mm 2mm #0000001a}
 .kp .qrrow svg{width:20mm;height:20mm;flex:none}
 .kp .qrrow b{display:block;font-size:3.8mm}
 .kp .qrrow span{color:var(--mut);font-size:2.9mm}
 .kp .contact{position:absolute;left:7mm;right:7mm;bottom:7mm;border-top:.25mm solid #ddd3c6;padding-top:2.2mm;display:flex;justify-content:space-between;gap:3mm;font-size:2.5mm}
 .kp .contact div{display:grid;gap:.5mm}
-.kp .micro{font-size:2.1mm;color:#9aa0a8}
+.kp .micro{font-size:2.7mm;color:#8a919a}
 /* kapak (raf yüzü) */
 .kp.hero{background:radial-gradient(120% 80% at 50% 0%,#e8742a 0%,#b8501a 55%,#7e3410 100%);color:#fff}
 .kp.hero .brandline{color:#fff}
 .kp.hero .brandline img{background:#fff;border-radius:50%;padding:.4mm}
-.kp .kicker{display:inline-block;margin-top:5mm;background:#fff;color:var(--o);font-weight:800;font-size:2.4mm;letter-spacing:.16em;text-transform:uppercase;border-radius:9mm;padding:1.1mm 3mm}
+.kp .kicker{display:inline-block;margin-top:5mm;background:#fff;color:var(--o);font-weight:800;font-size:2.8mm;letter-spacing:.16em;text-transform:uppercase;border-radius:9mm;padding:1.1mm 3mm}
 .kp .big{font-size:14mm;line-height:.9;margin:2.6mm 0 2mm;letter-spacing:-.01em;text-shadow:0 .6mm 0 #0002}
 .kp .big span{color:#ffe08a}
 .kp .sub{font-size:3mm;color:#ffffffe6;max-width:78mm}
@@ -66,20 +66,23 @@
 .kp .tryit{position:absolute;left:5mm;right:5mm;bottom:5mm;background:#fff;color:var(--ink);border-radius:3mm;padding:2.4mm;display:flex;gap:2.6mm;align-items:center;box-shadow:0 1mm 3mm #0003}
 .kp .tryit svg{width:17mm;height:17mm;flex:none}
 .kp .tryit b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:4.2mm;line-height:1.05;color:var(--o)}
-.kp .tryit span{display:block;font-size:2.35mm;color:var(--mut);margin-top:.8mm;font-weight:600}
-.kp .tryit small{display:block;font-size:2.1mm;color:#9aa0a8;margin-top:.6mm}
-/* baskı yaprağı: A4 dikey, tek yüz; 2×2 A6 hücre, üst sıra 180° dönük (katlayınca düzelir) */
-.kit-sheet{position:relative;width:210mm;height:297mm;display:grid;grid-template-columns:105mm 105mm;grid-template-rows:148.5mm 148.5mm;
+.kp .tryit span{display:block;font-size:2.75mm;color:var(--mut);margin-top:.8mm;font-weight:600}
+.kp .tryit small{display:block;font-size:2.6mm;color:#8a919a;margin-top:.6mm}
+/* baskı yaprağı: A4 yatay; 2×2 açılım (148,5×105 mm), her açılımda iki A7 sayfa (A6 çizim %70,7 küçültülür) */
+.kit-sheet{position:relative;width:297mm;height:210mm;display:grid;grid-template-columns:148.5mm 148.5mm;grid-template-rows:105mm 105mm;
   overflow:hidden;background:#fff;break-after:page;page-break-after:always}
 .kit-sheet:last-child{break-after:auto;page-break-after:auto}
-.kit-sheet .cell{width:105mm;height:148.5mm;overflow:hidden}
-.kit-sheet .cell .kp{height:148.5mm}
-.kit-sheet .cell.flip{transform:rotate(180deg)}
-/* katlama yerleri: yalnızca kenarlarda kısa işaret */
-.kit-sheet .fold{position:absolute;background:#0000;pointer-events:none}
-.kit-sheet .fold.h{left:0;right:0;top:148.5mm;height:0;border-top:.2mm dashed #0000}
-.kit-sheet .fold.v{top:0;bottom:0;left:105mm;width:0}
-.kit-sheet .fold.h::before,.kit-sheet .fold.h::after{content:"";position:absolute;top:-.1mm;width:3mm;border-top:.2mm solid #999}
-.kit-sheet .fold.h::before{left:0}.kit-sheet .fold.h::after{right:0}
-.kit-sheet .fold.v::before,.kit-sheet .fold.v::after{content:"";position:absolute;left:-.1mm;height:3mm;border-left:.2mm solid #999}
-.kit-sheet .fold.v::before{top:0}.kit-sheet .fold.v::after{bottom:0}
+.kit-sheet .spread{display:flex}
+.kit-sheet .pg{width:74.25mm;height:105mm;overflow:hidden}
+.kit-sheet .pg .kp{zoom:.70711;height:148.5mm}
+/* kesim (düz) ve katlama (kesikli) işaretleri: yalnızca kenarlarda */
+.kit-sheet i{position:absolute;pointer-events:none}
+.kit-sheet .cut.h{left:0;right:0;top:105mm;height:0}
+.kit-sheet .cut.v{top:0;bottom:0;left:148.5mm;width:0}
+.kit-sheet .cut.h::before,.kit-sheet .cut.h::after{content:"";position:absolute;top:-.1mm;width:4mm;border-top:.25mm solid #666}
+.kit-sheet .cut.h::before{left:0}.kit-sheet .cut.h::after{right:0}
+.kit-sheet .cut.v::before,.kit-sheet .cut.v::after{content:"";position:absolute;left:-.1mm;height:4mm;border-left:.25mm solid #666}
+.kit-sheet .cut.v::before{top:0}.kit-sheet .cut.v::after{bottom:0}
+.kit-sheet .foldm{top:0;bottom:0;width:0}
+.kit-sheet .foldm::before,.kit-sheet .foldm::after{content:"";position:absolute;left:-.1mm;height:3mm;border-left:.25mm dashed #999}
+.kit-sheet .foldm::before{top:0}.kit-sheet .foldm::after{bottom:0}
