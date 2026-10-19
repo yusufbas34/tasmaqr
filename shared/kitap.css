@@ -86,3 +86,36 @@
 .kit-sheet .foldm{top:0;bottom:0;width:0}
 .kit-sheet .foldm::before,.kit-sheet .foldm::after{content:"";position:absolute;left:-.1mm;height:3mm;border-left:.25mm dashed #999}
 .kit-sheet .foldm::before{top:0}.kit-sheet .foldm::after{bottom:0}
+/* ---------------- kartvizit 85×55 mm */
+.bc{--o:#b8501a;--ink:#1d2330;--mut:#5d6472;width:85mm;height:55mm;position:relative;overflow:hidden;box-sizing:border-box;flex:none;
+  font-family:"Barlow",Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bc *{box-sizing:border-box}
+.bc h2{font-family:"Barlow Condensed",sans-serif;margin:0;line-height:.95}
+.bc-front{background:radial-gradient(90% 120% at 85% 20%,#e8742a 0%,#b8501a 50%,#6e2c0c 100%);color:#fff;padding:5mm 5.5mm}
+.bc-brand{display:flex;align-items:center;gap:1.6mm;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:4.4mm}
+.bc-brand img{width:6.4mm;height:6.4mm;background:#fff;border-radius:22%;padding:.3mm}
+.bc-front h2{font-size:7.6mm;margin-top:5mm;text-shadow:0 .4mm 0 #0002}
+.bc-front h2 em{font-style:normal;color:#ffe08a}
+.bc-front p{margin:2mm 0 0;font-size:2.55mm;line-height:1.3;color:#ffffffe0;font-weight:600}
+.bc-badge{position:absolute;right:-3mm;top:9mm;transform:rotate(12deg);filter:drop-shadow(0 1mm 1.5mm #0006)}
+.bc-badge .badgebox{zoom:1.05}
+.bc-back{background:#fffdf9;color:var(--ink);padding:5mm 5.5mm}
+.bc-who b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:5.6mm;line-height:1}
+.bc-who small{display:block;font-size:2.5mm;color:var(--o);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-top:.8mm}
+.bc-lines{display:grid;gap:1.1mm;margin-top:3.6mm;font-size:2.65mm;font-weight:600;max-width:50mm}
+.bc-lines span{display:flex;gap:1.4mm;align-items:center;white-space:nowrap}
+.bc-lines i{font-style:normal;width:3.6mm;text-align:center}
+.bc-qr{position:absolute;right:5mm;top:5mm;width:22mm;text-align:center}
+.bc-qr svg{width:22mm;height:22mm;display:block}
+.bc-qr span{display:block;font-size:2.2mm;font-weight:700;color:var(--o);margin-top:.8mm}
+.bc-bar{position:absolute;left:0;right:0;bottom:0;height:3mm;background:linear-gradient(90deg,#e8742a,#b8501a)}
+/* taşma paylı (matbaa) kopya: kart 91×61 mm'ye büyür, zemin kenara kadar; içerik 3 mm içeride kalır */
+.bc-bleed{width:91mm;height:61mm}
+.bc-bleed .bc{width:91mm;height:61mm;padding:8mm 8.5mm}
+.bc-bleed .bc-badge{right:0;top:12mm}
+.bc-bleed .bc-qr{right:8mm;top:8mm}
+.bc-bleed .bc-bar{height:6mm}
+/* A4 baskı: 2×5 kartvizit, kenar boşlukları 20 × 11 mm */
+.bc-sheet{position:relative;width:210mm;height:297mm;padding:11mm 20mm;display:grid;grid-template-columns:85mm 85mm;grid-auto-rows:55mm;
+  background:#fff;break-after:page;page-break-after:always;box-sizing:border-box}
+.bc-sheet:last-child{break-after:auto;page-break-after:auto}

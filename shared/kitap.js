@@ -76,3 +76,24 @@ const kitSheets = pages => KIT_FACES.map(([l, r]) => {
   const spread = `<div class="spread"><div class="pg">${pages[l]}</div><div class="pg">${pages[r]}</div></div>`;
   return `<div class="kit-sheet">${spread.repeat(4)}<i class="cut h"></i><i class="cut v"></i>${[74.25, 222.75].map(x => `<i class="foldm" style="left:${x}mm"></i>`).join("")}</div>`;
 });
+
+// ---------------------------------------------------------------- kartvizit (85×55 mm)
+// opt: {site, name, title, phone, email, instagram}. Ön: marka ve rozet; arka: kişi, iletişim ve siteyi açan QR.
+function cardFaces(opt) {
+  const ig = (opt.instagram || "").replace(/^@/, "");
+  const lines = [opt.phone && `<span><i>📞</i>${esc(opt.phone)}</span>`, opt.email && `<span><i>✉️</i>${esc(opt.email)}</span>`,
+    ig && `<span><i>📷</i>@${esc(ig)}</span>`, `<span><i>🌐</i>yusufbas34.github.io/tasmaqr</span>`].filter(Boolean).join("");
+  const front = `<div class="bc bc-front">
+      <div class="bc-brand"><img src="shared/logo.svg" alt="">Tasma QR</div>
+      <h2>Kaybolursa,<br><em>sizi arasın.</em></h2>
+      <p>Kedi, köpek ve tüm dostlar için<br>tasmaya takılan QR künye</p>
+      <div class="bc-badge">${badgeAt("ÖRNEK", "klasik", "y30", {link: opt.site, name: "DOSTUM"})}</div>
+    </div>`;
+  const back = `<div class="bc bc-back">
+      <div class="bc-who">${opt.name ? `<b>${esc(opt.name)}</b>` : `<b>Tasma QR</b>`}<small>${esc(opt.title || "Evcil hayvan QR künye")}</small></div>
+      <div class="bc-lines">${lines}</div>
+      <div class="bc-qr">${qrSvg(opt.site)}<span>Okut, ücretsiz dene</span></div>
+      <div class="bc-bar"></div>
+    </div>`;
+  return {front, back};
+}

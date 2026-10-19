@@ -1755,7 +1755,7 @@ const designOptions = (sel, withRandom) =>
 function tabsHtml(newCount) {
   const tab = (id, name, n) => `<button data-tab="${id}" class="${adminTab === id ? "on" : ""}">${name}${n ? `<span class="badge">${n}</span>` : ""}</button>`;
   return `<div class="tabs noprint">
-    ${tab("tags", "Rozetler")}${tab("stock", "Sahibimi Ara (stok)")}${tab("requests", "Talepler", newCount)}${tab("orders", "Siparişler", orderBadge)}${tab("kit", "Kullanım kitapçığı")}${tab("settings", "Ayarlar")}
+    ${tab("tags", "Rozetler")}${tab("stock", "Sahibimi Ara (stok)")}${tab("requests", "Talepler", newCount)}${tab("orders", "Siparişler", orderBadge)}${tab("kit", "Kullanım kitapçığı")}${tab("card", "Kartvizit")}${tab("settings", "Ayarlar")}
   </div>`;
 }
 
@@ -1788,6 +1788,7 @@ async function showAdmin() {
   if (adminTab === "settings") return showSettings(newReq);
   if (adminTab === "stock") return showStock(rows, newReq);
   if (adminTab === "kit") return showKit(newReq);
+  if (adminTab === "card") return showCard(newReq);
   const state = r => r.phone ? "used" : r.given_at ? "given" : "ready";
   const count = {ready: 0, given: 0, used: 0};
   rows.forEach(r => count[state(r)]++);
@@ -2229,6 +2230,94 @@ async function showKit(newCount) {
   };
   $("kt-pdf6").onclick = async ev => { ev.target.disabled = true; const box = await offscreen(pages.join(""));
     await pdfOf([...box.querySelectorAll(".kp")], 105, 148, "tasmaqr-kullanim-kitapcigi-A6.pdf"); box.remove(); ev.target.disabled = false; };
+}
+
+// ---------------------------------------------------------------- yönetim: kartvizit (85×55 mm; A4'e 10 adet ya da matbaa için taşma paylı)
+async function showCard(newCount) {
+  show(`${tabsHtml(newCount)}<p>Yükleniyor…</p>`, true);
+  loadCss("shared/kitap.css");
+  try { await loadScript("shared/kitap.js"); } catch (e) { return show(`${tabsHtml(newCount)}<div class="msg err">Kartvizit yüklenemedi, sayfayı yenileyin.</div>`, true); }
+  const opt = {site: SITE_URL, name: pref("card-name", ""), title: pref("card-title", ""), phone: pref("kit-phone", ""), email: pref("kit-mail", ""), instagram: pref("kit-ig", "")};
+  const {front, back} = cardFaces(opt);
+  const sheet = face => `<div class="bc-sheet">${face.repeat(10)}</div>`;
+  const v = k => esc(opt[k] || "");
+  show(`
+    ${tabsHtml(newCount)}
+    <div class="noprint">
+      <div class="card" style="max-width:760px">
+        <h2>Kartvizit</h2>
+        <p>Standart 85×55 mm. Ön yüz marka ve rozet, arka yüz sizin bilgileriniz ve siteyi açan QR.</p>
+        <div class="row2">
+          <div><label for="bc-name">Ad soyad <span class="opt">(boşsa “Tasma QR”)</span></label><input id="bc-name" value="${v("name")}"></div>
+          <div><label for="bc-title">Ünvan</label><input id="bc-title" placeholder="ör. Kurucu · Satış" value="${v("title")}"></div>
+        </div>
+        <div class="row2">
+          <div><label for="bc-phone">Telefon / WhatsApp</label><input id="bc-phone" type="tel" placeholder="0532 123 45 67" value="${v("phone")}"></div>
+          <div><label for="bc-mail">E-posta</label><input id="bc-mail" type="email" value="${v("email")}"></div>
+        </div>
+        <label for="bc-ig">Instagram</label><input id="bc-ig" placeholder="tasmaqr" value="${v("instagram")}">
+        <div class="bar" style="margin:16px 0 0">
+          <button class="btn" type="button" id="bc-save">Bilgileri uygula</button>
+          <button class="btn" type="button" id="bc-print">🖨 Yazdır (A4'e 10 adet)</button>
+          <button class="btn alt" type="button" id="bc-pdf">PDF indir (A4'e 10 adet)</button>
+          <button class="btn alt" type="button" id="bc-pdfm">PDF indir (matbaa, taşma paylı)</button>
+        </div>
+        <details class="howto"><summary>Nasıl basılır?</summary><ol>
+          <li><b>Evde / ofiste:</b> A4 dikey, ölçek <b>%100 / Gerçek boyut</b>, <b>arkalı önlü · uzun kenardan çevir</b>. 250–350 g/m² mat kuşe ya da kartvizit kartonu kullanın; köşelerdeki çizgilerden kesin.</li>
+          <li><b>Matbaada:</b> “matbaa” PDF'ini gönderin (91×61 mm, 3 mm taşma payı; 1. sayfa ön, 2. sayfa arka). 350 g/m² mat selefon önerilir.</li></ol></details>
+        <div id="msg"></div>
+      </div>
+      <div class="kitprev" style="align-items:flex-start"><figure><div style="zoom:1.6">${front}</div><figcaption>Ön yüz</figcaption></figure>
+        <figure><div style="zoom:1.6">${back}</div><figcaption>Arka yüz</figcaption></figure></div>
+    </div>
+    <div id="kitprint">${sheet(front)}${sheet(back)}</div>`, true);
+  bindTabs();
+  const $ = id => document.getElementById(id);
+  $("bc-save").onclick = () => {
+    savePref("card-name", $("bc-name").value.trim()); savePref("card-title", $("bc-title").value.trim());
+    savePref("kit-phone", $("bc-phone").value.trim()); savePref("kit-mail", $("bc-mail").value.trim()); savePref("kit-ig", $("bc-ig").value.trim().replace(/^@/, ""));
+    showCard(newCount);
+  };
+  $("bc-print").onclick = async () => {
+    let st = $("pagestyle");
+    if (!st) { st = Object.assign(document.createElement("style"), {id: "pagestyle"}); document.head.append(st); }
+    const old = st.textContent;
+    st.textContent = "@page{size:A4 portrait;margin:0}";
+    document.body.classList.add("kitprint");
+    await new Promise(done => { addEventListener("afterprint", done, {once: true}); print(); });
+    document.body.classList.remove("kitprint"); st.textContent = old;
+  };
+  const shot = async (html, scale = 6) => {
+    const box = document.createElement("div"); box.style.cssText = "position:fixed;left:-40000px;top:0"; box.innerHTML = html; document.body.append(box);
+    await Promise.all([...box.querySelectorAll("img")].map(i => i.decode().catch(() => {})));
+    try { return (await html2canvas(box.firstElementChild, {scale, backgroundColor: "#ffffff", logging: false})).toDataURL("image/jpeg", .93); }
+    finally { box.remove(); }
+  };
+  const run = async (btn, fn) => {
+    btn.disabled = true; toast("PDF hazırlanıyor…", 120000);
+    try { await loadPdfLibs(); await fn(); toast("PDF kaydedildi."); }
+    catch (e) { document.querySelector(".toast")?.remove(); adminError("PDF oluşturulamadı: " + e.message); }
+    btn.disabled = false;
+  };
+  $("bc-pdf").onclick = ev => run(ev.target, async () => {
+    const imgs = [await shot(front), await shot(back)];
+    const pdf = new window.jspdf.jsPDF({unit: "mm", format: "a4"});
+    imgs.forEach((img, face) => {
+      if (face) pdf.addPage("a4", "portrait");
+      for (let i = 0; i < 10; i++) pdf.addImage(img, "JPEG", 20 + (i % 2) * 85, 11 + Math.floor(i / 2) * 55, 85, 55, undefined, "FAST");
+      pdf.setDrawColor(120).setLineWidth(.2);  // kesim işaretleri: kenar boşluğunda
+      [20, 105, 190].forEach(x => { pdf.line(x, 3, x, 9); pdf.line(x, 288, x, 294); });
+      [0, 1, 2, 3, 4, 5].forEach(r => { const y = 11 + r * 55; pdf.line(10, y, 18, y); pdf.line(192, y, 200, y); });
+    });
+    savePdfFile(pdf, "tasmaqr-kartvizit-A4-10lu.pdf");
+  });
+  $("bc-pdfm").onclick = ev => run(ev.target, async () => {
+    const pdf = new window.jspdf.jsPDF({unit: "mm", format: [91, 61], orientation: "landscape"});
+    pdf.addImage(await shot(`<div class="bc-bleed front">${front}</div>`), "JPEG", 0, 0, 91, 61, undefined, "FAST");
+    pdf.addPage([91, 61], "landscape");
+    pdf.addImage(await shot(`<div class="bc-bleed back">${back}</div>`), "JPEG", 0, 0, 91, 61, undefined, "FAST");
+    savePdfFile(pdf, "tasmaqr-kartvizit-matbaa-91x61.pdf");
+  });
 }
 
 // ---------------------------------------------------------------- yönetim: talepler
