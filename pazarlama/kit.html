@@ -9,6 +9,8 @@
 <script src="../shared/vendor/qrcode.js"></script>
 <script src="../shared/tag.js"></script>
 <script src="../shared/intro.js"></script>
+<link rel="stylesheet" href="../shared/kitap.css">
+<script src="../shared/kitap.js"></script>
 <style>
 body{margin:0;background:#888;display:flex;flex-wrap:wrap;gap:40px;padding:40px;font-family:"Barlow",sans-serif}
 .ab{position:relative;overflow:hidden;flex:none;color:#fff;font-family:"Barlow",sans-serif}
@@ -16,6 +18,10 @@ body{margin:0;background:#888;display:flex;flex-wrap:wrap;gap:40px;padding:40px;
 .cream{background:#f6f1ea;color:#2a1a10}
 .navy{background:radial-gradient(120% 80% at 20% 0%,#2a4f9a 0%,#163a7a 55%,#0a1838 100%)}
 .red{background:radial-gradient(120% 80% at 80% 0%,#e53935 0%,#a11d1d 60%,#4a0b0b 100%)}
+.purple{background:radial-gradient(120% 80% at 80% 0%,#a48bd0 0%,#6b4fa0 55%,#2e1f4f 100%)}
+.grid12{display:grid;grid-template-columns:repeat(4,auto);gap:18px 26px;justify-content:center}
+.grid12 .badgebox{filter:drop-shadow(0 10px 18px rgba(0,0,0,.3))}
+.kitcover{transform:rotate(-5deg);box-shadow:0 30px 60px rgba(0,0,0,.45);border-radius:10px;overflow:hidden}
 .frame{position:absolute;left:80px;right:80px;display:flex;flex-direction:column}
 .vis{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;margin-top:30px}
 .h{font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;line-height:.98;margin:0}
@@ -66,6 +72,58 @@ const phone = (src, w = 560) => `<div class="phone" style="width:${w}px"><img sr
 const AB = [];
 const add = (name, w, h, cls, html) => AB.push(`<div class="ab ${cls}" data-name="${name}" style="width:${w}px;height:${h}px">${html}</div>`);
 
+
+// ================ AÇILIŞ SETİ (ilk gün): 1080x1350 gönderiler, açılış hikâyesi
+add("acilis-1-merhaba", 1080, 1350, "orange", frame(`
+    <span class="pill" style="font-size:36px;padding:10px 26px">YENİ HESAP 🎉 KAYDIR →</span>
+    <h1 class="h" style="font-size:112px;margin-top:24px">Merhaba!<br>Biz <span class="mark">Tasma QR.</span></h1>
+    <p class="p" style="font-size:44px;margin-top:20px">Kedi, köpek ve tüm dostlar için tasmaya takılan akıllı QR künye.</p>`,
+  fan(["kedi", "Minnoş"], ["turuncu", "Zeytin"], ["klasik", "Pamuk", "metal"]), 90, 140) + brand(50));
+add("acilis-2-nasil", 1080, 1350, "cream", `<div style="position:absolute;left:70px;right:70px;top:80px;bottom:150px;display:flex;flex-direction:column;gap:26px;justify-content:center">
+    <h1 class="h" style="font-size:104px">Nasıl çalışır?</h1>
+    ${[["Rozetini oluştur", "Adı, telefonun, tasarım. Bir dakika, ücretsiz; hesap yok."], ["Tasmaya tak", "Epoksi ya da metal rozetin halkasıyla gelir."],
+       ["Bulan kişi okutur", "Seni tek dokunuşla arar, konumunu gönderir."], ["Kaybolursa kayıp modu", "Okutan herkes kırmızı “KAYIP!” uyarısını görür."]]
+      .map(([t, d], i) => `<div class="tip"><span class="num">${i + 1}</span><div><h1 class="h" style="font-size:50px">${t}</h1><p>${d}</p></div></div>`).join("")}
+  </div>` + brand(50, true));
+add("acilis-3-bulan-kisi", 1080, 1350, "navy", frame(`
+    <span class="chip" style="font-size:36px;padding:10px 26px">📱 UYGULAMA GEREKMEZ</span>
+    <h1 class="h" style="font-size:108px;margin-top:22px">Bulan kişi <span class="mark">bunu görür.</span></h1>`,
+  phone("ekran/bulan-kisi.png", 520), 90, 140) + brand(50));
+add("acilis-4-dene", 1080, 1350, "orange", `
+  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:34px;padding:90px">
+    ${logo(240)}
+    <h1 class="h" style="font-size:128px">Ücretsiz dene</h1>
+    <p class="p" style="font-size:50px">Profildeki bağlantıya dokun,<br>bir dakikada rozetini oluştur.</p>
+    <span class="pill" style="font-size:44px;padding:16px 40px">Takip et, dostların güvende olsun 🐾</span>
+  </div>`);
+add("gonderi-c-kedi", 1080, 1350, "purple", frame(`
+    <span class="pill" style="font-size:36px;padding:10px 26px">KEDİ SAHİPLERİ 🐱</span>
+    <h1 class="h" style="font-size:124px;margin-top:24px">Kediler de <span class="mark">kaybolur.</span></h1>
+    <p class="p" style="font-size:44px;margin-top:20px">Hafif Ø25 mm rozet + güvenlik kilitli kedi tasması. Pencereden kaçsa bile bulan kişi seni arar.</p>`,
+  badge("kedi", "Minnoş", "epoksi", "transform:rotate(-6deg)"), 90, 140) + brand(50));
+add("gonderi-d-pin", 1080, 1350, "cream", frame(`
+    <span class="pill" style="font-size:36px;padding:10px 26px">GİZLİLİK 🔒</span>
+    <h1 class="h" style="font-size:104px;margin-top:22px">Numaran rozette <span class="mark">yazmaz.</span></h1>
+    <p class="p" style="font-size:42px;margin-top:18px">Bilgilerini yalnızca sen, PIN'inle görür ve değiştirirsin. 5 yanlış denemede kilitlenir.</p>`,
+  phone("ekran/pin.png", 470), 90, 140) + brand(50, true));
+add("gonderi-e-tasarimlar", 1080, 1350, "orange", frame(`<div style="text-align:center">
+    <span class="pill" style="font-size:36px;padding:10px 26px">YORUMA YAZ 👇</span>
+    <h1 class="h" style="font-size:112px;margin-top:22px">${Object.keys(DESIGNS).length} tasarım. <span class="mark">Hangisi onun?</span></h1></div>`,
+  `<div class="grid12">${Object.keys(DESIGNS).map(d => badgeAt("SAB3C9D2", d, "y25", {name: "", link: LINK})).join("")}</div>`, 90, 140) + brand(50));
+add("gonderi-f-isletme", 1080, 1350, "navy", frame(`
+    <span class="chip" style="font-size:36px;padding:10px 26px">🏥 VETERİNER · PET SHOP</span>
+    <h1 class="h" style="font-size:100px;margin-top:22px">Rozet <span class="mark">rafınızda,</span> kılavuzu yanında.</h1>
+    <p class="p" style="font-size:40px;margin-top:18px;opacity:.92">İsimsiz “OKUT • SAHİBİMİ ARA” stok rozet + PIN kartı + mini kullanım kitapçığı. Bayilik için DM.</p>`,
+  `<div style="display:flex;align-items:center;gap:40px">
+     <div class="kitcover" style="width:105mm;height:148mm">${kitPages({site: SITE}).map(x => x.replace(/shared\/logo\.svg/g, "../shared/logo.svg"))[0]}</div>
+     <div class="shadow" style="transform:rotate(8deg)">${badgeAt("SAB3C9D2", "turuncu", "y40", {top: "SAHİBİMİ ARA", link: LINK})}</div></div>`, 90, 140) + brand(50));
+add("hikaye-acilis", 1080, 1920, "orange", frame(`<div style="text-align:center">
+    <span class="pill" style="font-size:44px;padding:14px 34px">🎉 BUGÜN AÇILDIK</span>
+    <h1 class="h" style="font-size:140px;margin-top:30px">Dostların <span class="mark">kaybolmasın.</span></h1>
+    <p class="p" style="font-size:50px;margin-top:20px">Kedi, köpek ve tüm dostlar için QR künye. Takip et, arkadaşınla paylaş!</p></div>`,
+  collar("kedi", "Minnoş", "#163a7a"), 250, 480) + `
+  <div style="position:absolute;left:140px;right:140px;bottom:270px;height:150px;border:5px dashed rgba(255,255,255,.7);border-radius:30px;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700">👆 Bağlantı çıkartmasını buraya koy</div>`);
+
 // ---------------- Reels kapakları 1080x1920 (yazılar üstte 250 px'ten sonra; alt 400 px'te yalnızca marka satırı)
 add("reels-1-kapi-acik-kaldi", 1080, 1920, "orange", frame(`
     <span class="pill" style="font-size:40px;padding:12px 30px">BİR AN DİKKATSİZLİK</span>
@@ -94,7 +152,7 @@ add("reels-4-kayip-modu", 1080, 1920, "red", frame(`
 add("reels-5-hangisi-yakisir", 1080, 1920, "orange", frame(`<div style="text-align:center">
     <span class="pill" style="font-size:40px;padding:12px 30px">YORUMA YAZ 👇</span>
     <h1 class="h" style="font-size:150px;margin-top:26px">Hangisi <span class="mark">seninkine</span> yakışır?</h1>
-    <p class="p" style="font-size:50px;margin-top:20px">11 renkli tasarım ya da paslanmaz metal.</p></div>`,
+    <p class="p" style="font-size:50px;margin-top:20px">${Object.keys(DESIGNS).length} renkli tasarım ya da paslanmaz metal.</p></div>`,
   fan(["kirmizi", "Bobi"], ["sari", "Fındık"], ["klasik", "Pamuk", "metal"])) + brand(120));
 
 add("reels-6-saglik-notu", 1080, 1920, "cream", frame(`
@@ -108,7 +166,7 @@ add("profil-fotografi", 1080, 1080, "orange", `
 
 // ---------------- Öne çıkan hikâye kapakları 1080x1920
 [["one-cikan-nasil", "❓", "NASIL?"], ["one-cikan-rozetler", "🏷️", "ROZETLER"], ["one-cikan-kayip", "🚨", "KAYIP?"],
- ["one-cikan-siparis", "📦", "SİPARİŞ"], ["one-cikan-sss", "💬", "SSS"], ["one-cikan-dostlar", "🐾", "DOSTLAR"]].forEach(([n, ic, t]) =>
+ ["one-cikan-siparis", "📦", "SİPARİŞ"], ["one-cikan-sss", "💬", "SSS"], ["one-cikan-dostlar", "🐾", "DOSTLAR"], ["one-cikan-isletme", "🏥", "İŞLETME"]].forEach(([n, ic, t]) =>
   add(n, 1080, 1920, "orange hl", `<div class="ring"><div class="ic">${ic}</div><div class="t">${t}</div></div>`));
 
 // ---------------- Gönderi A (kaydırmalı) 1080x1350: 3 adımda rozet

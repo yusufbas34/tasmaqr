@@ -3,103 +3,282 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tasma QR Büyüme Planı</title>
+<title>Tasma QR Pazarlama</title>
 <link rel="icon" type="image/svg+xml" href="../shared/logo.svg">
 <link rel="stylesheet" href="../shared/fonts.css">
 <style>
+:root{--o:#b8501a;--o2:#e8742a;--n:#163a7a;--bg:#f6f1ea;--card:#fff;--ink:#1d2330;--mut:#5d6472;--line:#e4dbd0;--ok:#0c7a43;--soft:#fbeee5}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15181e;--card:#1f232b;--ink:#eef0f4;--mut:#a3a9b5;--line:#343a45;--soft:#3a2a20;--o:#f08a4b}}
+:root[data-theme="dark"]{--bg:#15181e;--card:#1f232b;--ink:#eef0f4;--mut:#a3a9b5;--line:#343a45;--soft:#3a2a20;--o:#f08a4b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Barlow",system-ui,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 18px 70px}
+h1,h2,h3{font-family:"Barlow Condensed","Barlow",sans-serif;line-height:1.1;margin:0}
+a{color:var(--o)}
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin:0 -18px 26px;padding:10px 18px}
+.top .in{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:22px;color:var(--ink);text-decoration:none}
+.brand img{width:32px;height:32px}
+.top nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;justify-content:flex-end}
+.top nav a{white-space:nowrap;text-decoration:none;color:var(--mut);font-weight:600;font-size:15px;padding:7px 11px;border-radius:8px}
+.top nav a:hover{background:var(--soft);color:var(--ink)}
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;align-items:center;margin-bottom:30px}
+.hero h1{font-size:46px;margin:6px 0 10px}
+.hero p{color:var(--mut);font-size:18px;margin:0}
+.eyebrow{display:inline-block;font-size:12.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--o);background:var(--soft);border-radius:999px;padding:5px 12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stat b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:30px;color:var(--o);line-height:1}
+.stat span{font-size:13.5px;color:var(--mut)}
+@media (max-width:760px){.hero{grid-template-columns:1fr}.hero h1{font-size:36px}}
+section{margin:38px 0}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.sec-head h2{font-size:30px}
+.sec-head p{margin:0;color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 1px 2px #0000000a}
+.today{background:linear-gradient(135deg,#b8501a,#7e3410);color:#fff;border:0}
+.today h2{color:#fff;font-size:30px}.today p{color:#ffffffd9}
+.steps{display:grid;gap:10px;margin-top:14px;counter-reset:s;list-style:none;padding:0}
+.steps li{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;background:#ffffff1a;border-radius:12px;padding:12px;counter-increment:s}
+.steps li::before{content:counter(s);width:34px;height:34px;border-radius:50%;background:#ffe08a;color:#7e3410;font-weight:800;display:flex;align-items:center;justify-content:center}
+.steps b{display:block}
+.steps small{color:#ffffffcc}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.copybox{position:relative;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;white-space:pre-wrap;font-size:15px;margin:8px 0 0}
+.copy{font:inherit;font-size:14px;font-weight:700;color:#fff;background:var(--o);border:0;border-radius:8px;padding:7px 12px;cursor:pointer;margin-top:8px}
+.copy.done{background:var(--ok)}
+.label{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.posts{display:grid;gap:14px}
+.post{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:start}
+.post .thumbs{display:flex;gap:6px;flex-wrap:wrap}
+.post .thumbs img{width:150px;border-radius:10px;border:1px solid var(--line);display:block}
+.post .thumbs.many img{width:72px}
+.post h3{font-size:22px}
+.post .when{display:inline-block;font-size:12.5px;font-weight:800;color:var(--o);background:var(--soft);border-radius:999px;padding:3px 10px;margin-bottom:6px}
+@media (max-width:620px){.post{grid-template-columns:1fr}.post .thumbs img{width:110px}}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.gal a{display:block;text-decoration:none;color:var(--mut);font-size:12.5px}
+.gal img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:12px;border:1px solid var(--line);display:block;background:var(--card)}
+.gal img.p45{aspect-ratio:4/5}.gal img.sq{aspect-ratio:1/1}
+.gal span{display:block;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gh{font-size:20px;margin:22px 0 10px}
+/* plan takibi */
+.total{display:grid;gap:8px}
+.total .row{display:flex;align-items:baseline;gap:12px}
+.big{font-family:"Barlow Condensed",sans-serif;font-size:40px;font-weight:700;color:var(--o)}
+.status{color:var(--mut);font-size:14px}.status.err{color:#b3261e}
+.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--o2),var(--o))}
+.bar.mini{height:6px;flex-basis:100%}
+.phase{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 10px}
+.phase h2{font-size:24px}.phase .tag{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--n);border-radius:999px;padding:3px 10px}
+.phase .cnt{margin-left:auto;color:var(--mut);font-weight:700}
+#list ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.item{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.item input{width:20px;height:20px;margin-top:2px;accent-color:var(--o);flex:none}
+.item .txt{display:grid;gap:2px}.item small{color:var(--mut)}
+.is-done .item{opacity:.6}.is-done b{text-decoration:line-through}
+.when2{font-size:12.5px;color:var(--ok);font-weight:700}
+.foot{color:var(--mut);font-size:14px;margin-top:30px}
+code{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="plate"><b>🐾</b><span>TASMA QR</span></div>
-    <h1>Büyüme planı takibi</h1>
-    <p class="lead">90 günlük planın yapılacakları. Biteni işaretleyin; işaretler bu tarayıcıda saklanır.</p>
-    <nav class="nav" aria-label="Plan belgeleri">
-      <a href="buyume-plani.html">📄 Planın tamamı</a>
-      <a href="Tasma-QR-Buyume-Plani.pdf">⬇️ PDF</a>
-      <a href="#instagram">📸 Instagram görselleri</a>
-      <a href="https://github.com/yusufbas34/tasmaqr/blob/main/android/GOOGLE_PLAY.md">▶️ Google Play rehberi</a>
-    </nav>
-  </header>
+  <header class="top"><div class="in">
+    <a class="brand" href="../"><img src="../shared/logo.svg" alt="">Tasma QR</a>
+    <nav aria-label="Bölümler"><a href="#bugun">Bugün</a><a href="#takvim">İlk hafta</a><a href="#plan">Plan</a><a href="#gorseller">Görseller</a>
+      <a href="buyume-plani.html">Planın tamamı</a><a href="Tasma-QR-Buyume-Plani.pdf">PDF</a></nav>
+  </div></header>
 
-  <div class="total">
-    <div class="row"><span class="big" id="pct">0%</span><span class="status" id="status">Yükleniyor…</span></div>
-    <div class="bar"><i id="totalbar" style="width:0%"></i></div>
-    <span class="status" id="count"></span>
+  <div class="hero">
+    <div><span class="eyebrow">Pazarlama merkezi</span>
+      <h1>Instagram açılışı ve 90 günlük büyüme</h1>
+      <p>Kedi, köpek ve tüm evcil hayvanlar için QR künye. Bugünkü açılış adımları, hazır metinler, görseller ve plan takibi tek sayfada.</p></div>
+    <div class="stats">
+      <div class="stat"><b>12</b><span>rozet tasarımı (kedi yüzü dahil)</span></div>
+      <div class="stat"><b>2</b><span>ürün: epoksi ve metal</span></div>
+      <div class="stat"><b>A7</b><span>kullanım kitapçığı, A4'ten 4</span></div>
+    </div>
   </div>
 
-  <div id="list"></div>
+  <section id="bugun">
+    <div class="card today">
+      <h2>Bugün: Instagram'ı açıyoruz 🎉</h2>
+      <p>Sırayla yapın; toplam 30–40 dakika. Profil boş görünmesin diye ilk gün 3 gönderi paylaşılır.</p>
+      <ol class="steps">
+        <li><div><b>İşletme hesabı açın: @tasmaqr</b><small>Ayarlar › Hesap türü › Profesyonel › İşletme. Kategori: <b>Evcil Hayvan Ürünleri</b>.</small></div></li>
+        <li><div><b>Profil fotoğrafı, ad ve bio</b><small>Profil fotoğrafı aşağıdaki galeride; ad ve bio metnini kopyalayın. Bağlantı: siteniz.</small></div></li>
+        <li><div><b>3 gönderiyi şu sırayla paylaşın</b><small>1) 12 tasarım → 2) Kediler de kaybolur → 3) Açılış gönderisi (4 kare). Son paylaşılan en başta görünür.</small></div></li>
+        <li><div><b>Açılış hikâyesi</b><small>“Bugün açıldık” hikâyesine bağlantı çıkartması ekleyin, arkadaşlarınıza paylaşmalarını rica edin.</small></div></li>
+        <li><div><b>Öne çıkanlar</b><small>Nasıl? · Rozetler · Kayıp? · Sipariş · SSS · Dostlar · İşletme kapaklarıyla; her birine ilgili hikâyeyi ekleyin.</small></div></li>
+        <li><div><b>İlk takipçiler</b><small>Rehberinizdeki evcil hayvan sahiplerine, mahalle/site gruplarına ve tanıdık veteriner, pet shoplara profil bağlantısını gönderin.</small></div></li>
+      </ol>
+    </div>
+    <div class="two" style="margin-top:14px">
+      <div class="card"><div class="label">Profil adı (aramada çıkar, en fazla 30)</div>
+        <div class="copybox" id="t-name">Tasma QR | Evcil Hayvan Künye</div><button class="copy" data-copy="t-name">Kopyala</button></div>
+      <div class="card"><div class="label">Bio (150 karakter)</div>
+        <div class="copybox" id="t-bio">🐾 Kedi, köpek ve tüm dostlar için QR künye
+📞 Bulan kişi tek dokunuşla seni arar
+📍 Konum · 🚨 Kayıp modu · 🔒 Numaran gizli
+👇 Ücretsiz oluştur</div><button class="copy" data-copy="t-bio">Kopyala</button></div>
+    </div>
+    <div class="card" style="margin-top:14px"><div class="label">Bağlantı</div>
+      <div class="copybox" id="t-link">https://yusufbas34.github.io/tasmaqr/</div><button class="copy" data-copy="t-link">Kopyala</button></div>
+  </section>
 
-  <h2 class="sec" id="instagram">Instagram görselleri</h2>
-  <p class="foot" style="margin:0">Görsele dokunun, açılınca basılı tutup kaydedin. Reels kapakları 1080×1920, gönderiler 1080×1350, profil 1080×1080.</p>
-  <div class="gal">
-      <a href="instagram/reels-1-kapi-acik-kaldi.png"><img src="instagram/reels-1-kapi-acik-kaldi.png" alt="reels-1-kapi-acik-kaldi" loading="lazy"><span>reels-1-kapi-acik-kaldi</span></a>
-      <a href="instagram/reels-2-kunyeye-numara-kazima.png"><img src="instagram/reels-2-kunyeye-numara-kazima.png" alt="reels-2-kunyeye-numara-kazima" loading="lazy"><span>reels-2-kunyeye-numara-kazima</span></a>
-      <a href="instagram/reels-3-konum-geldi.png"><img src="instagram/reels-3-konum-geldi.png" alt="reels-3-konum-geldi" loading="lazy"><span>reels-3-konum-geldi</span></a>
-      <a href="instagram/reels-4-kayip-modu.png"><img src="instagram/reels-4-kayip-modu.png" alt="reels-4-kayip-modu" loading="lazy"><span>reels-4-kayip-modu</span></a>
-      <a href="instagram/reels-5-hangisi-yakisir.png"><img src="instagram/reels-5-hangisi-yakisir.png" alt="reels-5-hangisi-yakisir" loading="lazy"><span>reels-5-hangisi-yakisir</span></a>
-      <a href="instagram/reels-6-saglik-notu.png"><img src="instagram/reels-6-saglik-notu.png" alt="reels-6-saglik-notu" loading="lazy"><span>reels-6-saglik-notu</span></a>
-      <a href="instagram/profil-fotografi.png"><img src="instagram/profil-fotografi.png" alt="profil-fotografi" loading="lazy" class="sq"><span>profil-fotografi</span></a>
-      <a href="instagram/one-cikan-nasil.png"><img src="instagram/one-cikan-nasil.png" alt="one-cikan-nasil" loading="lazy"><span>one-cikan-nasil</span></a>
-      <a href="instagram/one-cikan-rozetler.png"><img src="instagram/one-cikan-rozetler.png" alt="one-cikan-rozetler" loading="lazy"><span>one-cikan-rozetler</span></a>
-      <a href="instagram/one-cikan-kayip.png"><img src="instagram/one-cikan-kayip.png" alt="one-cikan-kayip" loading="lazy"><span>one-cikan-kayip</span></a>
-      <a href="instagram/one-cikan-siparis.png"><img src="instagram/one-cikan-siparis.png" alt="one-cikan-siparis" loading="lazy"><span>one-cikan-siparis</span></a>
-      <a href="instagram/one-cikan-sss.png"><img src="instagram/one-cikan-sss.png" alt="one-cikan-sss" loading="lazy"><span>one-cikan-sss</span></a>
-      <a href="instagram/one-cikan-dostlar.png"><img src="instagram/one-cikan-dostlar.png" alt="one-cikan-dostlar" loading="lazy"><span>one-cikan-dostlar</span></a>
-      <a href="instagram/gonderi-a1-kapak.png"><img src="instagram/gonderi-a1-kapak.png" alt="gonderi-a1-kapak" loading="lazy" class="sq"><span>gonderi-a1-kapak</span></a>
-      <a href="instagram/gonderi-a2-adim1.png"><img src="instagram/gonderi-a2-adim1.png" alt="gonderi-a2-adim1" loading="lazy" class="sq"><span>gonderi-a2-adim1</span></a>
-      <a href="instagram/gonderi-a3-adim2.png"><img src="instagram/gonderi-a3-adim2.png" alt="gonderi-a3-adim2" loading="lazy" class="sq"><span>gonderi-a3-adim2</span></a>
-      <a href="instagram/gonderi-a4-adim3.png"><img src="instagram/gonderi-a4-adim3.png" alt="gonderi-a4-adim3" loading="lazy" class="sq"><span>gonderi-a4-adim3</span></a>
-      <a href="instagram/gonderi-a5-indir.png"><img src="instagram/gonderi-a5-indir.png" alt="gonderi-a5-indir" loading="lazy" class="sq"><span>gonderi-a5-indir</span></a>
-      <a href="instagram/gonderi-b1-kapak.png"><img src="instagram/gonderi-b1-kapak.png" alt="gonderi-b1-kapak" loading="lazy" class="sq"><span>gonderi-b1-kapak</span></a>
-      <a href="instagram/gonderi-b2-adimlar.png"><img src="instagram/gonderi-b2-adimlar.png" alt="gonderi-b2-adimlar" loading="lazy" class="sq"><span>gonderi-b2-adimlar</span></a>
-      <a href="instagram/gonderi-b3-onlem.png"><img src="instagram/gonderi-b3-onlem.png" alt="gonderi-b3-onlem" loading="lazy" class="sq"><span>gonderi-b3-onlem</span></a>
-      <a href="instagram/hikaye-baglanti.png"><img src="instagram/hikaye-baglanti.png" alt="hikaye-baglanti" loading="lazy"><span>hikaye-baglanti</span></a>
-      <a href="instagram/hikaye-anket.png"><img src="instagram/hikaye-anket.png" alt="hikaye-anket" loading="lazy"><span>hikaye-anket</span></a>
-      <a href="instagram/hikaye-sahiplendirme.png"><img src="instagram/hikaye-sahiplendirme.png" alt="hikaye-sahiplendirme" loading="lazy"><span>hikaye-sahiplendirme</span></a>
-  </div>
+  <section id="takvim">
+    <div class="sec-head"><h2>İlk hafta paylaşım takvimi</h2><p>Görsele dokunup kaydedin, metni kopyalayıp yapıştırın.</p></div>
+    <div class="posts" id="posts"></div>
+  </section>
 
-  <p class="foot">Kaynak: Tasma QR Hızlı Büyüme Planı. Senaryolar, fiyat tablosu, ortaklıklar ve riskler “Planın tamamı” sayfasında.
-    Görselleri değiştirmek için <code>pazarlama/kit.html</code>'i düzenleyip <code>node pazarlama/uret.js</code> çalıştırın.</p>
+  <section id="plan">
+    <div class="sec-head"><h2>90 günlük plan takibi</h2><p>Biteni işaretleyin; bu tarayıcıda saklanır.</p></div>
+    <div class="card total">
+      <div class="row"><span class="big" id="pct">0%</span><span class="status" id="status">Yükleniyor…</span></div>
+      <div class="bar"><i id="totalbar" style="width:0%"></i></div>
+      <span class="status" id="count"></span>
+    </div>
+    <div id="list"></div>
+  </section>
+
+  <section id="gorseller">
+    <div class="sec-head"><h2>Tüm Instagram görselleri</h2><p>Gönderiler 1080×1350, hikâye ve reels 1080×1920, profil 1080×1080.</p></div>
+    <div id="gal"></div>
+  </section>
+
+  <p class="foot">Görselleri değiştirmek için <code>pazarlama/kit.html</code>'i düzenleyip <code>node pazarlama/uret.js</code> çalıştırın.
+    Senaryolar, fiyatlar, ortaklıklar ve riskler “Planın tamamı” sayfasında.</p>
 </div>
 
 <script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const TAGS = "#evcilhayvan #kedi #köpek #kedisever #köpeksever #patidostlar #kayıpkedi #kayıpköpek #tasma #qrkünye";
+
+// ---------------- ilk hafta paylaşımları
+const POSTS = [
+  {when: "Bugün · 1", title: "12 tasarım (tek görsel)", imgs: ["gonderi-e-tasarimlar"], text:
+`12 tasarım, hepsi tasmaya takılan gerçek rozet 🐾 Seninkine hangisi yakışır? Yoruma yaz 👇
+
+Kedi yüzünden nazar boncuğuna, sarı “çok görünür”den sade siyaha… Ücretsiz oluştur, istersen epoksi ya da metal rozetin kapına gelsin.
+
+${TAGS}`},
+  {when: "Bugün · 2", title: "Kediler de kaybolur", imgs: ["gonderi-c-kedi"], text:
+`Kediler de kaybolur 🐱 Açık kalan bir pencere, bir anlık kapı aralığı…
+
+Tasma QR'ın hafif Ø25 mm rozetini güvenlik kilitli (çekince açılan) kedi tasmasına takın. Bulan kişi rozeti okutur, sizi tek dokunuşla arar ya da konumunu gönderir. Numaranız rozette yazmaz.
+
+Profildeki bağlantıdan ücretsiz oluşturun.
+${TAGS} #kedisahibi`},
+  {when: "Bugün · 3", title: "Açılış gönderisi (4 kare, kaydırmalı)", imgs: ["acilis-1-merhaba", "acilis-2-nasil", "acilis-3-bulan-kisi", "acilis-4-dene"], text:
+`Merhaba! Biz Tasma QR 🎉🐾
+
+Kedi, köpek ve tüm dostlar için tasmaya takılan akıllı QR künye:
+📞 Bulan kişi okutur, seni tek dokunuşla arar
+📍 Bulunduğu yeri sana gönderir
+🚨 Kaybolursa tek dokunuşla “KAYIP!” modu
+🔒 Numaran rozette yazmaz, bilgileri PIN'inle sen değiştirirsin
+
+Uygulama indirmek gerekmez; her telefonun kamerası okur. Ücretsiz dene: bağlantı profilde 👆
+Takip et, dostların güvende olsun 💛
+
+${TAGS}`},
+  {when: "Bugün · hikâye", title: "Bugün açıldık (bağlantı çıkartmalı)", imgs: ["hikaye-acilis"], text: `Hikâyeye bağlantı çıkartması ekleyin: https://yusufbas34.github.io/tasmaqr/  Çıkartma metni: “Rozetini yap”`},
+  {when: "2. gün", title: "Gizlilik: numaran rozette yazmaz", imgs: ["gonderi-d-pin"], text:
+`“Künyeye telefonumu yazdırmak istemiyorum” diyenler buraya 🔒
+
+Tasma QR'da numaranız rozette yazmaz. Yalnızca rozeti okutan kişi, size ulaşabilsin diye arama ekranında görür. Bilgileri görmek ve değiştirmek için PIN gerekir; 5 yanlış denemede kilitlenir.
+
+${TAGS} #gizlilik`},
+  {when: "3. gün", title: "Reels: Kapı açık kaldı", imgs: ["reels-1-kapi-acik-kaldi"], text:
+`Bir an dikkatsizlik… Kapı açık kaldı, dostun kaçtı 😟 Onu bulan kişi seni nasıl arayacak?
+
+Tasmasındaki QR rozeti okutur, seni tek dokunuşla arar. Ücretsiz oluştur: bağlantı profilde.
+${TAGS} #reels`},
+  {when: "4. gün", title: "Kaybolursa ilk saatlerde 5 şey (kaydırmalı)", imgs: ["gonderi-b1-kapak", "gonderi-b2-adimlar", "gonderi-b3-onlem"], text:
+`Kaydet 🔖 Dostun kaybolursa ilk saatlerde yapılacak 5 şey. Lazım olunca aramakla vakit kaybetme; şimdiden kaydet, sevdiklerinle paylaş.
+
+${TAGS} #kayıphayvan`},
+  {when: "5. gün", title: "Reels: Konum geldi", imgs: ["reels-3-konum-geldi"], text:
+`Bulan kişi konumunu gönderdi 📍 Bildirim anında telefonuna gelir, haritada görürsün.
+${TAGS} #reels`},
+  {when: "6. gün", title: "Veteriner ve pet shoplar için", imgs: ["gonderi-f-isletme"], text:
+`Veteriner kliniği, pet shop ya da pansiyon musunuz? 🏥
+
+İsimsiz “OKUT • SAHİBİMİ ARA” stok rozetlerimiz PIN kartı ve mini kullanım kitapçığıyla gelir: rafınızda durur, müşteriniz bir dakikada kendi dostuna bağlar. Abonelik yok, kurulum yok.
+
+Toptan fiyat ve deneme paketi için DM 📩
+${TAGS} #veteriner #petshop`},
+  {when: "7. gün", title: "Reels: Kayıp modu", imgs: ["reels-4-kayip-modu"], text:
+`Tek dokunuşla “KAYIP!” 🚨 Rozeti okutan herkes kırmızı uyarıyı ve ödül notunu görür.
+${TAGS} #reels`},
+];
+document.getElementById("posts").innerHTML = POSTS.map((p, i) => `<div class="card post">
+  <div class="thumbs${p.imgs.length > 2 ? " many" : ""}">${p.imgs.map(n => `<a href="instagram/${n}.png" target="_blank"><img src="instagram/${n}.png" alt="${esc(n)}" loading="lazy"></a>`).join("")}</div>
+  <div><span class="when">${esc(p.when)}</span><h3>${esc(p.title)}</h3>
+    <div class="copybox" id="p-${i}">${esc(p.text)}</div><button class="copy" data-copy="p-${i}">Metni kopyala</button></div></div>`).join("");
+
+// ---------------- galeri
+const GAL = [
+  ["Açılış ve yeni gönderiler", "p45", ["acilis-1-merhaba", "acilis-2-nasil", "acilis-3-bulan-kisi", "acilis-4-dene", "gonderi-c-kedi", "gonderi-d-pin", "gonderi-e-tasarimlar", "gonderi-f-isletme"]],
+  ["Kaydırmalı gönderiler", "p45", ["gonderi-a1-kapak", "gonderi-a2-adim1", "gonderi-a3-adim2", "gonderi-a4-adim3", "gonderi-a5-indir", "gonderi-b1-kapak", "gonderi-b2-adimlar", "gonderi-b3-onlem"]],
+  ["Reels kapakları", "", ["reels-1-kapi-acik-kaldi", "reels-2-kunyeye-numara-kazima", "reels-3-konum-geldi", "reels-4-kayip-modu", "reels-5-hangisi-yakisir", "reels-6-saglik-notu"]],
+  ["Hikâyeler", "", ["hikaye-acilis", "hikaye-baglanti", "hikaye-anket", "hikaye-sahiplendirme"]],
+  ["Profil ve öne çıkan kapakları", "", ["profil-fotografi", "one-cikan-nasil", "one-cikan-rozetler", "one-cikan-kayip", "one-cikan-siparis", "one-cikan-sss", "one-cikan-dostlar", "one-cikan-isletme"]],
+];
+document.getElementById("gal").innerHTML = GAL.map(([t, cls, list]) => `<h3 class="gh">${esc(t)}</h3><div class="gal">${list.map(n =>
+  `<a href="instagram/${n}.png" target="_blank"><img src="instagram/${n}.png" alt="${esc(n)}" loading="lazy" class="${n === "profil-fotografi" ? "sq" : cls}"><span>${esc(n)}</span></a>`).join("")}</div>`).join("");
+
+document.addEventListener("click", async ev => {
+  const b = ev.target.closest("[data-copy]"); if (!b) return;
+  const text = document.getElementById(b.dataset.copy).textContent;
+  try { await navigator.clipboard.writeText(text); } catch (e) { const r = document.createRange(); r.selectNodeContents(document.getElementById(b.dataset.copy)); getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand("copy"); }
+  const old = b.textContent; b.textContent = "✓ Kopyalandı"; b.classList.add("done"); setTimeout(() => { b.textContent = old; b.classList.remove("done"); }, 1600);
+});
+
+// ---------------- plan takibi
 const PLAN = [
   {id: "hazirlik", tag: "Hazır", title: "Hazırlık", items: [
-    ["h1", "Web sitesi, uygulama ve veritabanı", "yusufbas34.github.io/tasmaqr · APK · kurulum.sql"],
+    ["h1", "Web sitesi, uygulama ve veritabanı", "Sayfalı site, uygulamada Rozetlerim / Siparişlerim / Profilim sekmeleri"],
     ["h2", "Gizlilik politikası ve veri silme sayfası", "yusufbas34.github.io/tasmaqr/gizlilik.html"],
-    ["h3", "Play mağaza görselleri ve metinleri", "android/store ve GOOGLE_PLAY.md"],
-    ["h4", "Instagram görsel kiti", "6 reels kapağı, profil, 6 öne çıkan, 2 kaydırmalı gönderi, 3 hikâye"],
+    ["h3", "Play mağaza görselleri ve metinleri", "Evcil hayvan sürümüne göre yenilendi (android/store, GOOGLE_PLAY.md)"],
+    ["h4", "Instagram görsel kiti", "Açılış seti, 6 reels, 2 kaydırmalı gönderi, 4 hikâye, 7 öne çıkan"],
     ["h5", "Büyüme planı PDF'i", ""],
+    ["h6", "Kedi ve tüm evcil hayvanlar için metinler, Kedi yüzü tasarımı", "12 tasarım"],
+    ["h7", "PIN önce: bilgiler PIN girilince açılır; PIN denemeleri kilitli", "Supabase'de güncel kurulum.sql çalıştırılmalı"],
+    ["h8", "İşletme paketi: isimsiz stok rozet, PIN kartı, A7 kullanım kitapçığı", "Yönetim › Sahibimi Ara (stok) ve Kullanım kitapçığı"],
   ]},
   {id: "hafta0", tag: "Bu hafta", title: "Başlangıç", items: [
-    ["w0a", "Play Console'da Tasma QR uygulamasını oluştur, formları doldur", "Gizlilik, reklam yok, içerik derecelendirmesi, hedef kitle 18+, veri güvenliği"],
-    ["w0b", "Yükleme anahtarını oluştur, GitHub Secrets'a ekle", "Sonra Actions'tan ilk AAB'yi al"],
+    ["w0d", "Instagram işletme hesabını aç (@tasmaqr)", "Bugün: profil, bio, 3 gönderi, açılış hikâyesi, öne çıkanlar"],
+    ["w0g", "Supabase'de son kurulum.sql'i çalıştır", "PIN ekranı ve PIN kilidi için"],
+    ["w0a", "Play Console'da uygulamayı oluştur, formları doldur", "Yeni ad: Tasma QR: Evcil Hayvan Künyesi"],
+    ["w0b", "Yükleme anahtarını GitHub Secrets'a ekle, AAB al", ""],
     ["w0c", "15–20 testçi ekle, kapalı testi yayınla", "Kedi/köpek sahibi arkadaşlar; 14 gün sayacı buradan başlar"],
-    ["w0d", "Instagram işletme hesabını aç (@tasmaqr)", "Profil fotoğrafı, bio, öne çıkan kapakları"],
     ["w0e", "Ø30 mm epoksi ve metal numune yaptır, QR'ı 3–4 telefonla okut", "Fotoğraf ve video çek: reels için en iyi malzeme"],
-    ["w0f", "Yönetim › Ayarlar: fiyatlar, IBAN, ürün açıklaması, Telegram", "Supabase'de son kurulum.sql çalıştırıldı mı?"],
+    ["w0f", "Yönetim › Ayarlar: fiyatlar, IBAN, ürün açıklaması, Telegram", ""],
+    ["w0h", "İlk stok partisi: 30–50 isimsiz rozet + PIN kartı + A7 kitapçık", "Yönetim › Sahibimi Ara (stok) ve Kullanım kitapçığı"],
   ]},
   {id: "hafta12", tag: "Hafta 1–2", title: "İlk dağıtım", items: [
-    ["w1a", "Panelden 50 rozet üret, PIN kartıyla bas; 10 numune rozet yaptır", ""],
-    ["w1b", "5 veteriner ve 5 pet shopla görüş", "Tezgâh kartı ve örnek rozet bırak"],
-    ["w1c", "İlk 3 reels'i paylaş", "Kapı açık kaldı · Künyeye numara kazıtma · Konum geldi"],
-    ["w1d", "“Hayvanın kaybolursa 5 adım” gönderisi ve künye anketi", "Kaydırmalı gönderi B, hikâye anketi"],
+    ["w1b", "5 veteriner ve 5 pet shopla görüş", "Tezgâha stok rozet ve kitapçık bırak; gönderi-f-isletme'yi göster"],
+    ["w1c", "İlk 3 reels'i paylaş", "Kapı açık kaldı · Konum geldi · Kayıp modu"],
+    ["w1d", "“Kaybolursa 5 şey” gönderisi ve künye anketi", "Kaydırmalı gönderi B, hikâye anketi"],
+    ["w1f", "Kedi sahiplerine özel içerik", "Kedi grupları, kedi kafeleri, kedi hesaplarıyla iş birliği"],
     ["w1e", "Testçilerden geri bildirim topla, küçük bir güncelleme yayınla", ""],
   ]},
   {id: "hafta34", tag: "Hafta 3–4", title: "Play'e çıkış", items: [
     ["w3a", "14 gün dolunca üretim erişimi başvurusu yap", ""],
     ["w3b", "Yayın günü testçilerden Play'de yorum ve puan iste", "Instagram bağlantısını Play sayfasına çevir"],
     ["w3c", "2 barınak / dernekle görüş: sahiplendirilen her hayvana hediye rozet", "Hikâye şablonu: hikaye-sahiplendirme"],
-    ["w3d", "Bir köpek eğitmeni ve bir pet kuaförle iş birliği", ""],
+    ["w3d", "Bir eğitmen, bir pet kuaför ve bir pansiyonla iş birliği", "Stok rozet + kitapçık"],
     ["w3e", "Haftada 3 reels'e devam et", "En çok izlenenin benzerini yap"],
   ]},
   {id: "ay2", tag: "Ay 2", title: "Ortaklıklar", items: [
-    ["m2a", "Ortak işletmelere tezgâh standı; iyi gidene özel tasarım teklif et", "20 adet ve üstü"],
+    ["m2a", "İyi giden ortak işletmelere tezgâh standı ve özel tasarım teklifi", "20 adet ve üstü"],
     ["m2b", "3–5 mikro kedi/köpek hesabıyla iş birliği", "Ücretsiz rozet karşılığı tasmada çekim"],
     ["m2c", "Müşterilerden tasmadaki rozet fotoğrafı topla", "İzinle hikâyede paylaş · öne çıkan: DOSTLAR"],
-    ["m2d", "Köpek parkı ya da sahiplendirme etkinliğinde stant", "Yerinde rozet oluşturma, okutma denemesi"],
+    ["m2d", "Sahiplendirme etkinliği ya da parkta stant", "Yerinde rozet oluşturma, okutma denemesi"],
+    ["m2e", "3D baskı gövde + QR etiket denemesi", "uretim/3d: düşük maliyetli renkli seçenek"],
   ]},
   {id: "ay3", tag: "Ay 3", title: "Büyütme", items: [
     ["m3a", "En iyi reels'i küçük bütçeyle öne çıkar", "Önce 3–5 gün test; ilgi alanı kedi, köpek / evcil hayvan"],
@@ -110,11 +289,8 @@ const PLAN = [
 ];
 const ALL = PLAN.flatMap(p => p.items.map(i => i[0]));
 const LS = "tasmaqr-plan-takip";
-let done = {};          // id -> ISO tarih (işaretlendiği an) ya da yok
-
-const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+let done = {};
 const day = iso => { try { return new Date(iso).toLocaleDateString("tr-TR", {day: "numeric", month: "long"}); } catch (e) { return ""; } };
-
 function render() {
   const n = ALL.filter(id => done[id]).length, pct = Math.round(100 * n / ALL.length);
   document.getElementById("pct").textContent = pct + "%";
@@ -122,18 +298,15 @@ function render() {
   document.getElementById("count").textContent = `${n} / ${ALL.length} adım tamamlandı`;
   document.getElementById("list").innerHTML = PLAN.map(p => {
     const k = p.items.filter(i => done[i[0]]).length;
-    return `<section>
-      <div class="phase"><span class="tag">${esc(p.tag)}</span><h2>${esc(p.title)}</h2><span class="cnt">${k}/${p.items.length}</span>
+    return `<div class="phase"><span class="tag">${esc(p.tag)}</span><h2>${esc(p.title)}</h2><span class="cnt">${k}/${p.items.length}</span>
         <div class="bar mini"><i style="width:${Math.round(100 * k / p.items.length)}%"></i></div></div>
       <ul>${p.items.map(([id, t, d]) => `<li class="${done[id] ? "is-done" : ""}"><label class="item">
-        <input type="checkbox" id="c-${id}" data-id="${id}"${done[id] ? " checked" : ""}>
-        <span class="txt"><span><b>${esc(t)}</b></span>${d ? `<small>${esc(d)}</small>` : ""}${done[id] ? `<span class="when">✓ ${esc(day(done[id]))}</span>` : ""}</span>
-      </label></li>`).join("")}</ul></section>`;
+        <input type="checkbox" data-id="${id}"${done[id] ? " checked" : ""}>
+        <span class="txt"><b>${esc(t)}</b>${d ? `<small>${esc(d)}</small>` : ""}${done[id] ? `<span class="when2">✓ ${esc(day(done[id]))}</span>` : ""}</span>
+      </label></li>`).join("")}</ul>`;
   }).join("");
 }
-
-function setStatus(t, err) { const el = document.getElementById("status"); el.textContent = t; el.className = "status" + (err ? " err" : ""); }
-
+function setStatus(t) { document.getElementById("status").textContent = t; }
 document.getElementById("list").addEventListener("change", ev => {
   const id = ev.target.dataset.id; if (!id) return;
   if (ev.target.checked) done[id] = new Date().toISOString(); else delete done[id];
@@ -141,11 +314,9 @@ document.getElementById("list").addEventListener("change", ev => {
   try { localStorage.setItem(LS, JSON.stringify(done)); } catch (e) {}
   setStatus("Kaydedildi");
 });
-
-const PREP = {h1: "2026-10-12", h2: "2026-10-12", h3: "2026-10-12", h4: "2026-10-12", h5: "2026-10-12"};  // tamamlanmış hazırlık
-try { const v = localStorage.getItem(LS); done = v ? JSON.parse(v) || {} : {...PREP}; } catch (e) { done = {...PREP}; }
+const PREP = {h1: "2026-10-12", h2: "2026-10-12", h3: "2026-10-18", h4: "2026-10-19", h5: "2026-10-12", h6: "2026-10-18", h7: "2026-10-19", h8: "2026-10-19"};
+try { const v = localStorage.getItem(LS); done = {...PREP, ...(v ? JSON.parse(v) || {} : {})}; } catch (e) { done = {...PREP}; }
 render();
-
 setStatus("Bu tarayıcıda saklanıyor");
 </script>
 </body>
