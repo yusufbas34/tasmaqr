@@ -19,7 +19,7 @@ Veri güvenliği formu cevapları ve mağaza metinleri. Görseller `android/stor
   - Açılışta başlama: bildirim kontrolü telefon yeniden başlayınca da sürsün diye
 
   Konum, kamera, rehber ve dosya izni yok. Hiçbiri Play'de ek beyan istemez.
-- **Uygulama düzeni (Araç QR gibi):** üst bar (geri tuşu + sayfa adı) ve alt sekmeler: **Rozetlerim · Siparişlerim · Profilim**.
+- **Uygulama düzeni (site gibi):** üst bar (geri tuşu + sayfa adı) ve 5 alt sekme: **Ana sayfa · Rozetlerim · Rozetler · Siparişler · Profil**; Nasıl çalışır, SSS ve Hazır rozet alt sayfa.
   Profilim'de teslimat bilgileri, bildirimler, "Arkadaşına öner", gizlilik politikası ve "Tüm verilerimi sil" var.
 - **Arkadaşına öner** Play sürümünde Play Store bağlantısını paylaşır (GitHub APK bağlantısı Play sürümünde hiç görünmez).
 - **Ödeme:** Rozet fiziksel bir ürün olduğu için havale/EFT ile satılabilir; Play Faturalandırma zorunlu değildir

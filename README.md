@@ -4,7 +4,7 @@ Evcil hayvanların tasmasına künye gibi takılan QR rozet. Rozeti okutan kişi
 
 ## Özellikler
 
-- **Sayfalar**: sitede üst menü (Ana sayfa · Nasıl çalışır · Rozetler · Hazır rozet · SSS · Rozetlerim) ve alt bölüm; uygulamada üst bar ve alt sekmeler (Rozetlerim · Siparişlerim · Profilim)
+- **Sayfalar**: sitede üst menü (Ana sayfa · Nasıl çalışır · Rozetler · Hazır rozet · SSS · Rozetlerim) ve alt bölüm; uygulamada üst bar ve 5 alt sekme (Ana sayfa · Rozetlerim · Rozetler · Siparişler · Profil); Nasıl çalışır, SSS ve Hazır rozet uygulamada da alt sayfa
 - **Tasarım kilidi**: tasarım rozet oluşturulurken seçilir, ücretsiz baskıda değiştirilemez; yeni tasarım rozet siparişinde seçilir ve ödeme onaylanınca rozete işlenir
 - **İlk giriş tanıtımı**: reels gibi yukarı kaydırılan 5 tam ekran slayt (ana sayfadaki “30 saniyede tanıyın” ile tekrar izlenir)
 - **Sahip girişi PIN ile**: QR okutulunca “Bilgileri düzenleyin” ve ilk bağlama önce yalnızca PIN sorar; bilgiler ve form PIN doğrulandıktan sonra açılır. Tüm PIN denemeleri (rozet listesi dahil) 5 yanlışta 15 dakika kilitlenir

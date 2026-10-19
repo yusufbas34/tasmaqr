@@ -171,6 +171,8 @@ body.has-tabbar{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 .appbar span{font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;font-size:23px;letter-spacing:.01em;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .appbar button{font:inherit;font-size:24px;line-height:1;color:#fff;background:#ffffff22;border:0;border-radius:50%;width:40px;height:40px;cursor:pointer;flex:none}
 .app-shell .back{display:none}
+.app-shell .hero-band{margin-top:-18px}
+.tabbar a{font-size:11.5px;letter-spacing:-.01em;white-space:nowrap}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:15;display:flex;background:#fff;border-top:1px solid var(--line);
   padding:6px 6px max(6px,env(safe-area-inset-bottom));box-shadow:0 -4px 16px #0000000d}
 .tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12.5px;font-weight:700;color:var(--muted);text-decoration:none;padding:6px 0;border-radius:10px}
@@ -393,9 +395,11 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 4px #b8501a1f}
 <main id="app"><p>Yükleniyor…</p></main>
 <footer class="site-foot" id="sitefoot" hidden></footer>
 <nav class="tabbar" id="tabbar" hidden aria-label="Ana menü">
+  <a href="#" data-tab="home"><span aria-hidden="true">🏠</span><span>Ana sayfa</span></a>
   <a href="#kunyelerim" data-tab="tags"><span aria-hidden="true">🐾</span><span>Rozetlerim</span></a>
-  <a href="#siparislerim" data-tab="orders"><span aria-hidden="true">📦</span><span>Siparişlerim</span></a>
-  <a href="#profil" data-tab="profile"><span aria-hidden="true">👤</span><span>Profilim</span></a>
+  <a href="#urunler" data-tab="shop"><span aria-hidden="true">🏷️</span><span>Rozetler</span></a>
+  <a href="#siparislerim" data-tab="orders"><span aria-hidden="true">📦</span><span>Siparişler</span></a>
+  <a href="#profil" data-tab="profile"><span aria-hidden="true">👤</span><span>Profil</span></a>
 </nav>
 
 <script>
@@ -1114,17 +1118,6 @@ const designChips = sel => `<div class="designs" role="radiogroup" aria-label="T
   `<button type="button" role="radio" aria-checked="${k === sel}" data-d="${k}" class="${k === sel ? "on" : ""}"><i style="background:${d.ring}"></i>${esc(d.name)}</button>`).join("")}</div>`;
 
 // ---------------------------------------------------------------- uygulama: karşılama, siparişlerim, profilim
-function showAppWelcome() {
-  show(`
-    <div class="showcase" style="margin:6px 0 4px">${showcaseHtml()}</div>
-    <h1 style="text-align:center">Tasmasındaki QR rozet, onu size geri getirsin</h1>
-    <p style="text-align:center">Bulan kişi rozeti telefonuyla okutur; evcil hayvanınızın adını ve notunuzu görür, sizi tek dokunuşla arar ya da konumunu gönderir.</p>
-    <a class="btn" href="#olustur">Rozetimi oluştur</a>
-    <a class="btn ghost" href="#kunyelerim/ekle">Elimdeki rozeti ekle (kod ve PIN)</a>
-    <button class="btn ghost" type="button" id="replay">▶ Nasıl çalışır?</button>`, "mid");
-  document.getElementById("replay").onclick = openIntro;
-}
-
 const orderCardsHtml = orders => `<div class="cards">${orders.map(o => `
   <a class="mine" href="#odeme/${encodeURIComponent(o.code)}" style="grid-template-columns:1fr">
     <div><b>${esc(o.code)} · ${esc(o.amount)} TL</b>
@@ -1185,7 +1178,10 @@ function showProfile(saved = false) {
     </div>` : ""}
     <h2>Uygulama</h2>
     <div class="settings">
-      <button type="button" id="replay">▶ Nasıl çalışır?</button>
+      <button type="button" id="replay">▶ Tanıtımı izle</button>
+      <a href="#nasil">📖 Nasıl çalışır</a>
+      <a href="#sss">❓ Sık sorulanlar</a>
+      <a href="#talep">📝 Hazır rozet iste</a>
       <button type="button" id="share">👋 Arkadaşına öner</button>
       <a href="${IG_URL}" target="_blank" rel="noopener">📷 Instagram'da takip edin · @tasmaqr</a>
       <a href="${esc(SITE_URL)}">🌐 Web sitesi</a>
@@ -2743,11 +2739,14 @@ async function route() {
   if (APP) {
     if (page === "siparislerim") { setChrome({kind: "app", tab: "orders", title: "Siparişlerim"}); return showMyOrders(); }
     if (page === "profil") { setChrome({kind: "app", tab: "profile", title: "Profilim"}); return showProfile(); }
-    if (!store.get("introSeen", false)) openIntro();
-    const has = myTags().length;
-    setChrome({kind: "app", tab: "tags", title: has || page === "kunyelerim" ? "Rozetlerim" : "Tasma QR"});
-    if (page === "kunyelerim" && arg === "ekle") return showMine("", true);
-    return has || page === "kunyelerim" ? showMine() : showAppWelcome();
+    // sitedeki sayfalar uygulamada sekme (Ana sayfa, Rozetler) ya da geri tuşlu alt sayfa (Nasıl çalışır, SSS, Hazır rozet)
+    if (page === "urunler") { setChrome({kind: "app", tab: "shop", title: "Rozetler"}); return showProducts(); }
+    if (page === "nasil") { sub("Nasıl çalışır"); return showHow(); }
+    if (page === "sss") { sub("Sık sorulanlar"); return showFaq(); }
+    if (page === "talep") { sub("Hazır rozet"); return showRequest(); }
+    if (page === "kunyelerim") { setChrome({kind: "app", tab: "tags", title: "Rozetlerim"}); return showMine("", arg === "ekle"); }
+    setChrome({kind: "app", tab: "home", title: "Tasma QR"});  // ilk girişte tanıtım showHome içinde açılır
+    return showHome();
   }
   const pages = {"": [showHome, "Tasma QR"], nasil: [showHow, "Nasıl çalışır"], urunler: [showProducts, "Rozetler"], talep: [showRequest, "Hazır rozet"],
     sss: [showFaq, "Sık sorulanlar"], kunyelerim: [() => showMine("", arg === "ekle"), "Rozetlerim"]};
