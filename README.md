@@ -7,6 +7,7 @@ Evcil hayvanların tasmasına künye gibi takılan QR rozet. Rozeti okutan kişi
 - **Sayfalar**: sitede üst menü (Ana sayfa · Nasıl çalışır · Rozetler · Hazır rozet · SSS · Rozetlerim) ve alt bölüm; uygulamada üst bar ve alt sekmeler (Rozetlerim · Siparişlerim · Profilim)
 - **Tasarım kilidi**: tasarım rozet oluşturulurken seçilir, ücretsiz baskıda değiştirilemez; yeni tasarım rozet siparişinde seçilir ve ödeme onaylanınca rozete işlenir
 - **İlk giriş tanıtımı**: reels gibi yukarı kaydırılan 5 tam ekran slayt (ana sayfadaki “30 saniyede tanıyın” ile tekrar izlenir)
+- **Sahip girişi PIN ile**: QR okutulunca “Bilgileri düzenleyin” ve ilk bağlama önce yalnızca PIN sorar; bilgiler ve form PIN doğrulandıktan sonra açılır. Tüm PIN denemeleri (rozet listesi dahil) 5 yanlışta 15 dakika kilitlenir
 - **Bulan kişi ekranı** (`?k=KOD`): sahibini arama, WhatsApp, SMS, yedek numara, sahibinin notu (sağlık, karakter)
 - **Konum gönderme**: bulan kişi izin verirse konumu sahibinin rozet sayfasına kaydedilir ve WhatsApp/SMS mesajına harita bağlantısı eklenir
 - **Kayıp modu ve ödül**: kayıp modu açıkken QR'ı okutan kişi kırmızı “KAYIP” uyarısını görür

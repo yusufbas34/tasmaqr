@@ -494,16 +494,60 @@ function showFound(code, tag) {
 }
 
 // ---------------------------------------------------------------- sahibi: rozeti bağla / düzenle (PIN ile)
-function showEdit(code, tag, error = "", v = null) {
+// Sahip girişi: önce PIN, PIN doğrulanınca bilgiler ve form açılır. İlk bağlamada da önce karttaki PIN istenir.
+function showPinGate(code, tag, error = "") {
+  const claim = !tag.phone, own = findTag(code);
+  const back = APP ? tagPageLink(code) : claim ? BASE : tagLink(code);
+  let known = own?.pin || "";
+  try { known ||= sessionStorage.getItem("tasmaqr-pin-" + code) || ""; } catch (e) {}
+  show(`
+    ${claim ? petBadge("", code) : petBadge(tag.pet_name, code, tag.lost)}
+    <h1>${claim ? "Rozeti etkinleştirin" : "Rozetin sahibi misiniz?"}</h1>
+    <p>${claim ? "Bu rozet henüz kimseye bağlı değil. Önce rozetle gelen PIN kartındaki 6 haneli PIN'i girin; ardından evcil hayvanınızın ve sizin bilgilerinizi yazıp kaydedeceksiniz."
+              : "Bilgileri görmek ve değiştirmek için rozetin 6 haneli PIN'ini girin."}</p>
+    ${error ? `<div class="msg err" role="alert">${esc(error)}</div>` : ""}
+    <form id="gf" novalidate>
+      <label for="g-pin">${claim ? "Karttaki PIN" : "PIN"}</label>
+      <input id="g-pin" type="text" inputmode="numeric" maxlength="6" placeholder="6 haneli" autocomplete="one-time-code" value="${esc(known)}">
+      ${known ? `<span class="hint">PIN bu cihazda kayıtlı olduğu için dolduruldu.</span>` : `<span class="hint">${claim ? "PIN, rozetle birlikte gelen kartta yazar." : "PIN'i rozeti oluşturduğunuz cihazda Rozetlerim'de ya da rozetle gelen kartta bulabilirsiniz."}</span>`}
+      <button class="btn" type="submit">Devam</button>
+    </form>
+    <p class="small"><a href="${esc(back)}">Vazgeç</a></p>`, "mid");
+  const input = document.getElementById("g-pin");
+  if (!known) input.focus();
+  document.getElementById("gf").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const pin = input.value.trim();
+    if (!/^\d{6}$/.test(pin)) return showPinGate(code, tag, "PIN 6 haneli olmalı.");
+    ev.submitter && (ev.submitter.disabled = true);
+    let r;
+    try {
+      r = await rpc("tasma_tag_unlock", {p_code: code, p_pin: pin}).catch(async e => {
+        if (e.status !== 404) throw e;  // veritabanı güncellenmediyse eski yolla doğrula
+        const rows = await rpc("tasma_tag_stats", {p_codes: [code], p_pins: [pin]});
+        return rows?.[0] ? {ok: true} : {ok: false, error: "bad_pin"};
+      });
+    } catch (e) { return showPinGate(code, tag, "Bağlantı hatası. İnternetinizi kontrol edip tekrar deneyin."); }
+    if (!r?.ok) {
+      return showPinGate(code, tag, {bad_pin: claim ? "PIN hatalı. Rozetle gelen karttaki 6 haneli PIN'i girin." : "PIN hatalı.",
+        locked: `Çok fazla yanlış deneme. ${r?.minutes || 15} dakika sonra tekrar deneyin.`, not_found: "Bu rozet bulunamadı."}[r?.error] || "PIN doğrulanamadı, tekrar deneyin.");
+    }
+    const {ok, claimed, ...fresh} = r;
+    showEdit(code, {...tag, ...fresh}, "", null, pin);
+  });
+}
+
+function showEdit(code, tag, error = "", v = null, pin = "") {
+  if (!/^\d{6}$/.test(pin)) return showPinGate(code, tag, error);
   const claim = !tag.phone, own = findTag(code);
   v ||= {name: tag.pet_name || own?.name || "", phone: prettyPhone(tag.phone), lost: !!tag.lost, reward: tag.reward || "",
-    notes: tag.notes || "", backup: prettyPhone(tag.backup_phone), backupName: tag.backup_name || "", pin: own?.pin || ""};
+    notes: tag.notes || "", backup: prettyPhone(tag.backup_phone), backupName: tag.backup_name || ""};
   const val = k => `value="${esc(v[k] || "")}"`;
   show(`
     ${petBadge(v.name, code, v.lost)}
     <h1>${claim ? "Bu rozeti evcil hayvanınıza bağlayın" : "Rozet bilgilerini düzenleyin"}</h1>
-    <p>${claim ? "Rozet henüz kullanılmıyor. Bilgilerinizi ve rozetle gelen karttaki PIN'i girin. Bundan sonra QR'ı okutan herkes sizi arayabilecek."
-              : "Değişiklikler QR'ı okutan kişiye hemen yansır. Kaydetmek için rozetin PIN'i gerekir."}</p>
+    <p>${claim ? "PIN doğrulandı ✓ Şimdi bilgilerinizi girip kaydedin. Bundan sonra QR'ı okutan herkes sizi arayabilecek."
+              : "PIN doğrulandı ✓ Değişiklikler QR'ı okutan kişiye hemen yansır."}</p>
     ${error ? `<div class="msg err" role="alert">${esc(error)}</div>` : ""}
     <form id="f" novalidate>
       <label for="e-name">Evcil hayvanınızın adı</label>
@@ -520,16 +564,11 @@ function showEdit(code, tag, error = "", v = null) {
           <input id="e-backup" type="tel" inputmode="tel" placeholder="05xx xxx xx xx" ${val("backup")}></div>
         <div><label for="e-bname">Yedek kişinin adı</label><input id="e-bname" maxlength="40" placeholder="ör. Eşim Ayşe" ${val("backupName")}></div>
       </div>
-      <label for="e-pin">${claim ? "Karttaki PIN" : "PIN"}</label>
-      <input id="e-pin" type="text" inputmode="numeric" maxlength="6" placeholder="6 haneli" autocomplete="off" ${val("pin")}>
-      ${own?.pin && !claim ? `<span class="hint">PIN bu cihazda kayıtlı olduğu için dolduruldu.</span>` : ""}
       <button class="btn" type="submit">${claim ? "Rozeti bağla" : "Kaydet"}</button>
     </form>
     ${claim ? "" : `<button class="btn ghost" type="button" id="del" style="color:var(--err)">🗑 Rozeti sil</button>`}
-    <p class="small"><a href="${esc(APP ? tagPageLink(code) : tagLink(code))}">Vazgeç</a></p>`, "mid");
+    <p class="small"><a href="${esc(APP ? tagPageLink(code) : claim ? BASE : tagLink(code))}">Vazgeç</a></p>`, "mid");
   document.getElementById("del")?.addEventListener("click", async ev => {
-    const pin = document.getElementById("e-pin").value.trim();
-    if (!/^\d{6}$/.test(pin)) return toast("Silmek için önce 6 haneli PIN'i girin.");
     ev.target.disabled = true;
     if (await deleteTag(code, pin, document.getElementById("e-name").value.trim())) showMessage("Rozet silindi", "Bu QR artık hiçbir bilgi göstermiyor.");
     else ev.target.disabled = false;
@@ -538,13 +577,12 @@ function showEdit(code, tag, error = "", v = null) {
     ev.preventDefault();
     const g = id => document.getElementById(id);
     const nv = {name: g("e-name").value.trim(), phone: g("e-phone").value.trim(), lost: g("e-lost").checked, reward: g("e-reward").value.trim(),
-      notes: g("e-notes").value.trim(), backup: g("e-backup").value.trim(), backupName: g("e-bname").value.trim(), pin: g("e-pin").value.trim()};
-    const again = msg => showEdit(code, tag, msg, nv);
+      notes: g("e-notes").value.trim(), backup: g("e-backup").value.trim(), backupName: g("e-bname").value.trim(), pin};
+    const again = msg => showEdit(code, tag, msg, nv, pin);
     const phone = normalizePhone(nv.phone), backup = nv.backup ? normalizePhone(nv.backup) : null;
     if (!nv.name) return again("Evcil hayvanınızın adını yazın.");
     if (!phone) return again("Numara geçersiz. Örnek: 0532 123 45 67");
     if (nv.backup && !backup) return again("Yedek numara geçersiz. İstemiyorsanız boş bırakın.");
-    if (!/^\d{6}$/.test(nv.pin)) return again("PIN 6 haneli olmalı.");
     ev.submitter && (ev.submitter.disabled = true);
     let res;
     try {
@@ -556,6 +594,7 @@ function showEdit(code, tag, error = "", v = null) {
       return showSaved(code, nv.name, phone, claim, nv.lost);
     }
     if (res?.error === "already") return route(); // biri az önce bağlamış
+    if (res?.error === "bad_pin" || res?.error === "locked") return showPinGate(code, tag, res.error === "locked" ? `Çok fazla yanlış deneme. ${res?.minutes || 15} dakika sonra tekrar deneyin.` : "PIN artık geçerli değil, tekrar girin.");
     again({bad_pin: claim ? "PIN hatalı. Rozetle gelen karttaki 6 haneli PIN'i girin." : "PIN hatalı. Rozeti oluştururken gösterilen ya da kartta yazan 6 haneli PIN'i girin.",
       locked: `Çok fazla yanlış deneme. ${res?.minutes || 15} dakika sonra tekrar deneyin.`,
       bad_phone: "Numara geçersiz. Örnek: 0532 123 45 67", bad_backup: "Yedek numara geçersiz.",
@@ -1191,7 +1230,7 @@ function showMine(error = "", openAdd = false) {
     catch (e) { return showMine("Bağlantı hatası, tekrar deneyin."); }
     const r = rows?.[0];
     if (!r) return showMine("Kod ya da PIN hatalı.");
-    if (!r.phone) { location.href = editLink(code); return; } // henüz bağlanmamış: önce bağlasın
+    if (!r.phone) { try { sessionStorage.setItem("tasmaqr-pin-" + code, pin); } catch (e) {} location.href = editLink(code); return; } // henüz bağlanmamış: önce bağlasın
     saveTag({code, pin, name: r.pet_name, phone: r.phone});
     location.hash = `#kunye/${encodeURIComponent(code)}`;
   });
@@ -1840,7 +1879,7 @@ const batchName = b => `sahibimi-ara-${b.date.slice(0, 10)}-${b.codes.length}-${
 const pinCardHtml = r => `<div class="stockpin">
   <div class="sp-head">${icon("paw", "#163a7a", 'width="5mm" height="5mm"')}<b>Tasma QR</b><span>Rozet kodu <b>${esc(r.code)}</b></span></div>
   <div class="sp-body">
-    <ol><li>Rozetteki QR'ı telefonunuzla okutun.</li><li>Evcil hayvanınızın adını ve telefon numaranızı yazın, aşağıdaki PIN'i girin.</li>
+    <ol><li>Rozetteki QR'ı telefonunuzla okutun.</li><li>Aşağıdaki PIN'i girin, sonra evcil hayvanınızın adını ve telefon numaranızı yazıp kaydedin.</li>
       <li>Hazır! Evcil hayvanınızı bulan kişi QR'ı okutunca sizi tek dokunuşla arar, konumunu gönderebilir.</li></ol>
     <div class="sp-pin">PIN<span>${esc(r.pin)}</span></div>
   </div>

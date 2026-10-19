@@ -53,7 +53,7 @@ begin
 end $$;
 revoke all on function public.tasma_admin_check(text) from public, anon, authenticated;  -- yalnızca içeriden
 
-create or replace function public.tasma_version() returns integer language sql immutable as 'select 1';
+create or replace function public.tasma_version() returns integer language sql immutable as 'select 2';
 
 -- ---------------------------------------------------------------- rozetler
 -- source = 'admin': yönetimden üretilip basılan (PIN kartıyla verilir, sahibi QR'ı okutup numarasını bağlar)
@@ -296,11 +296,18 @@ begin
 end $$;
 
 -- Sahibine istatistik ve son konumlar (yalnızca PIN'i bilen): [{code, pet_name, lost, total, last30, last, sightings:[…]}]
+-- Her kod/PIN çifti tasma_check_pin'den geçer: yanlış PIN denemesi sayılır, 5 yanlışta 15 dakika kilit (PIN tahminine karşı).
 create or replace function public.tasma_tag_stats(p_codes text[], p_pins text[])
 returns json
-language sql stable security definer set search_path = public
+language plpgsql volatile security definer set search_path = public
 as $$
-  select coalesce(json_agg(json_build_object('code', t.code, 'pet_name', t.pet_name, 'lost', t.lost, 'phone', t.phone,
+declare v_ok text[] := '{}'; n integer := coalesce(array_length(p_codes, 1), 0);
+begin
+  if n > 50 or n <> coalesce(array_length(p_pins, 1), 0) then return '[]'::json; end if;
+  for i in 1 .. n loop
+    if public.tasma_check_pin(p_codes[i], p_pins[i]) is null then v_ok := v_ok || upper(trim(p_codes[i])); end if;
+  end loop;
+  return (select coalesce(json_agg(json_build_object('code', t.code, 'pet_name', t.pet_name, 'lost', t.lost, 'phone', t.phone,
       'total', (select count(*) from tasma_scans s where s.code = t.code),
       'last30', (select count(*) from tasma_scans s where s.code = t.code and s.scanned_at > now() - interval '30 days'),
       'last', (select max(scanned_at) from tasma_scans s where s.code = t.code),
@@ -308,9 +315,22 @@ as $$
           order by g.seen_at desc), '[]'::json)
         from (select * from tasma_sightings g where g.code = t.code and g.seen_at > now() - interval '30 days'
               order by g.seen_at desc limit 5) g))), '[]'::json)
-  from unnest(p_codes, p_pins) as q(code, pin)
-  join tasma_tags t on t.code = upper(trim(q.code)) and t.pin = trim(q.pin);
-$$;
+    from tasma_tags t where t.code = any (v_ok));
+end $$;
+
+-- Sahip girişi: PIN doğruysa düzenleme formu için rozetin bilgilerini döner (QR okutup "Sahibi misiniz?" → PIN → bilgiler)
+create or replace function public.tasma_tag_unlock(p_code text, p_pin text)
+returns json
+language plpgsql security definer set search_path = public
+as $$
+declare v_code text := upper(trim(coalesce(p_code, ''))); v_err text; t tasma_tags;
+begin
+  v_err := public.tasma_check_pin(v_code, p_pin);
+  if v_err is not null then return public.tasma_pin_error(v_code, v_err); end if;
+  select * into t from tasma_tags where code = v_code;
+  return json_build_object('ok', true, 'claimed', t.phone is not null, 'phone', t.phone, 'pet_name', t.pet_name, 'notes', t.notes,
+    'reward', t.reward, 'lost', t.lost, 'backup_phone', t.backup_phone, 'backup_name', t.backup_name);
+end $$;
 
 -- ---------------------------------------------------------------- yönetim: basılan rozetler
 create or replace function public.tasma_admin_list(p_key text)
@@ -718,6 +738,7 @@ begin
     'tasma_tag_delete(text, text)',
     'tasma_report_location(text, double precision, double precision, integer)',
     'tasma_tag_stats(text[], text[])',
+    'tasma_tag_unlock(text, text)',
     'tasma_admin_list(text)',
     'tasma_admin_add(text, integer)',
     'tasma_admin_set_given(text, text[], boolean)',

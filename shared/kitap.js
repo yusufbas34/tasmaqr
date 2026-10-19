@@ -26,7 +26,7 @@ function kitPages(opt) {
       <h2 class="h-sec">3 adımda kurulum</h2>
       <ol class="ksteps">
         <li><div><b>QR'ı okutun</b><span>Telefon kameranızı rozetteki QR'a tutun, açılan bağlantıya dokunun. Uygulama indirmeniz gerekmez.</span></div></li>
-        <li><div><b>Bilgilerinizi girin</b><span>Evcil hayvanınızın adını, size ulaşılacak numarayı ve <b>PIN kartındaki 6 haneli PIN'i</b> yazın. İsterseniz not ve yedek numara ekleyin.</span></div></li>
+        <li><div><b>PIN'i girin, bilgilerinizi yazın</b><span>Önce <b>PIN kartındaki 6 haneli PIN'i</b> girin. Ardından evcil hayvanınızın adını ve size ulaşılacak numarayı yazıp kaydedin; isterseniz not ve yedek numara ekleyin.</span></div></li>
         <li><div><b>Tasmaya takın</b><span>Halkayı rozetin kulağındaki delikten ve tasmanın D halkasından geçirin. Hazır!</span></div></li>
       </ol>
       <div class="tip"><b>Deneyin:</b> Kurulumdan sonra rozeti bir kez okutun; bulan kişinin göreceği ekranı siz de görün.</div>
