@@ -49,5 +49,6 @@ Google Play için: [android/GOOGLE_PLAY.md](android/GOOGLE_PLAY.md). Ayrıntıla
 - `shared/vendor`, `shared/fonts`: gömülü kütüphaneler ve fontlar (CDN'e bağımlı değil)
 - `android/`: Android uygulaması, `.github/workflows/android.yml`: APK / AAB derlemesi
 - `uretim/3d/`: 3D baskı rozet gövdesi (STL, 5 renk 3MF, `govde.py`) ve QR etiket sayfası (kodları yapıştırıp A4 basılır)
+- `uretim/kutu/`: rozet + katlanmış kitapçık için asma kulaklı ince karton kutu (56×78 mm iç ölçü, kalınlık 6/8/10 mm; A4 yatay 2 kutu, SVG indirme)
 - Instagram: https://www.instagram.com/tasmaqr (sitede alt bölüm ve ana sayfa, uygulamada Profilim, kitapçık ve kartvizitte)
 - `pazarlama/`: 90 günlük büyüme planı ve takip listesi, Instagram görsel kiti (`kit.html` → `node pazarlama/uret.js`)

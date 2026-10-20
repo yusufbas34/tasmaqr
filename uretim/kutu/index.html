@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asma Kutu</title>
+<link rel="stylesheet" href="../../shared/fonts.css">
+<script src="../../shared/vendor/qrcode.js"></script>
+<script src="../../shared/tag.js"></script>
+<style>
+:root{--bg:#f6f1ea;--card:#fff;--ink:#1d2330;--muted:#5d6472;--line:#ddd3c6;--band:#b8501a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15181e;--card:#1f232b;--ink:#eef0f4;--muted:#a3a9b5;--line:#343a45;--band:#f08a4b}}
+:root[data-theme="dark"]{--bg:#15181e;--card:#1f232b;--ink:#eef0f4;--muted:#a3a9b5;--line:#343a45;--band:#f08a4b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Barlow",system-ui,sans-serif}
+main{max-width:1000px;margin:0 auto;padding:24px 16px 60px}
+h1{font-family:"Barlow Condensed",sans-serif;font-size:34px;line-height:1.1;margin:0 0 6px}
+h2{font-family:"Barlow Condensed",sans-serif;font-size:24px;margin:28px 0 10px}
+.lead{color:var(--muted);margin:0 0 18px;max-width:720px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.form{display:grid;grid-template-columns:200px minmax(0,1fr);gap:10px 14px;align-items:center}
+@media (max-width:640px){.form{grid-template-columns:1fr}}
+select,button{font:inherit}select{width:100%;padding:9px;border:2px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+button{background:var(--band);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-weight:700;cursor:pointer}
+.ghostb{background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.bar2{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.hint{color:var(--muted);font-size:14px}
+.swb{width:30px;height:30px;padding:0;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}
+.swb[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink)}
+.views{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:16px;align-items:start}
+@media (max-width:720px){.views{grid-template-columns:1fr}}
+.views #flat>svg,.views #front>svg{width:100%;height:auto;background:#fff;border-radius:10px}
+.shelf{text-align:center}.views #front>svg{max-width:190px;background:none}
+.shelf figcaption,.flatcap{color:var(--muted);font-size:14px;margin-top:6px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:26px;border-top:2px solid #111;vertical-align:middle;margin-right:6px}.legend i.f{border-top-style:dashed}
+ol li{margin-bottom:6px}
+table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+.sheet{display:none}
+@media print{
+  @page{size:A4 landscape;margin:0}
+  body{background:#fff}main{display:none}
+  .sheet{display:block;width:297mm;height:210mm;page-break-after:always;overflow:hidden}
+  .sheet>svg{width:297mm;height:210mm;display:block}
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>Asma kutu</h1>
+  <p class="lead">Rozet ve katlanmış kullanım kitapçığı için ince karton kutu. Üstündeki asma kulağıyla petshop ya da veteriner reyonundaki çengele takılır.
+    A4'e yatay basılır; her sayfadan 2 kutu çıkar. Kesin, katlayın, tek kenarını yapıştırın.</p>
+
+  <div class="card">
+    <div class="form">
+      <label>Kutu rengi</label>
+      <div class="bar2" id="colors"></div>
+      <label for="depth">Kalınlık</label>
+      <select id="depth">
+        <option value="6">6 mm (yalnız epoksi rozet + kitapçık)</option>
+        <option value="8" selected>8 mm (3D gövdeli rozet + kitapçık)</option>
+        <option value="10">10 mm (kalın rozet ya da 2 rozet)</option>
+      </select>
+      <label for="win">Ön yüz</label>
+      <select id="win">
+        <option value="0">Rozet resmi basılı</option>
+        <option value="1">Yuvarlak pencere (gerçek rozet görünür)</option>
+      </select>
+      <label for="marks">Çizgiler</label>
+      <select id="marks">
+        <option value="1">Kesim ve katlama çizgileri basılsın (evde kesim)</option>
+        <option value="0">Çizgisiz (matbaa kendi bıçağıyla keser)</option>
+      </select>
+    </div>
+    <div class="bar2" style="margin-top:16px">
+      <button id="print">A4'e yazdır (2 kutu)</button>
+      <button class="ghostb" id="svg">SVG indir (matbaa / kesim makinesi)</button>
+      <span class="hint">Yazdırırken: yatay, ölçek %100 / Gerçek boyut, 250–350 g/m² karton.</span>
+    </div>
+  </div>
+
+  <h2>Önizleme</h2>
+  <div class="card views">
+    <div><div id="flat"></div>
+      <div class="legend"><span><i></i>kesim</span><span><i class="f"></i>katlama</span><span id="dims"></span></div></div>
+    <figure class="shelf" style="margin:0"><div id="front"></div><figcaption>Reyonda görünüşü</figcaption></figure>
+  </div>
+
+  <h2>Nasıl kurulur</h2>
+  <div class="card">
+    <ol>
+      <li>Kalın kartona (250–350 g/m²) <b>%100 ölçekle</b> basın. Kontrol: ön yüzün genişliği cetvelle 56 mm olmalı.</li>
+      <li>Düz çizgilerden maket bıçağıyla kesin. Askı deliğini ve pencereyi (varsa) de kesin.</li>
+      <li>Kesikli çizgileri cetvel ve tükenmiş tükenmez kalemle bastırarak çizin, sonra katlayın.</li>
+      <li>Asma kulağının ön parçasını arkaya katlayıp iki parçayı birbirine yapıştırın. Delikler üst üste gelir.</li>
+      <li>"Yapıştır" payını ön yüzün iç kenarına yapıştırın; kutu gövdesi oluşur.</li>
+      <li>Alt kapağı kapatın, rozet ve katlanmış kitapçığı koyun, üst kapağı dilini içeri sokarak kapatın.</li>
+    </ol>
+    <table style="margin-top:12px">
+      <tr><th>İç ölçü</th><td>56 × 78 mm, kalınlık seçtiğiniz kadar</td></tr>
+      <tr><th>İçine sığan</th><td>Ø35'e kadar rozet (kulak dahil 43 mm) + A7 kitapçık ikiye katlanmış (52,5 × 74 mm)</td></tr>
+      <tr><th>Askı deliği</th><td>Standart "euro" askı (yaklaşık 26 × 7 mm), market ve petshop çengellerine uyar</td></tr>
+    </table>
+  </div>
+</main>
+<div id="sheets"></div>
+<script>
+const SITE_URL = "https://yusufbas34.github.io/tasmaqr/";
+const W = 56, H = 78, T = 14, HH = 27, G = 9; // ön yüz, yükseklik, kapak dili, asma kulağı, yapıştırma payı (mm)
+const COLORS = [
+  {name: "Marka turuncu", hex: "#B8501A", design: "turuncu"},
+  {name: "Lacivert", hex: "#163A7A", design: "klasik"},
+  {name: "Kırmızı", hex: "#C62828", design: "kirmizi"},
+  {name: "Yeşil", hex: "#1F7A4A", design: "yesil"},
+  {name: "Pembe", hex: "#E05A8A", design: "pembe"},
+  {name: "Mor (kedi)", hex: "#8A6FB3", design: "kedi"},
+];
+const LOGO = `<rect width="72" height="72" rx="16" fill="#B8501A"/><path d="M14 22q22-12 44 0" fill="none" stroke="#4A2410" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="18.5" r="3.4" fill="none" stroke="#FFD400" stroke-width="2.4"/><circle cx="36" cy="42" r="20" fill="#FFD400"/><circle cx="36" cy="42" r="14.5" fill="#fff"/><g fill="#163A7A"><path d="M27 33h6v6h-6zM39 33h6v6h-6zM27 45h6v6h-6z"/><path d="M35 35h2v2h-2zM35 39h4v2h-4zM41 41h2v2h-2zM37 45h2v4h-2zM41 45h4v2h-4zM43 49h2v2h-2zM39 49h2v2h-2z"/></g><g fill="#fff"><path d="M29 35h2v2h-2zM41 35h2v2h-2zM29 47h2v2h-2z"/></g>`;
+const logo = (x, y, s) => `<svg x="${x}" y="${y}" width="${s}" height="${s}" viewBox="0 0 72 72">${LOGO}</svg>`;
+const FC = `font-family="'Barlow Condensed','Arial Narrow',Arial,sans-serif" font-weight="700"`, FB = `font-family="Barlow,Arial,sans-serif"`;
+const txt = (x, y, size, s, extra = "") => `<text x="${x}" y="${y}" font-size="${size}" ${extra}>${esc(s)}</text>`;
+let opt = {color: COLORS[0], D: 8, win: false, marks: true};
+
+// Euro askı deliği (yukarıda kubbe), merkez 0,0
+const EURO = "M-11.25 -1.75L-4.437 -1.75A4.5 4.5 0 1 1 4.437 -1.75L11.25 -1.75A1.75 1.75 0 0 1 11.25 1.75L1.479 1.75A4.5 4.5 0 0 1 -1.479 1.75L-11.25 1.75A1.75 1.75 0 0 1 -11.25 -1.75Z";
+const HOLE_K = 10, WIN_R = 16.5, WIN_Y = 40; // deliğin katlama çizgisine uzaklığı; pencere yarıçapı ve ön yüzdeki yeri
+
+// Açılım: sütunlar ön | sağ yan | arka | sol yan | yapıştırma; arka sütunun üstünde iki kat asma kulağı
+function geo(D) {
+  const F = Math.min(W / 2 - 3, 15), TOP = Math.max(2 * HH, D + T);
+  const a = 0, b = W, c = W + D, d = 2 * W + D, e = 2 * W + 2 * D, f = e + G, yT = TOP, yB = TOP + H;
+  return {D, F, a, b, c, d, e, f, yT, yB, w: f, h: yB + D + T};
+}
+function outline(g) {
+  const {D, F, b, c, d, e, f, yT, yB} = g, r = 5;
+  const tuckUp = (x0, x1, y) => `L${x0 + 1} ${y}L${x0 + 1} ${y - T + r}A${r} ${r} 0 0 1 ${x0 + 1 + r} ${y - T}L${x1 - 1 - r} ${y - T}A${r} ${r} 0 0 1 ${x1 - 1} ${y - T + r}L${x1 - 1} ${y}`;
+  const tuckDn = (x1, x0, y) => `L${x1 - 1} ${y}L${x1 - 1} ${y + T - r}A${r} ${r} 0 0 1 ${x1 - 1 - r} ${y + T}L${x0 + 1 + r} ${y + T}A${r} ${r} 0 0 1 ${x0 + 1} ${y + T - r}L${x0 + 1} ${y}`;
+  return `M0 ${yT}L0 ${yT - D}${tuckUp(0, b, yT - D)}L${b} ${yT - D}L${b} ${yT}` +
+    `L${b + 1} ${yT - F}L${c - 1} ${yT - F}L${c} ${yT}L${c} ${yT - 2 * HH}L${d} ${yT - 2 * HH}L${d} ${yT}` +
+    `L${d + 1} ${yT - F}L${e - 1} ${yT - F}L${e} ${yT}L${f} ${yT + 3}L${f} ${yB - 3}L${e} ${yB}` +
+    `L${e - 1} ${yB + F}L${d + 1} ${yB + F}L${d} ${yB}L${d} ${yB + D}${tuckDn(d, c, yB + D)}L${c} ${yB + D}L${c} ${yB}` +
+    `L${c - 1} ${yB + F}L${b + 1} ${yB + F}L${b} ${yB}L0 ${yB}Z`;
+}
+function folds(g) {
+  const {D, b, c, d, e, yT, yB} = g;
+  return [[b, yT, b, yB], [c, yT, c, yB], [d, yT, d, yB], [e, yT, e, yB], [0, yT, b, yT], [1, yT - D, b - 1, yT - D],
+    [b, yT, c, yT], [d, yT, e, yT], [c, yT - HH, d, yT - HH], [b, yB, c, yB], [c, yB, d, yB], [d, yB, e, yB], [c + 1, yB + D, d - 1, yB + D]];
+}
+const holes = g => {
+  const cx = (g.c + g.d) / 2, y = g.yT - HH;
+  return [`<path d="${EURO}" transform="translate(${cx} ${y + HOLE_K})"/>`, `<path d="${EURO}" transform="translate(${cx} ${y - HOLE_K}) scale(1 -1)"/>`];
+};
+
+// Yüzler (yerel koordinat, 0,0 sol üst)
+const front = (o) => {
+  const D_ = DESIGNS[o.color.design];
+  const badge = o.win ? `<circle cx="${W / 2}" cy="${WIN_Y}" r="${WIN_R + 1.6}" fill="none" stroke="#FFD400" stroke-width="1.2"/>`
+    : `<circle cx="${W / 2}" cy="${WIN_Y}" r="19" fill="#fff" fill-opacity=".14"/>` +
+      roundTagSvg("ÖRNEK", D_, SITE_URL, "").replace('<svg class="disc"', `<svg x="${W / 2 - 16}" y="${WIN_Y - 16}" width="32" height="32"`);
+  return `${logo(5, 4.5, 11)}${txt(18.5, 11.4, 8.4, "Tasma QR", `${FC} fill="#fff"`)}${txt(18.6, 15.4, 2.9, "Akıllı QR künye", `${FB} fill="#fff" fill-opacity=".85"`)}
+    ${badge}
+    ${txt(W / 2, 64, 4.4, "OKUT • SAHİBİMİ ARA", `${FC} fill="#FFD400" text-anchor="middle" letter-spacing=".3"`)}
+    ${txt(W / 2, 69, 2.9, "Kedi · Köpek · Tüm evcil dostlar", `${FB} font-weight="600" fill="#fff" text-anchor="middle"`)}
+    ${txt(W / 2, 74, 2.3, "Su geçirmez · Pil yok · Abonelik yok", `${FB} fill="#fff" fill-opacity=".8" text-anchor="middle"`)}`;
+};
+const back = (o) => {
+  const step = (n, y, a, b) => `<circle cx="7" cy="${y - 1}" r="2.6" fill="${o.color.hex}"/>${txt(7, y, 3, n, `${FC} fill="#fff" text-anchor="middle"`)}
+    ${txt(11.5, y - 1.5, 2.8, a, `${FB} font-weight="600" fill="#1d2330"`)}${txt(11.5, y + 2, 2.6, b, `${FB} fill="#5d6472"`)}`;
+  return `<rect width="${W}" height="${H}" fill="#fff"/>
+    ${txt(4.5, 9, 5.2, "Nasıl çalışır?", `${FC} fill="#1d2330"`)}
+    ${step(1, 17, "Rozeti tasmaya takın.", "Şarj, pil, abonelik yok.")}
+    ${step(2, 26, "QR'ı okutun, kitapçıktaki", "PIN ile bilgilerinizi girin.")}
+    ${step(3, 35, "Bulan kişi telefonla okutur,", "size tek dokunuşla ulaşır.")}
+    ${qrSvg(SITE_URL, `x="4" y="42" width="17" height="17"`)}
+    ${txt(23.5, 47, 3.4, "Okut, ücretsiz dene", `${FC} fill="#1d2330"`)}
+    ${txt(23.5, 51.5, 2.3, "yusufbas34.github.io/tasmaqr", `${FB} fill="#5d6472"`)}
+    ${txt(23.5, 55.5, 2.3, "Instagram: @tasmaqr", `${FB} fill="#5d6472"`)}
+    <rect x="3" y="63" width="${W - 6}" height="11.5" rx="2" fill="#f6f1ea"/>
+    ${txt(W / 2, 67.7, 2.5, "İçindekiler: 1 QR rozet + 1 kullanım kitapçığı", `${FB} font-weight="600" fill="#1d2330" text-anchor="middle"`)}
+    ${txt(W / 2, 71.8, 2.2, "Kurulum adımları kitapçıkta · Türkiye'de üretildi", `${FB} fill="#5d6472" text-anchor="middle"`)}`;
+};
+const side = (o) => `<g transform="translate(${o.D / 2} ${H / 2}) rotate(-90)">${txt(0, 1.2, Math.min(3.4, o.D * .48), "TASMA QR  •  OKUT • SAHİBİMİ ARA", `${FC} fill="#fff" text-anchor="middle" letter-spacing=".3"`)}</g>`;
+const headerFront = () => `${logo(W / 2 - 15.5, 16.3, 8.4)}${txt(W / 2 - 5.2, 23, 6.4, "Tasma QR", `${FC} fill="#fff"`)}`;
+const headerBack = () => `${txt(W / 2, 22.5, 2.6, "Kaybolursa okutulur, sahibine ulaşır.", `${FB} fill="#fff" fill-opacity=".9" text-anchor="middle"`)}`;
+const lidTop = (o) => txt(W / 2, o.D / 2 + 1.1, Math.min(3.2, o.D * .45), "TASMA QR", `${FC} fill="#fff" text-anchor="middle" letter-spacing=".6"`);
+const lidBottom = (o) => txt(W / 2, o.D / 2 + .9, Math.min(2.6, o.D * .38), "@tasmaqr · yusufbas34.github.io/tasmaqr", `${FB} fill="#fff" text-anchor="middle"`);
+
+// Tek kutunun açılımı: baskı + (isteğe bağlı) çizgiler, kendi koordinatında
+function boxSvg(o, uid) {
+  const g = geo(o.D), {D, b, c, d, e, f, yT, yB} = g, cut = `fill="none" stroke="#111" stroke-width=".25"`;
+  const at = (x, y, s) => `<g transform="translate(${x} ${y})">${s}</g>`;
+  const winCut = o.win ? `<circle cx="${W / 2}" cy="${yT + WIN_Y}" r="${WIN_R}"/>` : "";
+  return `<g id="baski">
+    <clipPath id="cl${uid}"><path d="${outline(g)}"/></clipPath>
+    <path d="${outline(g)}" fill="${o.color.hex}" stroke="${o.color.hex}" stroke-width="4" stroke-linejoin="round"/>
+    <g clip-path="url(#cl${uid})">
+      <rect x="${e}" y="${yT - 5}" width="${G + 3}" height="${H + 10}" fill="#fff"/>
+      ${txt(e + G / 2, yT + H / 2, 2.6, "YAPIŞTIR", `${FB} fill="#999" text-anchor="middle" transform="rotate(-90 ${e + G / 2} ${yT + H / 2})"`)}
+    </g>
+    ${at(0, yT, front(o))}${at(c, yT, back(o))}${at(b, yT, side(o))}${at(d, yT, side(o))}
+    ${at(0, yT - D, lidTop(o))}${at(c, yB, lidBottom(o))}
+    ${at(c, yT - HH, headerBack())}
+    <g transform="rotate(180 ${(c + d) / 2} ${yT - 1.5 * HH})">${at(c, yT - 2 * HH, headerFront())}</g>
+    <g fill="#fff">${holes(g).join("")}${winCut.replace("<circle", '<circle fill="#fff"')}</g>
+  </g>` + (o.marks ? `<g id="kesim" ${cut}><path d="${outline(g)}"/>${holes(g).join("")}${winCut}</g>
+  <g id="katlama" fill="none" stroke="#111" stroke-width=".25" stroke-dasharray="1.6 1.2">${folds(g).map(([x1, y1, x2, y2]) => `<path d="M${x1} ${y1}L${x2} ${y2}"/>`).join("")}</g>` : "");
+}
+
+// Reyon görünüşü: asma kulağının ön yüzü + ön yüz
+function shelfSvg(o) {
+  return `<svg viewBox="-1 -1 ${W + 2} ${HH + H + 2}" aria-label="Kutunun önden görünüşü">
+    <rect x="0" y="0" width="${W}" height="${HH + H}" rx=".6" fill="${o.color.hex}"/>
+    <g fill="#fff"><path d="${EURO}" transform="translate(${W / 2} ${HOLE_K}) "/></g>
+    ${headerFront()}<line x1="0" y1="${HH}" x2="${W}" y2="${HH}" stroke="#000" stroke-opacity=".25" stroke-width=".3"/>
+    <g transform="translate(0 ${HH})">${front(o)}${o.win ? `<circle cx="${W / 2}" cy="${WIN_Y}" r="${WIN_R}" fill="#f6f1ea"/>` +
+      roundTagSvg("ÖRNEK", DESIGNS[o.color.design], SITE_URL, "").replace('<svg class="disc"', `<svg x="${W / 2 - 15}" y="${WIN_Y - 15}" width="30" height="30"`) : ""}</g></svg>`;
+}
+
+function render() {
+  const g = geo(opt.D);
+  document.getElementById("flat").innerHTML = `<svg viewBox="-4 -4 ${g.w + 8} ${g.h + 8}" aria-label="Kutu açılımı">${boxSvg(opt, "p")}</svg>`;
+  document.getElementById("front").innerHTML = shelfSvg(opt);
+  document.getElementById("dims").textContent = `Açılım ${g.w} × ${g.h} mm`;
+  // A4 yatay: sığarsa 2 kutu yan yana
+  const two = 2 * g.w + 6 <= 287, x0 = two ? (297 - (2 * g.w + 6)) / 2 : (297 - g.w) / 2, y0 = (210 - g.h) / 2;
+  document.getElementById("sheets").innerHTML = `<div class="sheet"><svg viewBox="0 0 297 210">${at2(x0, y0, boxSvg(opt, "a"))}${two ? at2(x0 + g.w + 6, y0, boxSvg(opt, "b")) : ""}</svg></div>`;
+  document.querySelectorAll("#colors .swb").forEach((el, i) => el.setAttribute("aria-pressed", COLORS[i] === opt.color));
+}
+const at2 = (x, y, s) => `<g transform="translate(${x} ${y})">${s}</g>`;
+
+document.getElementById("colors").innerHTML = COLORS.map((c, i) =>
+  `<button type="button" class="swb" data-i="${i}" title="${c.name}" aria-label="${c.name}" style="background:${c.hex}"></button>`).join("");
+document.getElementById("colors").onclick = ev => { const b = ev.target.closest("[data-i]"); if (b) { opt.color = COLORS[+b.dataset.i]; render(); } };
+document.getElementById("depth").onchange = ev => { opt.D = +ev.target.value; render(); };
+document.getElementById("win").onchange = ev => { opt.win = ev.target.value === "1"; render(); };
+document.getElementById("marks").onchange = ev => { opt.marks = ev.target.value === "1"; render(); };
+document.getElementById("print").onclick = () => print();
+document.getElementById("svg").onclick = () => {
+  const g = geo(opt.D), s = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${g.w + 8}mm" height="${g.h + 8}mm" viewBox="-4 -4 ${g.w + 8} ${g.h + 8}">${boxSvg({...opt, marks: true}, "s")}</svg>`;
+  const a = Object.assign(document.createElement("a"), {href: URL.createObjectURL(new Blob([s], {type: "image/svg+xml"})), download: `tasmaqr-kutu-${opt.D}mm.svg`});
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+const q = new URLSearchParams(location.search);
+if (q.get("renk")) opt.color = COLORS.find(c => c.design === q.get("renk")) || opt.color;
+render();
+</script>
+</body>
+</html>
