@@ -280,6 +280,7 @@ form .btn[type=submit]{margin-top:22px}
 .btn[disabled]{opacity:.6}
 .btn.call{background:var(--ok);font-size:22px;padding:20px}
 .btn.loc{background:var(--band2)}
+.btn.wa{background:#1fa855;box-shadow:0 6px 18px #1fa85540}
 .btn.ghost{background:#fff;color:var(--band);border:2px solid var(--line)}
 .btn.danger{background:var(--err)}
 .btn.small{display:inline-block;width:auto;font-size:15px;padding:9px 14px;margin:6px 6px 0 0}
@@ -660,7 +661,7 @@ function showEdit(code, tag, error = "", v = null, pin = "") {
     } catch (e) { return again("Bağlantı hatası. İnternetinizi kontrol edip tekrar deneyin."); }
     if (res?.ok) {
       saveTag({code, pin: nv.pin, name: nv.name, phone});
-      return showSaved(code, nv.name, phone, claim, nv.lost);
+      return showSaved(code, nv.name, phone, claim, nv.lost, pin);
     }
     if (res?.error === "already") return route(); // biri az önce bağlamış
     if (res?.error === "bad_pin" || res?.error === "locked") return showPinGate(code, tag, res.error === "locked" ? `Çok fazla yanlış deneme. ${res?.minutes || 15} dakika sonra tekrar deneyin.` : "PIN artık geçerli değil, tekrar girin.");
@@ -671,13 +672,23 @@ function showEdit(code, tag, error = "", v = null, pin = "") {
   });
 }
 
-function showSaved(code, name, phone, claimed, lost) {
+// Sahibin kendi WhatsApp'ına (kendine mesaj) rozet bilgileri: hazır metin açılır, kişi yalnızca Gönder'e basar
+function waSelfLink(phone, {name, code, pin}) {
+  const text = ["🐾 Tasma QR rozet bilgilerim", name && `Evcil hayvan: ${name}`, `Rozet kodu: ${code}`, `PIN: ${pin}`,
+    `Rozet bağlantısı: ${tagLink(code)}`, "", "Bilgileri değiştirmek ve kayıp modunu açmak için bu PIN gerekir. Kimseyle paylaşmayın."].filter(x => x !== undefined && x !== null && x !== false).join("\n");
+  return `https://wa.me/${digits(phone)}?text=${encodeURIComponent(text)}`;
+}
+const waSelfButton = (phone, info, cls = "btn wa") => phone && info.pin ? `<a class="${cls}" href="${esc(waSelfLink(phone, info))}" target="_blank" rel="noopener">📲 Bilgilerimi WhatsApp'ıma kaydet</a>
+  <span class="hint" style="text-align:center">WhatsApp kendi numaranızla açılır; hazır mesajı göndermeniz yeterli. PIN'iniz mesajlarınızda saklı kalır.</span>` : "";
+
+function showSaved(code, name, phone, claimed, lost, pin = "") {
   show(`
     ${petBadge(name, code, lost)}
     <div class="msg ok">${claimed ? `Rozet bağlandı! Bu QR artık ${esc(prettyPhone(phone))} numarasını arar.` : "Kaydedildi."}
       ${lost ? "<br><b>Kayıp modu açık:</b> QR'ı okutan kişi kırmızı uyarıyı görecek. Umarız çabucak kavuşursunuz." : ""}</div>
     <p>PIN'inizi saklayın; bilgileri değiştirmek için gerekecek. Rozet bu cihazda <b>Rozetlerim</b>'e de eklendi.</p>
-    <a class="btn" href="${esc(tagPageLink(code))}">Rozetimi gör</a>
+    ${claimed ? waSelfButton(phone, {name, code, pin}) : ""}
+    <a class="btn${claimed ? " ghost" : ""}" href="${esc(tagPageLink(code))}">Rozetimi gör</a>
     <a class="btn ghost" href="${esc(tagLink(code))}">QR'ı test et</a>
     ${claimed ? igButton() : ""}`);
   if (!lost) confetti();
@@ -1359,7 +1370,8 @@ function showTagPage(code, fresh) {
     <div class="noprint">
       ${backLink("#kunyelerim", "Rozetlerim")}
       ${petBadge(t.name, t.code)}
-      ${fresh ? `<div class="msg ok"><b>Rozetiniz hazır!</b> Aşağıdaki PIN'i bir yere not edin: bilgileri değiştirmek ve kayıp modunu açmak için gerekir.</div>` : ""}
+      ${fresh ? `<div class="msg ok"><b>Rozetiniz hazır!</b> Aşağıdaki PIN'i bir yere not edin: bilgileri değiştirmek ve kayıp modunu açmak için gerekir.</div>
+        ${waSelfButton(t.phone, {name: t.name, code: t.code, pin: t.pin})}` : ""}
       <div class="card">
         <div id="lostbox"></div>
         <dl class="kv">
@@ -1370,6 +1382,7 @@ function showTagPage(code, fresh) {
         </dl>
         <div id="sightings"></div>
         <a class="btn ghost" href="${esc(editLink(t.code))}">Bilgileri düzenle (ad, numara, not, ödül)</a>
+        ${fresh ? "" : waSelfButton(t.phone, {name: t.name, code: t.code, pin: t.pin}, "btn ghost")}
       </div>
 
       <div class="card">
