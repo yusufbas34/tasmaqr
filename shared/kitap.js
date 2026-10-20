@@ -5,11 +5,13 @@
 // Kapak, veteriner ve pet shop tezgâhında görünen yüzdür.
 // opt: {site, phone, instagram, email, batch}. batch: stok partisi için kod/PIN alanları boş yer tutucu olarak çizilir
 // (PDF'te her kitapçığın kodu ve PIN'i bu alanların üstüne yazılır; [data-fill] öğeleri).
+// "@tasmaqr", "tasmaqr" ya da "https://www.instagram.com/tasmaqr/" → "tasmaqr"
+const igHandle = v => String(v || "").trim().replace(/^@/, "").replace(/^(https?:\/\/)?(www\.)?instagram\.com\//i, "").replace(/[/?#].*$/, "");
 const KIT_IG = "https://www.instagram.com/tasmaqr", KIT_PLAY = "https://play.google.com/store/apps/details?id=io.github.yusufbas34.tasmaqr";
 function kitPages(opt) {
   const site = opt.site, logo = `<img src="${opt.root || ""}shared/logo.svg" alt="">`;  // root: sayfa alt klasördeyse (ör. "../../")
   const brand = `<div class="brandline">${logo}Tasma QR</div>`;
-  const rows = [opt.phone && `📞 <b>${esc(opt.phone)}</b>`, opt.instagram && `📷 <b>@${esc(opt.instagram.replace(/^@/, ""))}</b>`,
+  const rows = [opt.phone && `📞 <b>${esc(opt.phone)}</b>`, igHandle(opt.instagram) && `📷 <b>@${esc(igHandle(opt.instagram))}</b>`,
     opt.email && `✉️ ${esc(opt.email)}`].filter(Boolean);
   const contact = rows.length ? rows.map(r => `<span>${r}</span>`).join("") : `<span>Sorularınız için uygulamadaki iletişim bilgilerinden bize ulaşın.</span>`;
   const badge = (design, name, size = "y40") => badgeAt("ÖRNEK", design, size, {link: site, name});
@@ -84,7 +86,7 @@ const kitSheets = pages => KIT_FACES.map(([l, r]) => {
 // ---------------------------------------------------------------- kartvizit (85×55 mm)
 // opt: {site, name, title, phone, email, instagram}. Ön: marka ve rozet; arka: kişi, iletişim ve siteyi açan QR.
 function cardFaces(opt) {
-  const ig = (opt.instagram || "").replace(/^@/, "");
+  const ig = igHandle(opt.instagram);
   const lines = [opt.phone && `<span><i>📞</i>${esc(opt.phone)}</span>`, opt.email && `<span><i>✉️</i>${esc(opt.email)}</span>`,
     ig && `<span><i>📷</i>@${esc(ig)}</span>`, `<span><i>🌐</i>yusufbas34.github.io/tasmaqr</span>`].filter(Boolean).join("");
   const front = `<div class="bc bc-front">
