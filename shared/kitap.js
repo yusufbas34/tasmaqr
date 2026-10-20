@@ -7,7 +7,7 @@
 // (PDF'te her kitapçığın kodu ve PIN'i bu alanların üstüne yazılır; [data-fill] öğeleri).
 const KIT_IG = "https://www.instagram.com/tasmaqr", KIT_PLAY = "https://play.google.com/store/apps/details?id=io.github.yusufbas34.tasmaqr";
 function kitPages(opt) {
-  const site = opt.site, logo = `<img src="shared/logo.svg" alt="">`;
+  const site = opt.site, logo = `<img src="${opt.root || ""}shared/logo.svg" alt="">`;  // root: sayfa alt klasördeyse (ör. "../../")
   const brand = `<div class="brandline">${logo}Tasma QR</div>`;
   const rows = [opt.phone && `📞 <b>${esc(opt.phone)}</b>`, opt.instagram && `📷 <b>@${esc(opt.instagram.replace(/^@/, ""))}</b>`,
     opt.email && `✉️ ${esc(opt.email)}`].filter(Boolean);
@@ -88,7 +88,7 @@ function cardFaces(opt) {
   const lines = [opt.phone && `<span><i>📞</i>${esc(opt.phone)}</span>`, opt.email && `<span><i>✉️</i>${esc(opt.email)}</span>`,
     ig && `<span><i>📷</i>@${esc(ig)}</span>`, `<span><i>🌐</i>yusufbas34.github.io/tasmaqr</span>`].filter(Boolean).join("");
   const front = `<div class="bc bc-front">
-      <div class="bc-brand"><img src="shared/logo.svg" alt="">Tasma QR</div>
+      <div class="bc-brand"><img src="${opt.root || ""}shared/logo.svg" alt="">Tasma QR</div>
       <h2>Kaybolursa,<br><em>sizi arasın.</em></h2>
       <p>Kedi, köpek ve tüm dostlar için<br>tasmaya takılan QR künye</p>
       <div class="bc-badge">${badgeAt("ÖRNEK", "klasik", "y30", {link: opt.site, name: "DOSTUM"})}</div>
@@ -100,4 +100,63 @@ function cardFaces(opt) {
       <div class="bc-bar"></div>
     </div>`;
   return {front, back};
+}
+
+// ---------------------------------------------------------------- stok partisi kitapçıkları (yönetim ve uretim/3d ortak)
+// rows: [{code, pin}]. Ortak sayfalar bir kez görüntülenir, her kitapçığa kendi kodu ve PIN'i vektör yazıyla basılır.
+// A4 yatay, 4 kitapçık: ön yüzde (4 | 1), arka yüzde (2 | 3); arka yüz kısa kenardan çevrildiği için sütunlar yer değiştirir.
+// window.html2canvas ve window.jspdf yüklenmiş olmalı. progress(metin) isteğe bağlı.
+async function kitGuidesPdf(rows, opt, progress = () => {}) {
+  const pages = kitPages({...opt, batch: true}), toast = progress;
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;left:-40000px;top:0";
+  box.innerHTML = pages.join("");
+  document.body.append(box);
+  try {
+    await Promise.all([...box.querySelectorAll("img")].map(i => i.decode().catch(() => {})));
+    await document.fonts?.ready;
+    const kps = [...box.querySelectorAll(".kp")], K = 105 / kps[0].getBoundingClientRect().width;  // px → mm (A6)
+    const spot = (kp, key) => { const r = kp.getBoundingClientRect(), e = kp.querySelector(`[data-fill="${key}"]`).getBoundingClientRect();
+      return {x: (e.left - r.left) * K, y: (e.top - r.top + e.height / 2) * K}; };
+    const at = {code: spot(kps[2], "code"), pin: spot(kps[2], "pin"), code4: spot(kps[3], "code4")};
+    const imgs = [];
+    for (let i = 0; i < 4; i++) {
+      toast(`Kitapçık sayfaları hazırlanıyor… ${i + 1}/4`, 120000);
+      imgs.push((await html2canvas(kps[i], {scale: 4, backgroundColor: "#ffffff", logging: false})).toDataURL("image/jpeg", .92));
+    }
+    const pdf = new window.jspdf.jsPDF({unit: "mm", format: "a4", orientation: "landscape"});
+    const W = 74.25, H = 105, S = W / 105;  // A6 → A7
+    const marks = () => {
+      pdf.setDrawColor(102).setLineWidth(.25).setLineDashPattern([], 0);
+      [[0, 105, 4, 105], [293, 105, 297, 105], [148.5, 0, 148.5, 4], [148.5, 206, 148.5, 210]].forEach(a => pdf.line(...a));
+      pdf.setDrawColor(150).setLineDashPattern([1, 1], 0);
+      [74.25, 222.75].forEach(x => { pdf.line(x, 0, x, 3); pdf.line(x, 207, x, 210); });
+    };
+    const write = (text, x, y, size, space = 0) => {
+      pdf.setFont("helvetica", "bold").setFontSize(size).setTextColor(29, 35, 48);
+      pdf.text(String(text), x, y, {baseline: "middle", charSpace: space});
+    };
+    for (let s0 = 0; s0 < rows.length; s0 += 4) {
+      const group = rows.slice(s0, s0 + 4);
+      toast(`Kitapçıklar yerleştiriliyor… ${Math.min(s0 + 4, rows.length)}/${rows.length}`, 120000);
+      if (s0) pdf.addPage("a4", "landscape");
+      group.forEach((r, i) => {  // ön yüz: arka kapak | ön kapak
+        const x = (i % 2) * 148.5, y = Math.floor(i / 2) * H;
+        pdf.addImage(imgs[3], "JPEG", x, y, W, H, "kit-p4", "FAST");
+        pdf.addImage(imgs[0], "JPEG", x + W, y, W, H, "kit-p1", "FAST");
+        write(r.code, x + at.code4.x * S, y + at.code4.y * S, 7, .3);
+      });
+      marks();
+      pdf.addPage("a4", "landscape");
+      group.forEach((r, i) => {  // arka yüz: aynı kitapçık, sütunu ayna (kısa kenardan çevirme)
+        const x = (1 - i % 2) * 148.5, y = Math.floor(i / 2) * H;
+        pdf.addImage(imgs[1], "JPEG", x, y, W, H, "kit-p2", "FAST");
+        pdf.addImage(imgs[2], "JPEG", x + W, y, W, H, "kit-p3", "FAST");
+        write(r.code, x + W + at.code.x * S, y + at.code.y * S, 10, .4);
+        write(r.pin, x + W + at.pin.x * S, y + at.pin.y * S, 11, 1);
+      });
+      marks();
+    }
+    return pdf;
+  } finally { box.remove(); }
 }

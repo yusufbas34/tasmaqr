@@ -8,6 +8,9 @@
 <link rel="stylesheet" href="../../shared/tag.css">
 <script src="../../shared/vendor/qrcode.js"></script>
 <script src="../../shared/tag.js"></script>
+<script src="../../shared/intro.js"></script>
+<link rel="stylesheet" href="../../shared/kitap.css">
+<script src="../../shared/kitap.js"></script>
 <style>
 :root{--bg:#f6f1ea;--card:#fff;--ink:#1d2330;--muted:#5d6472;--line:#ddd3c6;--band:#b8501a}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15181e;--card:#1f232b;--ink:#eef0f4;--muted:#a3a9b5;--line:#343a45;--band:#f08a4b}}
@@ -36,6 +39,14 @@ select,textarea,button{font:inherit}select,textarea{width:100%;padding:9px;borde
 button{background:var(--band);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-weight:700;cursor:pointer}
 .hint{color:var(--muted);font-size:14px}
 .sheetwrap{overflow-x:auto;margin-top:14px}
+.bar2{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ghostb{background:var(--card);color:var(--ink);border:2px solid var(--line);padding:7px 12px;font-size:14px}
+.swb{width:30px;height:30px;padding:0;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-top:12px}
+.cgrid label{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 8px;font:600 14px/1 "Barlow Condensed",sans-serif;letter-spacing:.04em}
+.cgrid select{width:auto;flex:1;padding:5px;font-size:13px}
+.cgrid i{width:14px;height:14px;border-radius:50%;flex:none}
+input[type=password]{width:100%;padding:9px;border:2px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
 .sheet{width:210mm;min-height:297mm;background:#fff;padding:10mm;display:flex;flex-wrap:wrap;gap:3mm;align-content:flex-start}
 .sheet .st{width:var(--sd);height:var(--sd)}.sheet .st .sticker{width:100%;height:100%}
 @media print{
@@ -89,14 +100,32 @@ button{background:var(--band);color:#fff;border:0;border-radius:10px;padding:11p
       <div class="form">
         <label for="size">Gövde ölçüsü</label>
         <select id="size"><option value="35">Ø35 gövde · Ø30 etiket (A4'e 40)</option><option value="30">Ø30 gövde · Ø25 etiket (A4'e 60)</option></select>
-        <label for="codes">Rozet kodları <span class="hint">(isteğe bağlı)</span></label>
+        <label for="batch">Stok partisi</label>
+        <div><select id="batch"></select>
+          <p class="hint">Yönetim › Sahibimi Ara (stok)'ta bu tarayıcıda oluşturduğunuz partiler. Seçince kodlar aşağıya dolar.</p></div>
+        <label for="codes">Rozet kodları</label>
         <div>
-          <textarea id="codes" rows="4" placeholder="K25A6X4E&#10;K2FAE897&#10;…"></textarea>
-          <p class="hint">Yönetim › Sahibimi Ara (stok) › PIN listesi ya da QR listesi dosyasındaki kodları yapıştırın; kodlar sırayla 5 renge bölünür
-            (ilk beşte biri lacivert, ikinci beşte biri turuncu…). Boş bırakırsanız sitenin ana sayfasını açan örnek etiketler çıkar.</p>
+          <textarea id="codes" rows="4" placeholder="K25A6X4E&#10;K2FAE897 turuncu&#10;…"></textarea>
+          <p class="hint">Her satıra bir kod. Rengi kodun yanına da yazabilirsiniz (lacivert, turuncu, kırmızı, yeşil, pembe). Boş bırakırsanız sitenin ana sayfasını açan örnek etiketler çıkar.</p>
         </div>
       </div>
+      <div id="colorbox" hidden>
+        <h3 style="margin:18px 0 8px">Renkler</h3>
+        <div class="bar2"><button type="button" class="ghostb" data-mode="split">5 renge böl</button><button type="button" class="ghostb" data-mode="cycle">Sırayla dönüşümlü</button>
+          <span class="hint">Hepsi:</span><span id="allbtns" class="bar2"></span></div>
+        <div class="cgrid" id="cgrid"></div>
+        <p class="hint" id="csum"></p>
+      </div>
       <p><button id="print">Etiket sayfasını yazdır</button> <span class="hint">Yazdırırken ölçek %100 / Gerçek boyut, kenar boşluğu yok.</span></p>
+    </div>
+
+    <h2>Kullanım kitapçıkları</h2>
+    <div class="card">
+      <p style="margin-top:0">Yukarıdaki kodların her birine kendi kodu ve PIN'i basılı A7 kitapçık (A4'ten 4 adet). PIN'ler veritabanından alınır; yönetim şifresi gerekir (kaydedilmez).</p>
+      <div class="form">
+        <label for="akey">Yönetim şifresi</label><input id="akey" type="password" autocomplete="current-password">
+      </div>
+      <p><button id="guides">📘 Kitapçıkları PDF indir</button> <span class="hint" id="gmsg">A4 yatay, arkalı önlü · kısa kenardan çevir, %100 ölçek. 4'e kesip katlayın.</span></p>
     </div>
   </section>
   <div class="sheetwrap" id="sheets"></div>
@@ -135,28 +164,99 @@ document.getElementById("real").innerHTML = [30, 35].map(d =>
 document.getElementById("ctable").insertAdjacentHTML("beforeend", COLORS.map(c =>
   `<tr><td><span class="sw" style="background:${c.hex}"></span>${c.name}</td><td>${c.fil} (${c.hex})</td><td>${DESIGNS[c.key].name}</td></tr>`).join(""));
 
+// ---------------- partiler ve rozet başına renk
+const SUPABASE_URL = "https://vsurqyzjtxtbhhbtbhgz.supabase.co", SUPABASE_KEY = "sb_publishable_Dz8WxGrendM_qa9UxVbC3g_nvwAnCcH";
+const ls = (k, f) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch (e) { return f; } };
+const BATCHES = ls("tasmaqr-admin-stok", []);
+let colorOf = ls("tasmaqr-3d-renk", {});
+const saveColors = () => { try { localStorage.setItem("tasmaqr-3d-renk", JSON.stringify(colorOf)); } catch (e) {} };
+const NAMES = {lacivert: "klasik", turuncu: "turuncu", "kırmızı": "kirmizi", kirmizi: "kirmizi", "yeşil": "yesil", yesil: "yesil", pembe: "pembe"};
+const $ = id => document.getElementById(id);
+$("batch").innerHTML = `<option value="">Kodları elle gireceğim</option>` + BATCHES.map((b, i) =>
+  `<option value="${i}">${new Date(b.date).toLocaleDateString("tr-TR")} · ${b.codes.length} rozet · ${b.kind === "metal" ? "metal" : "epoksi"} · ${b.codes[0]}…</option>`).join("");
+$("allbtns").innerHTML = COLORS.map(c => `<button type="button" class="swb" data-all="${c.key}" title="Hepsi ${c.name}" style="background:${c.hex}"></button>`).join("");
+$("batch").onchange = () => { const b = BATCHES[$("batch").value]; if (b) { $("codes").value = b.codes.join("\n"); renderSheets(); } };
+
+function readCodes() {
+  const out = [];
+  for (const line of $("codes").value.split(/\n|,|;/)) {
+    const [raw, col] = line.trim().split(/\s+/), code = (raw || "").replace(/"/g, "").toUpperCase();
+    if (!/^[A-Z0-9-]{4,}$/.test(code) || code === "KOD" || out.includes(code)) continue;
+    const k = NAMES[(col || "").toLocaleLowerCase("tr")];
+    if (k) colorOf[code] = k;
+    out.push(code);
+  }
+  return out;
+}
+function assign(mode, key) {
+  const codes = readCodes(), n = Math.ceil(codes.length / COLORS.length);
+  codes.forEach((c, i) => { colorOf[c] = key || (mode === "cycle" ? COLORS[i % COLORS.length] : COLORS[Math.floor(i / n)]).key; });
+  saveColors(); renderSheets();
+}
+document.addEventListener("click", ev => {
+  const m = ev.target.closest("[data-mode]"), c = ev.target.closest("[data-all]");
+  if (m) assign(m.dataset.mode); if (c) assign("", c.dataset.all);
+});
+$("cgrid").addEventListener("change", ev => { colorOf[ev.target.dataset.code] = ev.target.value; saveColors(); renderSheets(); });
+
 function renderSheets() {
-  const d = +document.getElementById("size").value, sd = stickerDia(d);
+  const d = +$("size").value, sd = stickerDia(d);
   const per = Math.floor((190 + 3) / (sd + 3)) * Math.floor((277 + 3) / (sd + 3));
-  const codes = document.getElementById("codes").value.split(/[\s,;"]+/).map(x => x.trim().toUpperCase()).filter(x => /^[A-Z0-9-]{4,}$/.test(x) && x !== "KOD");
+  const codes = readCodes();
   let items;
   if (codes.length) {
     const n = Math.ceil(codes.length / COLORS.length);
-    items = codes.map((code, i) => ({code, c: COLORS[Math.floor(i / n)]}));
+    codes.forEach((c, i) => { colorOf[c] ||= COLORS[Math.floor(i / n)].key; });
+    saveColors();
+    items = codes.map(code => ({code, c: COLORS.find(x => x.key === colorOf[code]) || COLORS[0]}));
+    $("cgrid").innerHTML = items.map(it => `<label><i style="background:${it.c.hex}"></i>${it.code}<select data-code="${it.code}">${COLORS.map(c =>
+      `<option value="${c.key}"${c.key === it.c.key ? " selected" : ""}>${c.name}</option>`).join("")}</select></label>`).join("");
+    $("csum").textContent = "Basılacak gövde: " + COLORS.map(c => [c.name, items.filter(it => it.c.key === c.key).length]).filter(x => x[1]).map(([n, k]) => `${n} ${k}`).join(" · ") + ` · toplam ${items.length}`;
   } else {
     const each = Math.floor(per / COLORS.length);
     items = COLORS.flatMap(c => Array.from({length: each}, () => ({code: "ÖRNEK", c, link: SITE_URL})));
   }
+  $("colorbox").hidden = !codes.length;
   const pages = [];
   for (let i = 0; i < items.length; i += per) pages.push(items.slice(i, i + per));
-  document.getElementById("sheets").innerHTML = pages.map(p => `<div class="sheet" style="--sd:${sd}mm">${
+  $("sheets").innerHTML = pages.map(p => `<div class="sheet" style="--sd:${sd}mm">${
     p.map(it => `<div class="st">${sticker(it.code, it.c.key, it.link || tagLink(it.code))}</div>`).join("")}</div>`).join("");
 }
-document.getElementById("size").onchange = renderSheets;
-document.getElementById("codes").oninput = renderSheets;
-document.getElementById("print").onclick = () => print();
+$("size").onchange = renderSheets;
+$("codes").oninput = renderSheets;
+$("print").onclick = () => print();
+
+// ---------------- kullanım kitapçıkları (kod + PIN)
+// iletişim bilgileri yönetimdeki Kullanım kitapçığı sekmesinden (aynı site, düz metin olarak saklanır)
+const adminPrefs = () => { const g = k => { try { return localStorage.getItem("tasmaqr-admin-" + k); } catch (e) { return null; } };
+  return {phone: g("kit-phone") || "", email: g("kit-mail") || "", instagram: g("kit-ig") ?? "tasmaqr"}; };
+const loadScript = src => new Promise((ok, fail) => { if (document.querySelector(`script[src="${src}"]`)) return ok();
+  document.head.append(Object.assign(document.createElement("script"), {src, onload: ok, onerror: () => fail(new Error("kütüphane yüklenemedi"))})); });
+$("guides").onclick = async ev => {
+  const msg = t => { $("gmsg").textContent = t; };
+  const codes = readCodes();
+  if (!codes.length) return msg("Önce yukarıya rozet kodlarını girin ya da bir parti seçin.");
+  if (!$("akey").value) return msg("Yönetim şifresini girin.");
+  ev.target.disabled = true;
+  try {
+    msg("PIN'ler alınıyor…");
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/tasma_admin_list`, {method: "POST", headers: {"Content-Type": "application/json", apikey: SUPABASE_KEY},
+      body: JSON.stringify({p_key: $("akey").value})});
+    if (r.status === 403 || r.status === 401) throw new Error("Şifre hatalı.");
+    if (!r.ok) throw new Error("Veritabanına ulaşılamadı.");
+    const pinOf = Object.fromEntries((await r.json()).map(x => [x.code, x.pin]));
+    const missing = codes.filter(c => !pinOf[c]);
+    if (missing.length) throw new Error(`Bu kodlar yönetimde bulunamadı: ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? "…" : ""}`);
+    await Promise.all([loadScript("../../shared/vendor/html2canvas.min.js"), loadScript("../../shared/vendor/jspdf.umd.min.js")]);
+    const pdf = await kitGuidesPdf(codes.map(c => ({code: c, pin: pinOf[c]})), {site: SITE_URL, root: "../../", ...adminPrefs()}, msg);
+    pdf.save(`tasmaqr-kullanim-kitapciklari-${codes.length}.pdf`);
+    msg(`✓ ${codes.length} kitapçık indirildi. A4 yatay, arkalı önlü · kısa kenardan çevir, %100 ölçek.`);
+  } catch (e) { msg("⚠ " + e.message); }
+  ev.target.disabled = false;
+};
 const q = new URLSearchParams(location.search);
 if (q.get("olcu")) document.getElementById("size").value = q.get("olcu");
+if (q.get("parti")) { const i = BATCHES.findIndex(b => b.date === q.get("parti")); if (i >= 0) { $("batch").value = i; $("codes").value = BATCHES[i].codes.join("\n"); } }
 renderSheets();
 </script>
 </body>
