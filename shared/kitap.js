@@ -3,7 +3,9 @@
 // Baskı: A4 yatay, arkalı önlü (kısa kenardan çevir). Ön yüzde 4 kez 4 | 1, arka yüzde 4 kez 2 | 3.
 // A4 işaretlerden 4 parçaya kesilir, her parça ortadan katlanınca sayfalar 1-2-3-4 sırasıyla okunur.
 // Kapak, veteriner ve pet shop tezgâhında görünen yüzdür.
-// opt: {site, phone, instagram, email}
+// opt: {site, phone, instagram, email, batch}. batch: stok partisi için kod/PIN alanları boş yer tutucu olarak çizilir
+// (PDF'te her kitapçığın kodu ve PIN'i bu alanların üstüne yazılır; [data-fill] öğeleri).
+const KIT_IG = "https://www.instagram.com/tasmaqr", KIT_PLAY = "https://play.google.com/store/apps/details?id=io.github.yusufbas34.tasmaqr";
 function kitPages(opt) {
   const site = opt.site, logo = `<img src="shared/logo.svg" alt="">`;
   const brand = `<div class="brandline">${logo}Tasma QR</div>`;
@@ -22,8 +24,8 @@ function kitPages(opt) {
     <div class="glow"></div>
     <div class="collarbox">${collarHtml(badge("klasik", "DOSTUM"), "#1d2330")}</div>
     <div class="burst"><span>Uygulama<br>gerekmez</span></div>
-    <div class="tryit">${qrSvg(site)}<div><b>Telefonunla okut, hemen dene!</b>
-      <span>✓ Numaranız rozette yazmaz &nbsp;✓ Konum gönderme &nbsp;✓ Kayıp modu</span><small>İçinde: kurulum ve kullanım kılavuzu</small></div></div></div>`,
+    <div class="tryit">${qrSvg(KIT_IG)}<div><b>Okut, Instagram'da takip et!</b>
+      <span>✓ Numaranız rozette yazmaz &nbsp;✓ Konum gönderme &nbsp;✓ Kayıp modu</span><small>@tasmaqr · İçinde: kurulum ve kullanım kılavuzu</small></div></div></div>`,
 
     // 2 · kurulum
     `<div class="kp"><div class="pad">
@@ -31,12 +33,12 @@ function kitPages(opt) {
       <h2 class="h-sec">3 adımda kurulum</h2>
       <ol class="ksteps">
         <li><div><b>QR'ı okutun</b><span>Telefon kameranızı rozetteki QR'a tutun, açılan bağlantıya dokunun. Uygulama indirmeniz gerekmez.</span></div></li>
-        <li><div><b>PIN'i girin, bilgilerinizi yazın</b><span>Önce <b>PIN kartındaki 6 haneli PIN'i</b> girin. Ardından evcil hayvanınızın adını ve size ulaşılacak numarayı yazıp kaydedin; isterseniz not ve yedek numara ekleyin.</span></div></li>
+        <li><div><b>PIN'i girin, bilgilerinizi yazın</b><span>Önce <b>${opt.batch ? "3. sayfada yazan" : "PIN kartındaki"} 6 haneli PIN'i</b> girin. Ardından evcil hayvanınızın adını ve size ulaşılacak numarayı yazıp kaydedin; isterseniz not ve yedek numara ekleyin.</span></div></li>
         <li><div><b>Tasmaya takın</b><span>Halkayı rozetin kulağındaki delikten ve tasmanın D halkasından geçirin. Hazır!</span></div></li>
       </ol>
       <div class="tip"><b>Deneyin:</b> Kurulumdan sonra rozeti bir kez okutun; bulan kişinin göreceği ekranı siz de görün.</div>
       <div class="tip"><b>Kediler için:</b> güvenlik kilitli (çekince açılan) kedi tasması kullanın.</div>
-      <div class="knote"><b>PIN kartını saklayın.</b> Bilgileri değiştirmek ve kayıp modunu açmak için gerekir; tasmada bırakmayın.</div>
+      <div class="knote"><b>${opt.batch ? "Bu kitapçığı saklayın." : "PIN kartını saklayın."}</b> PIN, bilgileri değiştirmek ve kayıp modunu açmak için gerekir; tasmada bırakmayın.</div>
     </div><div class="pno">2</div></div>`,
 
     // 3 · kaybolursa ve güncelleme
@@ -49,22 +51,24 @@ function kitPages(opt) {
         <li><b>Adını ve notunuzu</b> (sağlık, karakter…)</li><li><b>Sahibimi ara</b>, WhatsApp ve SMS butonları</li>
         <li><b>Konumumu gönder</b>: bulunduğu yer haritayla size gelir</li><li>Kayıp modu açıksa kırmızı <b>KAYIP</b> uyarısı</li></ul></div>
       <div class="blk"><h3>✏️ Bilgileri güncelleyin</h3>
-        <p>Numaranız değişti mi, not eklemek mi istiyorsunuz? Rozeti okutun, sayfanın altındaki <b>Bilgileri düzenleyin</b>'e dokunun ve PIN'inizle kaydedin. Rozet aynı kalır, yeniden yaptırmanız gerekmez.</p></div>
-      <div class="blk" style="margin-bottom:0"><h3>📱 Uygulama</h3>
-        <p>Android uygulamasında rozetlerinizi, okutmaları ve gelen konumları görür; konum gelince bildirim alırsınız.</p></div>
-    </div><div class="pno">3</div></div>`,
+        <p>Rozeti okutun, <b>Bilgileri düzenleyin</b>'e dokunun, PIN'inizle kaydedin. Rozet aynı kalır.</p></div>
+    </div>
+    <div class="mine-box"><h3>Bilgilerim</h3>
+      <div class="fill"><div>Hayvanımın adı</div><div>Kayıtlı telefon</div>
+        <div class="v">Rozet kodu<b data-fill="code"></b></div><div class="v">PIN<b data-fill="pin"></b></div></div></div>
+    <div class="pno">3</div></div>`,
 
     // 4 · arka kapak: not alanı, bakım, iletişim
     `<div class="kp cover"><div class="pad">
-      ${brand}
-      <h3 style="font-size:4.6mm;margin-top:4mm">Bilgilerim</h3>
-      <div class="fill"><div>Hayvanımın adı</div><div>Kayıtlı telefon</div><div>Rozet kodu</div><div>PIN</div></div>
-      <div class="blk"><h3>🧼 Bakım ve güvenlik</h3><ul>
+      ${brand}${opt.batch ? `<span class="code4">Rozet kodu <b data-fill="code4"></b></span>` : ""}
+      <div class="blk" style="margin-top:5mm"><h3>🧼 Bakım ve güvenlik</h3><ul>
         <li>Suya dayanıklıdır; arada ılık su ve yumuşak bezle silin.</li>
         <li>Halkayı ara sıra kontrol edin, gevşerse sıkıştırın.</li>
         <li>Numaranız rozette yazmaz; yalnızca okutan kişi arama ekranında görür.</li>
         <li>Mikroçipin yerine geçmez; ek bir önlemdir.</li></ul></div>
-      <div class="qrrow">${qrSvg(site)}<div><b>Uygulamayı indirin</b><span>Okutun; rozetlerinizi yönetin, konum gelince haber alın.</span></div></div>
+      <div class="blk"><h3>📱 Uygulama</h3>
+        <p>Android uygulamasında rozetlerinizi, okutmaları ve gelen konumları görür; konum gelince bildirim alırsınız.</p></div>
+      <div class="qrrow">${qrSvg(KIT_PLAY)}<div><b>Uygulamayı indirin</b><span>Okutun, Google Play'den kurun; rozetlerinizi yönetin, konum gelince haber alın.</span></div></div>
     </div>
     <div class="contact"><div>${contact}</div><div style="text-align:right"><b>Tasma QR</b><span class="micro">Evcil hayvanınız için akıllı künye</span></div></div></div>`,
   ];

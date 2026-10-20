@@ -39,11 +39,19 @@
 .kp .klost{background:#c62828;color:#fff;border-radius:2.4mm;padding:3.2mm 3.4mm;margin-bottom:4.4mm}
 .kp .klost h3{font-size:5.4mm;margin-bottom:1.4mm}
 .kp .klost ol{margin:0;padding-left:3.8mm;display:grid;gap:1mm}
+/* 3. sayfanın altı: Bilgilerim (stok partisinde kod ve PIN dolu basılır) */
+.kp .mine-box{position:absolute;left:7mm;right:7mm;bottom:8.5mm;border-top:.3mm dashed #c9c0b5;padding-top:2.4mm}
+.kp .mine-box h3{font-size:4.6mm;margin-bottom:1.6mm}
+.kp .mine-box .fill{margin:0}
+.kp .fill .v{display:flex;flex-direction:column;padding-bottom:1.4mm}
+.kp .fill .v b{display:block;min-height:5mm;margin-top:.6mm;font-family:"Barlow Condensed",sans-serif;font-size:5mm;letter-spacing:.06em;color:var(--ink)}
+.kp .code4{position:absolute;right:7mm;top:7.6mm;font-size:2.5mm;color:var(--mut);text-align:right}
+.kp .code4 b{display:inline-block;min-width:16mm;font-size:3.2mm;color:var(--ink);letter-spacing:.06em}
 /* arka kapak */
 .kp .fill{display:grid;grid-template-columns:1fr 1fr;gap:2mm;margin:2mm 0 3mm}
 .kp .fill div{border:.3mm solid #c9c0b5;border-radius:1.6mm;padding:1.4mm 2mm 5.6mm;font-size:2.7mm;color:var(--mut);background:#fff}
 .kp .qrrow{display:flex;gap:3mm;align-items:center;background:#fff;border-radius:2.4mm;padding:2.4mm;box-shadow:0 .5mm 2mm #0000001a}
-.kp .qrrow svg{width:20mm;height:20mm;flex:none}
+.kp .qrrow svg{width:28mm;height:28mm;flex:none}
 .kp .qrrow b{display:block;font-size:3.8mm}
 .kp .qrrow span{color:var(--mut);font-size:2.9mm}
 .kp .contact{position:absolute;left:7mm;right:7mm;bottom:7mm;border-top:.25mm solid #ddd3c6;padding-top:2.2mm;display:flex;justify-content:space-between;gap:3mm;font-size:2.5mm}
