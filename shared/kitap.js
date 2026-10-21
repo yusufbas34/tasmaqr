@@ -88,7 +88,7 @@ const kitSheets = pages => KIT_FACES.map(([l, r]) => {
 function cardFaces(opt) {
   const ig = igHandle(opt.instagram);
   const lines = [opt.phone && `<span><i>📞</i>${esc(opt.phone)}</span>`, opt.email && `<span><i>✉️</i>${esc(opt.email)}</span>`,
-    ig && `<span><i>📷</i>@${esc(ig)}</span>`, `<span><i>🌐</i>bulqr.com.tr</span>`].filter(Boolean).join("");
+    ig && `<span><i>📷</i>@${esc(ig)}</span>`, `<span><i>🌐</i>tasma.bulqr.com.tr</span>`].filter(Boolean).join("");
   const front = `<div class="bc bc-front">
       <div class="bc-brand"><img src="${opt.root || ""}shared/logo.svg" alt="">Tasma QR</div>
       <h2>Kaybolursa,<br><em>sizi arasın.</em></h2>

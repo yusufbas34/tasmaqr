@@ -105,7 +105,7 @@ table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--li
 </main>
 <div id="sheets"></div>
 <script>
-const SITE_URL = "https://bulqr.com.tr/";
+const SITE_URL = "https://tasma.bulqr.com.tr/";
 const W = 56, H = 78, T = 14, HH = 27, G = 9; // ön yüz, yükseklik, kapak dili, asma kulağı, yapıştırma payı (mm)
 const COLORS = [
   {name: "Marka turuncu", hex: "#B8501A", design: "turuncu"},
@@ -173,7 +173,7 @@ const back = (o) => {
     ${step(3, 35, "Bulan kişi telefonla okutur,", "size tek dokunuşla ulaşır.")}
     ${qrSvg(SITE_URL, `x="4" y="42" width="17" height="17"`)}
     ${txt(23.5, 47, 3.4, "Okut, ücretsiz dene", `${FC} fill="#1d2330"`)}
-    ${txt(23.5, 51.5, 2.3, "bulqr.com.tr", `${FB} fill="#5d6472"`)}
+    ${txt(23.5, 51.5, 2.3, "tasma.bulqr.com.tr", `${FB} fill="#5d6472"`)}
     ${txt(23.5, 55.5, 2.3, "Instagram: @tasmaqr", `${FB} fill="#5d6472"`)}
     <rect x="3" y="63" width="${W - 6}" height="11.5" rx="2" fill="#f6f1ea"/>
     ${txt(W / 2, 67.7, 2.5, "İçindekiler: 1 QR rozet + 1 kullanım kitapçığı", `${FB} font-weight="600" fill="#1d2330" text-anchor="middle"`)}
@@ -183,7 +183,7 @@ const side = (o) => `<g transform="translate(${o.D / 2} ${H / 2}) rotate(-90)">$
 const headerFront = () => `${logo(W / 2 - 15.5, 16.3, 8.4)}${txt(W / 2 - 5.2, 23, 6.4, "Tasma QR", `${FC} fill="#fff"`)}`;
 const headerBack = () => `${txt(W / 2, 22.5, 2.6, "Kaybolursa okutulur, sahibine ulaşır.", `${FB} fill="#fff" fill-opacity=".9" text-anchor="middle"`)}`;
 const lidTop = (o) => txt(W / 2, o.D / 2 + 1.1, Math.min(3.2, o.D * .45), "TASMA QR", `${FC} fill="#fff" text-anchor="middle" letter-spacing=".6"`);
-const lidBottom = (o) => txt(W / 2, o.D / 2 + .9, Math.min(2.6, o.D * .38), "@tasmaqr · bulqr.com.tr", `${FB} fill="#fff" text-anchor="middle"`);
+const lidBottom = (o) => txt(W / 2, o.D / 2 + .9, Math.min(2.6, o.D * .38), "@tasmaqr · tasma.bulqr.com.tr", `${FB} fill="#fff" text-anchor="middle"`);
 
 // Tek kutunun açılımı: baskı + (isteğe bağlı) çizgiler, kendi koordinatında
 function boxSvg(o, uid) {

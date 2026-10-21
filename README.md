@@ -35,12 +35,12 @@ Google Play için: [android/GOOGLE_PLAY.md](android/GOOGLE_PLAY.md). Ayrıntıla
 ## Kurulum
 
 1. **Veritabanı**: Supabase > SQL Editor'da `supabase/kurulum.sql` dosyasını açın, en üstteki `v_sifre` satırına admin şifrenizi (en az 10 karakter) yazıp **Run**'a basın. Güncelleme geldiğinde dosyayı yeniden çalıştırmanız yeterli (veriler korunur, şifre satırını `BURAYA-SIFRE` bırakırsanız şifre değişmez). Supabase projesi `index.html`'in başındaki `SUPABASE_URL` ve `SUPABASE_KEY` ile seçilir.
-2. **Yayın**: GitHub > Settings > Pages > Branch: `main` / root. Site `https://bulqr.com.tr/` adresinde açılır (adres farklıysa `index.html` içindeki `SITE_URL`'i güncelleyin; rozetlere basılan QR bu adresi açar).
-3. **Yönetim**: `https://bulqr.com.tr/?admin`
-4. **Alan adı (bulqr.com.tr)**: Kökteki `CNAME` dosyası GitHub Pages'e alan adını bildirir. Alan adı firmasının DNS panelinde:
-   - `@` için 4 adet **A** kaydı: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
-   - `www` için **CNAME** kaydı: `yusufbas34.github.io`
-   - Sonra GitHub > Settings > Pages'te alan adının doğrulandığını görüp **Enforce HTTPS**'i işaretleyin.
+2. **Yayın**: GitHub > Settings > Pages > Branch: `main` / root. Site `https://tasma.bulqr.com.tr/` adresinde açılır (adres farklıysa `index.html` içindeki `SITE_URL`'i güncelleyin; rozetlere basılan QR bu adresi açar).
+3. **Yönetim**: `https://tasma.bulqr.com.tr/?admin`
+4. **Alan adı (tasma.bulqr.com.tr)**: Kökteki `CNAME` dosyası GitHub Pages'e alan adını bildirir. DNS (Cloudflare, bulut gri / DNS only):
+   - `tasma` için **CNAME** kaydı: `yusufbas34.github.io`
+   - Ana alan adı `bulqr.com.tr` ortak Bul QR giriş sayfasıdır (`bulqr-site/`, ayrı repoda yayınlanır).
+   - GitHub > Settings > Pages'te alan adı doğrulanınca **Enforce HTTPS**'i işaretleyin.
    Eski `yusufbas34.github.io/tasmaqr/?k=KOD` bağlantıları (önceden basılmış rozetler) GitHub tarafından yeni adrese yönlendirilir; repo adını değiştirmeyin.
 
 ## Dosyalar

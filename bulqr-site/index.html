@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bul QR | Kaybolanı QR bulsun</title>
+<meta name="description" content="Bul QR: evcil hayvan tasması ve araç için QR etiketler. Bulan kişi telefonuyla okutur, size tek dokunuşla ulaşır. Uygulama indirmesine gerek yok.">
+<meta property="og:title" content="Bul QR | Kaybolanı QR bulsun">
+<meta property="og:description" content="Tasma QR ve Araç QR: bulan kişi okutur, size tek dokunuşla ulaşır.">
+<meta property="og:url" content="https://bulqr.com.tr/">
+<meta name="theme-color" content="#163A7A">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts.css">
+<script>
+// Eski ya da yanlış basılmış bağlantılar: rozet kodu ve yönetim Tasma QR'a gider
+(function () {
+  var q = new URLSearchParams(location.search);
+  if (q.has("k") || q.has("admin")) location.replace("https://tasma.bulqr.com.tr/" + location.search + location.hash);
+})();
+</script>
+<style>
+:root{--bg:#f6f1ea;--card:#fff;--ink:#1d2330;--muted:#5d6472;--line:#e3dacd;--navy:#163a7a;--orange:#b8501a;--yellow:#ffd400;--hero1:#163a7a;--hero2:#0d1f45}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#12151b;--card:#1c2028;--ink:#eef0f4;--muted:#a3a9b5;--line:#2e343e}}
+:root[data-theme="dark"]{--bg:#12151b;--card:#1c2028;--ink:#eef0f4;--muted:#a3a9b5;--line:#2e343e}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 "Barlow",system-ui,sans-serif}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;line-height:1.08;margin:0}
+
+/* üst çubuk */
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--hero1) 92%,transparent);backdrop-filter:blur(8px);color:#fff}
+.top .wrap{display:flex;align-items:center;gap:14px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 24px/1 "Barlow Condensed",sans-serif;letter-spacing:.02em}
+.brand img{width:34px;height:34px}
+.top nav{margin-left:auto;display:flex;gap:4px}
+.top nav a{text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:600;font-size:15px}
+.top nav a:hover{background:rgba(255,255,255,.12)}
+@media (max-width:560px){.top nav a.hide-s{display:none}}
+
+/* giriş */
+.hero{background:radial-gradient(110% 120% at 85% 0%,#2a56a8 0%,var(--hero1) 45%,var(--hero2) 100%);color:#fff;padding:64px 0 88px;overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:32px;align-items:center}
+@media (max-width:820px){.hero .wrap{grid-template-columns:1fr}.hero .art{display:none}}
+.eyebrow{display:inline-block;background:rgba(255,212,0,.16);color:var(--yellow);border:1px solid rgba(255,212,0,.4);border-radius:999px;padding:4px 12px;font-weight:700;font-size:14px;letter-spacing:.04em}
+.hero h1{font-size:clamp(44px,7vw,76px);margin:16px 0 14px}
+.hero h1 em{font-style:normal;color:var(--yellow)}
+.hero p{font-size:19px;color:rgba(255,255,255,.86);max-width:560px;margin:0 0 26px}
+.cta{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;border-radius:12px;padding:13px 20px;font-size:16px}
+.btn.y{background:var(--yellow);color:#1d2330}.btn.o{background:var(--orange);color:#fff}
+.btn.g{border:2px solid rgba(255,255,255,.4);color:#fff}
+.art{position:relative;height:300px}
+.art .chip{position:absolute;background:#fff;color:#1d2330;border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.35);display:flex;align-items:center;gap:12px;padding:14px 18px;font-weight:700}
+.art .chip img{width:56px;height:56px}
+.art .chip small{display:block;font-weight:400;color:#5d6472;font-size:14px}
+.art .c1{top:20px;left:0;transform:rotate(-5deg)}.art .c2{top:150px;left:70px;transform:rotate(4deg)}
+.art .ring{position:absolute;right:-40px;top:-30px;width:280px;height:280px;border-radius:50%;border:34px solid rgba(255,212,0,.12)}
+
+/* ürünler */
+.products{margin-top:-52px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:760px){.products{grid-template-columns:1fr}}
+.prod{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,.06);position:relative;overflow:hidden}
+.prod::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:var(--c)}
+.prod .head{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.prod .head img{width:58px;height:58px}
+.prod h2{font-size:34px}
+.prod .sub{color:var(--muted);font-weight:600;font-size:15px}
+.prod ul{list-style:none;padding:0;margin:6px 0 22px;display:grid;gap:8px}
+.prod li{padding-left:28px;position:relative}
+.prod li::before{content:"✓";position:absolute;left:0;top:0;width:20px;height:20px;border-radius:50%;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c);font-weight:700;font-size:13px;display:grid;place-items:center;margin-top:3px}
+.prod .btn{margin-top:auto;align-self:flex-start;background:var(--c);color:#fff}
+.prod.tasma{--c:#b8501a}.prod.arac{--c:#163a7a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .prod.arac{--c:#4f7fd6}}
+:root[data-theme="dark"] .prod.arac{--c:#4f7fd6}
+
+/* nasıl çalışır */
+section.block{padding:64px 0 0}
+.block h2.t{font-size:clamp(32px,4.5vw,44px);margin-bottom:8px}
+.block p.lead{color:var(--muted);margin:0 0 24px;max-width:640px}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:760px){.steps{grid-template-columns:1fr}}
+.step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.step b.n{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--yellow);color:#1d2330;font:700 20px/1 "Barlow Condensed",sans-serif;margin-bottom:10px}
+.step h3{font-size:24px;margin-bottom:4px}.step p{margin:0;color:var(--muted)}
+.why{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.why{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.why div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.why b{display:block;font-size:17px}.why span{color:var(--muted);font-size:15px}
+.why i{font-style:normal;font-size:26px;display:block;margin-bottom:6px}
+
+/* alt */
+.band{margin-top:64px;background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:36px 0}
+.band .wrap{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+.band h2{font-size:32px}.band p{margin:4px 0 0;color:var(--muted)}
+footer{padding:28px 0 40px;color:var(--muted);font-size:15px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center}
+footer a{text-decoration:none}footer a:hover{text-decoration:underline}
+footer .sp{margin-left:auto}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="logo.svg" alt="" width="34" height="34">Bul QR</a>
+    <nav><a href="#urunler">Ürünler</a><a class="hide-s" href="#nasil">Nasıl çalışır</a><a href="https://www.instagram.com/tasmaqr" target="_blank" rel="noopener">Instagram</a></nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">TASMA QR · ARAÇ QR</span>
+      <h1>Kaybolanı <em>QR</em> bulsun.</h1>
+      <p>Tasmaya ya da araca takılan QR etiketi bulan kişi telefonuyla okutur, size tek dokunuşla ulaşır. Okutan kişinin uygulama indirmesine gerek yok.</p>
+      <div class="cta">
+        <a class="btn o" href="https://tasma.bulqr.com.tr/">🐾 Tasma QR</a>
+        <a class="btn y" href="https://yusufbas34.github.io/aracqr/">🚗 Araç QR</a>
+        <a class="btn g" href="#nasil">Nasıl çalışır?</a>
+      </div>
+    </div>
+    <div class="art" aria-hidden="true">
+      <div class="ring"></div>
+      <div class="chip c1"><img src="tasma.svg" alt=""><div>Tasma QR<small>Evcil hayvan künyesi</small></div></div>
+      <div class="chip c2"><img src="arac.svg" alt=""><div>Araç QR<small>Araç iletişim etiketi</small></div></div>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+  <div class="products" id="urunler">
+    <article class="prod tasma">
+      <div class="head"><img src="tasma.svg" alt="" width="58" height="58"><div><h2>Tasma QR</h2><div class="sub">Kedi, köpek ve tüm evcil dostlar için</div></div></div>
+      <ul>
+        <li>Tasmaya takılan su geçirmez QR rozet</li>
+        <li>Bulan kişi okutur; sizi arar ya da konum gönderir</li>
+        <li>Bilgilerinizi PIN ile siz girer, istediğiniz zaman değiştirirsiniz</li>
+        <li>Pil yok, şarj yok, abonelik yok</li>
+      </ul>
+      <a class="btn" href="https://tasma.bulqr.com.tr/">Tasma QR'a git →</a>
+    </article>
+    <article class="prod arac">
+      <div class="head"><img src="arac.svg" alt="" width="58" height="58"><div><h2>Araç QR</h2><div class="sub">Aracınız için iletişim etiketi</div></div></div>
+      <ul>
+        <li>Aracın camına yapıştırılan QR etiket</li>
+        <li>Yanlış park, açık kalan far, küçük bir kaza: biri size hemen ulaşır</li>
+        <li>Okutan kişinin uygulama indirmesine gerek yok</li>
+        <li>Bilgilerinizi siz yönetirsiniz</li>
+      </ul>
+      <a class="btn" href="https://yusufbas34.github.io/aracqr/">Araç QR'a git →</a>
+    </article>
+  </div>
+
+  <section class="block" id="nasil">
+    <h2 class="t">Nasıl çalışır?</h2>
+    <p class="lead">İki üründe de aynı basit yol: etiketi takın, bilgilerinizi girin, gerisini QR halletsin.</p>
+    <div class="steps">
+      <div class="step"><b class="n">1</b><h3>Takın</h3><p>Rozeti tasmaya, etiketi aracın camına takın.</p></div>
+      <div class="step"><b class="n">2</b><h3>Bilgilerinizi girin</h3><p>QR'ı okutun, size verilen PIN ile telefonunuzu ve notlarınızı kaydedin.</p></div>
+      <div class="step"><b class="n">3</b><h3>Size ulaşsınlar</h3><p>Bulan ya da gören kişi QR'ı okutur, tek dokunuşla size ulaşır.</p></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="t">Neden Bul QR?</h2>
+    <p class="lead">Karmaşık cihazlar yerine herkesin telefonunda olan kamerayı kullanır.</p>
+    <div class="why">
+      <div><i>📱</i><b>Uygulama gerekmez</b><span>Okutan kişi için kamera yeterli</span></div>
+      <div><i>🔋</i><b>Pil yok</b><span>Şarj derdi, bakım derdi yok</span></div>
+      <div><i>✏️</i><b>Hep güncel</b><span>Bilgiyi değiştirin, etiket aynı kalsın</span></div>
+      <div><i>🇹🇷</i><b>Yerli</b><span>Türkiye'de tasarlandı ve üretildi</span></div>
+    </div>
+  </section>
+</main>
+
+<section class="band">
+  <div class="wrap">
+    <div><h2>Bizi takip edin</h2><p>Yenilikler, kampanyalar ve kavuşma hikâyeleri Instagram'da.</p></div>
+    <a class="btn o" href="https://www.instagram.com/tasmaqr" target="_blank" rel="noopener">📷 @tasmaqr</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="y">2026</span> Bul QR</span>
+    <a href="https://tasma.bulqr.com.tr/">Tasma QR</a>
+    <a href="https://yusufbas34.github.io/aracqr/">Araç QR</a>
+    <a href="https://tasma.bulqr.com.tr/gizlilik.html">Gizlilik</a>
+    <a class="sp" href="https://www.instagram.com/tasmaqr" target="_blank" rel="noopener">Instagram</a>
+  </div>
+</footer>
+<script>document.getElementById("y").textContent = new Date().getFullYear();</script>
+</body>
+</html>

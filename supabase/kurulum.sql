@@ -554,7 +554,7 @@ begin
     new.code || ' · ' || new.amount || ' TL' || E'\n' ||
     new.full_name || ' · ' || new.phone || E'\n' ||
     new.district || ' / ' || new.city || E'\n\n' ||
-    'Hesabınızı kontrol edip panelden onaylayın: https://bulqr.com.tr/?admin');
+    'Hesabınızı kontrol edip panelden onaylayın: https://tasma.bulqr.com.tr/?admin');
   return new;
 end $$;
 
