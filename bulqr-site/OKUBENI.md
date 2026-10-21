@@ -22,5 +22,5 @@ GitHub'da her repo tek bir alan adı alabilir: bu klasör `bulqr.com.tr`, tasmaq
 ## Notlar
 
 - `bulqr.com.tr/?k=KOD` ya da `?admin` ile gelen biri otomatik olarak Tasma QR'a yönlendirilir.
-- Araç QR bağlantıları şimdilik `yusufbas34.github.io/aracqr/` adresini açar. aracqr reposuna `arac.bulqr.com.tr` alan adı verilince GitHub bu adresi kendiliğinden yeni adrese yönlendirir; isterseniz bağlantıları sonra `https://arac.bulqr.com.tr/` yapabilirsiniz.
+- Tasma QR `https://tasma.bulqr.com.tr/`, Araç QR `https://arac.bulqr.com.tr/` adresine bağlanır.
 - Yazı tipleri Barlow ve Barlow Condensed (SIL OFL 1.1, `fonts/OFL.txt`).
