@@ -9,10 +9,10 @@ Veri güvenliği formu cevapları ve mağaza metinleri. Görseller `android/stor
   `play` sürümü (AAB) kendini güncellemez, GitHub'a hiç bağlanmaz. Güncellemeyi Play Store yapar; bu Play'in kuralıdır.
 - **Hedef API 36** (Android 16), en düşük Android 10.
 - **Yeni geri hareketi** (Android 13+ "predictive back") desteklenir.
-- **Gizlilik politikası:** https://yusufbas34.github.io/tasmaqr/gizlilik.html
+- **Gizlilik politikası:** https://tasma.bulqr.com.tr/gizlilik.html
 - **Veri silme:**
   - Uygulama içinde iki yol var: rozet sayfasında "Rozeti sil", Profilim sekmesinde "Tüm verilerimi sil".
-  - Web'de: https://yusufbas34.github.io/tasmaqr/gizlilik.html#silme
+  - Web'de: https://tasma.bulqr.com.tr/gizlilik.html#silme
 - **İzinler:**
   - İnternet ve ağ durumu
   - Bildirim (Android 13+ bir kez sorulur): konum gönderildi / kayıp modunda rozet okutuldu / sipariş ilerledi
@@ -34,7 +34,7 @@ Veri güvenliği formu cevapları ve mağaza metinleri. Görseller `android/stor
    https://github.com/yusufbas34/tasmaqr/releases/download/play-son/tasma-qr-play.aab
 3. **Play Console:** Uygulama oluştur › formlar (4. ve 6. bölüm) › Mağaza girişi (7. bölüm) › Test › Kapalı test › Yeni sürüm › AAB'yi yükle.
 4. **Testçiler:** Kapalı test › Testçiler'e Araç QR'daki grubu (`ara-qr-test@googlegroups.com`) ekleyin, testçilere
-   https://yusufbas34.github.io/tasmaqr/test.html sayfasını gönderin (8. bölümdeki WhatsApp mesajı).
+   https://tasma.bulqr.com.tr/test.html sayfasını gönderin (8. bölümdeki WhatsApp mesajı).
 5. **14 gün sonra:** Üretim erişimi başvurusu (8. bölümdeki cevap taslakları).
 
 ## 1. Yükleme anahtarı oluşturun (bir kez, kendi bilgisayarınızda)
@@ -92,7 +92,7 @@ Sürüm numarası her derlemede otomatik artar, bu yüzden her güncellemede yen
    - Dil: Türkçe
    - Uygulama, Ücretsiz
 3. **Uygulama içeriği** bölümündeki formlar (cevaplar aşağıda, 6. bölümde):
-   - Gizlilik politikası: `https://yusufbas34.github.io/tasmaqr/gizlilik.html`
+   - Gizlilik politikası: `https://tasma.bulqr.com.tr/gizlilik.html`
    - Uygulama erişimi: "Tüm işlevler özel erişim olmadan kullanılabilir"
    - Reklamlar: Hayır
    - İçerik derecelendirmesi anketi: Kategori "Yardımcı program / üretkenlik". Şiddet, cinsellik, kumar vb. sorulara hep Hayır. Kullanıcılar birbiriyle iletişim kurabilir mi sorusuna: Hayır (rozeti okutan, telefonun kendi arama/SMS/WhatsApp uygulamasıyla arar; uygulamada sohbet yok).
@@ -157,7 +157,7 @@ Gizlilik politikasıyla birebir aynı olmalı. Biri değişirse diğerini de gü
 - Uygulama kullanıcı verisi topluyor ya da paylaşıyor mu: **Evet**
 - Veriler aktarım sırasında şifreleniyor mu: **Evet** (HTTPS)
 - Kullanıcılar verilerinin silinmesini isteyebilir mi: **Evet**
-  - Silme bağlantısı: `https://yusufbas34.github.io/tasmaqr/gizlilik.html#silme`
+  - Silme bağlantısı: `https://tasma.bulqr.com.tr/gizlilik.html#silme`
   - Uygulama içinde silme de var.
 - Hesap oluşturma: **Yok**. Hesap olmadığı için "hesap silme bağlantısı" zorunlu değildir, yine de silme sayfası var.
 
@@ -219,7 +219,7 @@ Not: Tasma QR mikroçipin yerine geçmez; evcil hayvanınızı bulan kişinin si
 **Kategori:** Evcil hayvanlar için uygun bir kategori yok; **Yaşam Tarzı (Lifestyle)** önerilir.
 **Etiketler:** evcil hayvan, köpek, kedi, kayıp, QR kod
 **İletişim e-postası:** Play bu adresi mağazada herkese gösterir; gizlilik sayfası silme talepleri için bu adresi gösteriyor.
-**Web sitesi:** `https://yusufbas34.github.io/tasmaqr/`
+**Web sitesi:** `https://tasma.bulqr.com.tr/`
 **Instagram:** `https://www.instagram.com/tasmaqr` (tam açıklamanın sonuna “Instagram: @tasmaqr” satırı eklendi)
 
 **İlk sürüm notu:** `İlk sürüm: QR rozet oluşturma, kayıp modu, konum bildirimi, renkli epoksi ve metal rozet siparişi.`
@@ -233,7 +233,7 @@ Not: Tasma QR mikroçipin yerine geçmez; evcil hayvanınızı bulan kişinin si
 ## 8. Hazır metinler (kopyala-yapıştır)
 
 ### Testçi sayfası
-https://yusufbas34.github.io/tasmaqr/test.html: gruba katılma, test bağlantısı, Play'den indirme ve denenecekler.
+https://tasma.bulqr.com.tr/test.html: gruba katılma, test bağlantısı, Play'den indirme ve denenecekler.
 Grup bağlantısı (`ara-qr-test`) ve Play katılım bağlantısı (`play.google.com/apps/testing/io.github.yusufbas34.tasmaqr`) sayfada hazır.
 Katılım bağlantısı, kapalı test sürümü yayınlanınca çalışmaya başlar. Play Console farklı bir bağlantı gösterirse bana gönderin, sayfaya yazayım.
 
@@ -243,7 +243,7 @@ Katılım bağlantısı, kapalı test sürümü yayınlanınca çalışmaya baş
 Selam! 🐾 Araç QR'dan sonra evcil hayvanlar için de bir uygulama yaptım: Tasma QR. Hayvanın tasmasına QR rozet takılıyor; evcil hayvan kaybolursa bulan kişi rozeti okutup sahibini tek dokunuşla arıyor, istersen konumunu da gönderiyor.
 
 Bunun da Google Play'e çıkması için 14 gün test eden 12 kişi lazım. Araç QR testine katıldıysan grup aynı, sadece test bağlantısına dokunup kurman yeterli:
-👉 https://yusufbas34.github.io/tasmaqr/test.html
+👉 https://tasma.bulqr.com.tr/test.html
 
 Hayvanın olmasa da olur. Çok teşekkürler! 🙏
 ```
