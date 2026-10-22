@@ -51,6 +51,10 @@ button{background:var(--band);color:#fff;border:0;border-radius:10px;padding:11p
 .cgrid label{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 8px;font:600 14px/1 "Barlow Condensed",sans-serif;letter-spacing:.04em}
 .cgrid select{width:auto;flex:1;padding:5px;font-size:13px}
 .cgrid i{width:14px;height:14px;border-radius:50%;flex:none}
+.onb{display:inline-flex;align-items:center;gap:6px;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:999px;padding:5px 12px 5px 6px;font-size:14px}
+.onb i{width:18px;height:18px;border-radius:50%;flex:none}.onb[aria-pressed="false"]{opacity:.45;text-decoration:line-through}
+.onb[aria-pressed="true"]{border-color:var(--ink)}
+#ctable input.nm{width:110px;margin-left:2px}
 input[type=password]{width:100%;padding:9px;border:2px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
 .sheet{width:210mm;min-height:297mm;background:#fff;padding:10mm;display:flex;flex-wrap:wrap;gap:3mm;align-content:flex-start}
 .sheet .st{width:var(--sd);height:var(--sd)}.sheet .st .sticker{width:100%;height:100%}
@@ -119,7 +123,8 @@ input[type=password]{width:100%;padding:9px;border:2px solid var(--line);border-
       </div>
       <div id="colorbox" hidden>
         <h3 style="margin:18px 0 8px">Renkler</h3>
-        <div class="bar2"><button type="button" class="ghostb" data-mode="split">5 renge böl</button><button type="button" class="ghostb" data-mode="cycle">Sırayla dönüşümlü</button>
+        <div class="bar2" style="margin-bottom:8px"><span class="hint">Kullanılacak renkler:</span><span id="onbtns" class="bar2"></span></div>
+        <div class="bar2"><button type="button" class="ghostb" data-mode="split" id="splitbtn">5 renge böl</button><button type="button" class="ghostb" data-mode="cycle">Sırayla dönüşümlü</button>
           <span class="hint">Hepsi:</span><span id="allbtns" class="bar2"></span></div>
         <div class="cgrid" id="cgrid"></div>
         <p class="hint" id="csum"></p>
@@ -149,14 +154,25 @@ const COLORS = [
   {key: "pembe", name: "Pembe", hex: "#E05A8A", fil: "Pembe"},
 ];
 const TOP = "SAHİBİMİ ARA", RIM = 2.2, CLEAR = .3;
-const sticker = (code, key, link) => tagHtml(code, key, {link, name: TOP, round: true});
+// Renk kodu değiştirildiyse etiket o renkle çizilir (açık renklerde yazı koyu olur); değişmediyse hazır tasarım kullanılır
+const lum = h => { const n = parseInt(h.slice(1), 16), f = v => (v /= 255) <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4;
+  return .2126 * f(n >> 16 & 255) + .7152 * f(n >> 8 & 255) + .0722 * f(n & 255); };
+const shade = (h, k) => "#" + [16, 8, 0].map(b => Math.round((parseInt(h.slice(1), 16) >> b & 255) * k).toString(16).padStart(2, "0")).join("");
+const designOf = c => {
+  const D = DESIGNS[c.key], def = DEFAULT_HEX[c.key];
+  if (!def || c.hex.toUpperCase() === def) return D;
+  const light = lum(c.hex) > .45;
+  return {...D, ring: c.hex, line: c.hex, ink: light ? "#1d2330" : "#fff", accent: light ? shade(c.hex, .5) : c.hex};
+};
+const sticker = (code, c, link) => { const D = designOf(c);
+  return `<div class="sticker round" style="--ring:${D.ring};--ink:${D.ink};--accent:${D.accent};--line:${D.line || D.ring}">${roundTagSvg(code, D, link, TOP)}</div>`; };
 const stickerDia = d => 2 * (d / 2 - RIM - CLEAR);
 
 // Gövdenin üstten görünüşü (govde.py ile aynı ölçüler), içinde etiket
 let uid = 0;
 function bodySvg(d, c, cls = "body", style = "") {
   const R = d / 2, ec = R + 2.6, er = 5, hr = 2.1, s = stickerDia(d), id = "bm" + (++uid);
-  const disc = roundTagSvg("ÖRNEK", DESIGNS[c.key], SITE_URL, TOP)
+  const disc = roundTagSvg("ÖRNEK", designOf(c), SITE_URL, TOP)
     .replace('<svg class="disc"', `<svg x="${-s / 2}" y="${-s / 2}" width="${s}" height="${s}"`);
   return `<svg class="${cls}" style="${style}" viewBox="${-R - .2} ${-ec - er - .2} ${d + .4} ${R + ec + er + .4}" aria-label="${c.name} gövde">
     <mask id="${id}"><rect x="-50" y="-50" width="100" height="100" fill="#fff"/><circle cx="0" cy="${-ec}" r="${hr}" fill="#000"/></mask>
@@ -165,29 +181,35 @@ function bodySvg(d, c, cls = "body", style = "") {
     <circle r="${R - .25}" fill="none" stroke="#000" stroke-opacity=".18" stroke-width=".5"/></svg>`;
 }
 
-// Filament adı ve renk kodu kullanıcıya ait: tasmaqr-3d-filament = {key: {hex, fil}}
+// Renk adı, filament adı, renk kodu ve kullanımda olup olmadığı kullanıcıya ait: tasmaqr-3d-filament = {key: {name, hex, fil, on}}
+COLORS.forEach(c => { c.on = true; });
 const DEFAULT_COLORS = COLORS.map(c => ({...c}));
+const DEFAULT_HEX = Object.fromEntries(COLORS.map(c => [c.key, c.hex.toUpperCase()]));
+const ACTIVE = () => { const a = COLORS.filter(c => c.on); return a.length ? a : COLORS; };
 const FIL_KEY = "tasmaqr-3d-filament";
 try { const o = JSON.parse(localStorage.getItem(FIL_KEY) || "{}"); COLORS.forEach(c => Object.assign(c, o[c.key] || {})); } catch (e) {}
-const saveFil = () => { try { localStorage.setItem(FIL_KEY, JSON.stringify(Object.fromEntries(COLORS.map(c => [c.key, {hex: c.hex, fil: c.fil}])))); } catch (e) {} };
+const saveFil = () => { try { localStorage.setItem(FIL_KEY, JSON.stringify(Object.fromEntries(COLORS.map(c => [c.key, {name: c.name, hex: c.hex, fil: c.fil, on: c.on}])))); } catch (e) {} };
 function renderColors() {
   document.getElementById("colors").innerHTML = COLORS.map(c =>
     `<figure>${bodySvg(35, c)}<figcaption>${c.name}<small>${c.hex}</small></figcaption></figure>`).join("");
   document.getElementById("real").innerHTML = [30, 35].map(d =>
     bodySvg(d, COLORS[1], "", `width:${d + .4}mm;height:${(d / 2 + d / 2 + 7.6 + .4).toFixed(1)}mm`)).join("");
-  document.getElementById("allbtns").innerHTML = COLORS.map(c => `<button type="button" class="swb" data-all="${c.key}" title="Hepsi ${c.name}" style="background:${c.hex}"></button>`).join("");
+  document.getElementById("allbtns").innerHTML = COLORS.map(c => `<button type="button" class="swb" data-all="${c.key}" title="Hepsi ${esc(c.name)}" style="background:${c.hex}"></button>`).join("");
+  document.getElementById("onbtns").innerHTML = COLORS.map(c => `<button type="button" class="onb" data-on="${c.key}" aria-pressed="${c.on}"><i style="background:${c.hex}"></i>${esc(c.name)}</button>`).join("");
+  const n = ACTIVE().length; document.getElementById("splitbtn").textContent = n > 1 ? `${n} renge böl` : "Tek renk";
 }
 function renderTable() {
   document.querySelector("#ctable tbody").innerHTML = COLORS.map(c =>
-    `<tr data-key="${c.key}"><td><span class="sw" style="background:${c.hex}"></span>${c.name}</td>
+    `<tr data-key="${c.key}"><td><span class="sw" style="background:${c.hex}"></span><input class="nm" value="${esc(c.name)}" maxlength="20" aria-label="Renk adı"></td>
       <td><input class="fil" value="${esc(c.fil)}" aria-label="${c.name} filament adı"></td>
       <td><input type="color" value="${c.hex.toLowerCase()}" aria-label="${c.name} renk seç"><input class="hex" value="${c.hex}" maxlength="7" aria-label="${c.name} renk kodu"></td>
-      <td>${DESIGNS[c.key].name}</td></tr>`).join("");
+      <td class="dz">${designOf(c) === DESIGNS[c.key] ? DESIGNS[c.key].name : "Renk koduna göre"}</td></tr>`).join("");
 }
 document.getElementById("ctable").addEventListener("input", ev => {
   const tr = ev.target.closest("tr[data-key]"); if (!tr) return;
   const c = COLORS.find(x => x.key === tr.dataset.key), t = ev.target;
   if (t.classList.contains("fil")) { c.fil = t.value.trim() || c.name; saveFil(); return; }
+  if (t.classList.contains("nm")) { c.name = t.value.trim() || DEFAULT_COLORS.find(x => x.key === c.key).name; saveFil(); renderColors(); renderSheets(); return; }
   let v = t.value.trim();
   if (t.classList.contains("hex")) {
     if (v && v[0] !== "#") v = "#" + v;
@@ -195,6 +217,7 @@ document.getElementById("ctable").addEventListener("input", ev => {
     tr.querySelector("input[type=color]").value = v.toLowerCase();
   } else tr.querySelector("input.hex").value = v.toUpperCase();
   c.hex = v.toUpperCase(); tr.querySelector(".sw").style.background = c.hex;
+  tr.querySelector(".dz").textContent = designOf(c) === DESIGNS[c.key] ? DESIGNS[c.key].name : "Renk koduna göre";
   saveFil(); renderColors(); renderSheets();
 });
 document.getElementById("creset").onclick = () => {
@@ -221,18 +244,20 @@ function readCodes() {
   for (const line of $("codes").value.split(/\n|,|;/)) {
     const [raw, col] = line.trim().split(/\s+/), code = (raw || "").replace(/"/g, "").toUpperCase();
     if (!/^[A-Z0-9-]{4,}$/.test(code) || code === "KOD" || out.includes(code)) continue;
-    const k = NAMES[(col || "").toLocaleLowerCase("tr")];
+    const nm = (col || "").toLocaleLowerCase("tr"), k = NAMES[nm] || (COLORS.find(x => x.name.toLocaleLowerCase("tr") === nm) || {}).key;
     if (k) colorOf[code] = k;
     out.push(code);
   }
   return out;
 }
 function assign(mode, key) {
-  const codes = readCodes(), n = Math.ceil(codes.length / COLORS.length);
-  codes.forEach((c, i) => { colorOf[c] = key || (mode === "cycle" ? COLORS[i % COLORS.length] : COLORS[Math.floor(i / n)]).key; });
+  const codes = readCodes(), A = ACTIVE(), n = Math.ceil(codes.length / A.length);
+  codes.forEach((c, i) => { colorOf[c] = key || (mode === "cycle" ? A[i % A.length] : A[Math.floor(i / n)]).key; });
   saveColors(); renderSheets();
 }
 document.addEventListener("click", ev => {
+  const on = ev.target.closest("[data-on]");
+  if (on) { const c = COLORS.find(x => x.key === on.dataset.on); c.on = !c.on; saveFil(); renderColors(); return; }
   const m = ev.target.closest("[data-mode]"), c = ev.target.closest("[data-all]");
   if (m) assign(m.dataset.mode); if (c) assign("", c.dataset.all);
 });
@@ -244,22 +269,22 @@ function renderSheets() {
   const codes = readCodes();
   let items;
   if (codes.length) {
-    const n = Math.ceil(codes.length / COLORS.length);
-    codes.forEach((c, i) => { colorOf[c] ||= COLORS[Math.floor(i / n)].key; });
+    const A = ACTIVE(), n = Math.ceil(codes.length / A.length);
+    codes.forEach((c, i) => { colorOf[c] ||= A[Math.floor(i / n)].key; });
     saveColors();
     items = codes.map(code => ({code, c: COLORS.find(x => x.key === colorOf[code]) || COLORS[0]}));
     $("cgrid").innerHTML = items.map(it => `<label><i style="background:${it.c.hex}"></i>${it.code}<select data-code="${it.code}">${COLORS.map(c =>
-      `<option value="${c.key}"${c.key === it.c.key ? " selected" : ""}>${c.name}</option>`).join("")}</select></label>`).join("");
+      `<option value="${c.key}"${c.key === it.c.key ? " selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label>`).join("");
     $("csum").textContent = "Basılacak gövde: " + COLORS.map(c => [c.name, items.filter(it => it.c.key === c.key).length]).filter(x => x[1]).map(([n, k]) => `${n} ${k}`).join(" · ") + ` · toplam ${items.length}`;
   } else {
-    const each = Math.floor(per / COLORS.length);
-    items = COLORS.flatMap(c => Array.from({length: each}, () => ({code: "ÖRNEK", c, link: SITE_URL})));
+    const A = ACTIVE(), each = Math.floor(per / A.length);
+    items = A.flatMap(c => Array.from({length: each}, () => ({code: "ÖRNEK", c, link: SITE_URL})));
   }
   $("colorbox").hidden = !codes.length;
   const pages = [];
   for (let i = 0; i < items.length; i += per) pages.push(items.slice(i, i + per));
   $("sheets").innerHTML = pages.map(p => `<div class="sheet" style="--sd:${sd}mm">${
-    p.map(it => `<div class="st">${sticker(it.code, it.c.key, it.link || tagLink(it.code))}</div>`).join("")}</div>`).join("");
+    p.map(it => `<div class="st">${sticker(it.code, it.c, it.link || tagLink(it.code))}</div>`).join("")}</div>`).join("");
 }
 $("size").onchange = renderSheets;
 $("codes").oninput = renderSheets;
