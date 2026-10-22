@@ -54,7 +54,7 @@ table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--li
   <div class="card">
     <div class="form">
       <label>Kutu rengi</label>
-      <div class="bar2" id="colors"></div>
+      <div><div class="bar2" id="colors"></div><div class="hint" id="cname" style="margin-top:6px"></div></div>
       <label for="depth">Kalınlık</label>
       <select id="depth">
         <option value="6">6 mm (yalnız epoksi rozet + kitapçık)</option>
@@ -107,14 +107,25 @@ table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--li
 <script>
 const SITE_URL = "https://tasma.bulqr.com.tr/";
 const W = 56, H = 78, T = 14, HH = 27, G = 9; // ön yüz, yükseklik, kapak dili, asma kulağı, yapıştırma payı (mm)
-const COLORS = [
-  {name: "Marka turuncu", hex: "#B8501A", design: "turuncu"},
+// 3D sayfasının 5 gövde rengi (adı ve kodu orada değiştirilir, tasmaqr-3d-filament) + marka turuncusu ve mor
+const FIL = (() => { try { return JSON.parse(localStorage.getItem("tasmaqr-3d-filament") || "{}"); } catch (e) { return {}; } })();
+const BODY = [
   {name: "Lacivert", hex: "#163A7A", design: "klasik"},
+  {name: "Turuncu", hex: "#E8742A", design: "turuncu"},
   {name: "Kırmızı", hex: "#C62828", design: "kirmizi"},
   {name: "Yeşil", hex: "#1F7A4A", design: "yesil"},
   {name: "Pembe", hex: "#E05A8A", design: "pembe"},
-  {name: "Mor (kedi)", hex: "#8A6FB3", design: "kedi"},
-];
+].map(c => ({...c, def: c.hex, ...(FIL[c.design] ? {name: FIL[c.design].name || c.name, fil: FIL[c.design].fil || "", hex: (FIL[c.design].hex || c.hex).toUpperCase()} : {})}));
+const lum = h => { const n = parseInt(h.slice(1), 16), f = v => (v /= 255) <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4;
+  return .2126 * f(n >> 16 & 255) + .7152 * f(n >> 8 & 255) + .0722 * f(n & 255); };
+const shade = (h, k) => "#" + [16, 8, 0].map(b => Math.round((parseInt(h.slice(1), 16) >> b & 255) * k).toString(16).padStart(2, "0")).join("");
+// Açık renkli kutuda yazılar koyu, vurgu sarı yerine rengin koyusu; rozet resmi kutunun rengini alır
+const COLORS = [{name: "Marka turuncu", hex: "#B8501A", design: "turuncu", def: "#B8501A", brand: true}, ...BODY,
+  {name: "Mor (kedi)", hex: "#8A6FB3", design: "kedi", def: "#8A6FB3"}].map(c => {
+  const light = lum(c.hex) > .45, D = DESIGNS[c.design];
+  return {...c, ink: light ? "#1d2330" : "#fff", hi: light ? shade(c.hex, .45) : "#FFD400",
+    tag: c.brand || c.hex === c.def ? D : {...D, ring: c.hex, line: c.hex, ink: light ? "#1d2330" : "#fff", accent: light ? shade(c.hex, .5) : c.hex}};
+});
 const LOGO = `<rect width="72" height="72" rx="16" fill="#B8501A"/><path d="M14 22q22-12 44 0" fill="none" stroke="#4A2410" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="18.5" r="3.4" fill="none" stroke="#FFD400" stroke-width="2.4"/><circle cx="36" cy="42" r="20" fill="#FFD400"/><circle cx="36" cy="42" r="14.5" fill="#fff"/><g fill="#163A7A"><path d="M27 33h6v6h-6zM39 33h6v6h-6zM27 45h6v6h-6z"/><path d="M35 35h2v2h-2zM35 39h4v2h-4zM41 41h2v2h-2zM37 45h2v4h-2zM41 45h4v2h-4zM43 49h2v2h-2zM39 49h2v2h-2z"/></g><g fill="#fff"><path d="M29 35h2v2h-2zM41 35h2v2h-2zM29 47h2v2h-2z"/></g>`;
 const logo = (x, y, s) => `<svg x="${x}" y="${y}" width="${s}" height="${s}" viewBox="0 0 72 72">${LOGO}</svg>`;
 const FC = `font-family="'Barlow Condensed','Arial Narrow',Arial,sans-serif" font-weight="700"`, FB = `font-family="Barlow,Arial,sans-serif"`;
@@ -153,18 +164,18 @@ const holes = g => {
 
 // Yüzler (yerel koordinat, 0,0 sol üst)
 const front = (o) => {
-  const D_ = DESIGNS[o.color.design];
-  const badge = o.win ? `<circle cx="${W / 2}" cy="${WIN_Y}" r="${WIN_R + 1.6}" fill="none" stroke="#FFD400" stroke-width="1.2"/>`
-    : `<circle cx="${W / 2}" cy="${WIN_Y}" r="19" fill="#fff" fill-opacity=".14"/>` +
+  const D_ = o.color.tag, k = o.color.ink;
+  const badge = o.win ? `<circle cx="${W / 2}" cy="${WIN_Y}" r="${WIN_R + 1.6}" fill="none" stroke="${o.color.hi}" stroke-width="1.2"/>`
+    : `<circle cx="${W / 2}" cy="${WIN_Y}" r="19" fill="#fff" fill-opacity="${k === "#fff" ? ".14" : ".6"}"/>` +
       roundTagSvg("ÖRNEK", D_, SITE_URL, "").replace('<svg class="disc"', `<svg x="${W / 2 - 16}" y="${WIN_Y - 16}" width="32" height="32"`);
-  return `${logo(5, 4.5, 11)}${txt(18.5, 11.4, 8.4, "Tasma QR", `${FC} fill="#fff"`)}${txt(18.6, 15.4, 2.9, "Akıllı QR künye", `${FB} fill="#fff" fill-opacity=".85"`)}
+  return `${logo(5, 4.5, 11)}${txt(18.5, 11.4, 8.4, "Tasma QR", `${FC} fill="${k}"`)}${txt(18.6, 15.4, 2.9, "Akıllı QR künye", `${FB} fill="${k}" fill-opacity=".85"`)}
     ${badge}
-    ${txt(W / 2, 64, 4.4, "OKUT • SAHİBİMİ ARA", `${FC} fill="#FFD400" text-anchor="middle" letter-spacing=".3"`)}
-    ${txt(W / 2, 69, 2.9, "Kedi · Köpek · Tüm evcil dostlar", `${FB} font-weight="600" fill="#fff" text-anchor="middle"`)}
-    ${txt(W / 2, 74, 2.3, "Su geçirmez · Pil yok · Abonelik yok", `${FB} fill="#fff" fill-opacity=".8" text-anchor="middle"`)}`;
+    ${txt(W / 2, 64, 4.4, "OKUT • SAHİBİMİ ARA", `${FC} fill="${o.color.hi}" text-anchor="middle" letter-spacing=".3"`)}
+    ${txt(W / 2, 69, 2.9, "Kedi · Köpek · Tüm evcil dostlar", `${FB} font-weight="600" fill="${k}" text-anchor="middle"`)}
+    ${txt(W / 2, 74, 2.3, "Su geçirmez · Pil yok · Abonelik yok", `${FB} fill="${k}" fill-opacity=".8" text-anchor="middle"`)}`;
 };
 const back = (o) => {
-  const step = (n, y, a, b) => `<circle cx="7" cy="${y - 1}" r="2.6" fill="${o.color.hex}"/>${txt(7, y, 3, n, `${FC} fill="#fff" text-anchor="middle"`)}
+  const step = (n, y, a, b) => `<circle cx="7" cy="${y - 1}" r="2.6" fill="${o.color.hex}"/>${txt(7, y, 3, n, `${FC} fill="${o.color.ink}" text-anchor="middle"`)}
     ${txt(11.5, y - 1.5, 2.8, a, `${FB} font-weight="600" fill="#1d2330"`)}${txt(11.5, y + 2, 2.6, b, `${FB} fill="#5d6472"`)}`;
   return `<rect width="${W}" height="${H}" fill="#fff"/>
     ${txt(4.5, 9, 5.2, "Nasıl çalışır?", `${FC} fill="#1d2330"`)}
@@ -179,11 +190,11 @@ const back = (o) => {
     ${txt(W / 2, 67.7, 2.5, "İçindekiler: 1 QR rozet + 1 kullanım kitapçığı", `${FB} font-weight="600" fill="#1d2330" text-anchor="middle"`)}
     ${txt(W / 2, 71.8, 2.2, "Kurulum adımları kitapçıkta · Türkiye'de üretildi", `${FB} fill="#5d6472" text-anchor="middle"`)}`;
 };
-const side = (o) => `<g transform="translate(${o.D / 2} ${H / 2}) rotate(-90)">${txt(0, 1.2, Math.min(3.4, o.D * .48), "TASMA QR  •  OKUT • SAHİBİMİ ARA", `${FC} fill="#fff" text-anchor="middle" letter-spacing=".3"`)}</g>`;
-const headerFront = () => `${logo(W / 2 - 15.5, 16.3, 8.4)}${txt(W / 2 - 5.2, 23, 6.4, "Tasma QR", `${FC} fill="#fff"`)}`;
-const headerBack = () => `${txt(W / 2, 22.5, 2.6, "Kaybolursa okutulur, sahibine ulaşır.", `${FB} fill="#fff" fill-opacity=".9" text-anchor="middle"`)}`;
-const lidTop = (o) => txt(W / 2, o.D / 2 + 1.1, Math.min(3.2, o.D * .45), "TASMA QR", `${FC} fill="#fff" text-anchor="middle" letter-spacing=".6"`);
-const lidBottom = (o) => txt(W / 2, o.D / 2 + .9, Math.min(2.6, o.D * .38), "@tasmaqr · tasma.bulqr.com.tr", `${FB} fill="#fff" text-anchor="middle"`);
+const side = (o) => `<g transform="translate(${o.D / 2} ${H / 2}) rotate(-90)">${txt(0, 1.2, Math.min(3.4, o.D * .48), "TASMA QR  •  OKUT • SAHİBİMİ ARA", `${FC} fill="${o.color.ink}" text-anchor="middle" letter-spacing=".3"`)}</g>`;
+const headerFront = (o) => `${logo(W / 2 - 15.5, 16.3, 8.4)}${txt(W / 2 - 5.2, 23, 6.4, "Tasma QR", `${FC} fill="${o.color.ink}"`)}`;
+const headerBack = (o) => `${txt(W / 2, 22.5, 2.6, "Kaybolursa okutulur, sahibine ulaşır.", `${FB} fill="${o.color.ink}" fill-opacity=".9" text-anchor="middle"`)}`;
+const lidTop = (o) => txt(W / 2, o.D / 2 + 1.1, Math.min(3.2, o.D * .45), "TASMA QR", `${FC} fill="${o.color.ink}" text-anchor="middle" letter-spacing=".6"`);
+const lidBottom = (o) => txt(W / 2, o.D / 2 + .9, Math.min(2.6, o.D * .38), "@tasmaqr · tasma.bulqr.com.tr", `${FB} fill="${o.color.ink}" text-anchor="middle"`);
 
 // Tek kutunun açılımı: baskı + (isteğe bağlı) çizgiler, kendi koordinatında
 function boxSvg(o, uid) {
@@ -199,8 +210,8 @@ function boxSvg(o, uid) {
     </g>
     ${at(0, yT, front(o))}${at(c, yT, back(o))}${at(b, yT, side(o))}${at(d, yT, side(o))}
     ${at(0, yT - D, lidTop(o))}${at(c, yB, lidBottom(o))}
-    ${at(c, yT - HH, headerBack())}
-    <g transform="rotate(180 ${(c + d) / 2} ${yT - 1.5 * HH})">${at(c, yT - 2 * HH, headerFront())}</g>
+    ${at(c, yT - HH, headerBack(o))}
+    <g transform="rotate(180 ${(c + d) / 2} ${yT - 1.5 * HH})">${at(c, yT - 2 * HH, headerFront(o))}</g>
     <g fill="#fff">${holes(g).join("")}${winCut.replace("<circle", '<circle fill="#fff"')}</g>
   </g>` + (o.marks ? `<g id="kesim" ${cut}><path d="${outline(g)}"/>${holes(g).join("")}${winCut}</g>
   <g id="katlama" fill="none" stroke="#111" stroke-width=".25" stroke-dasharray="1.6 1.2">${folds(g).map(([x1, y1, x2, y2]) => `<path d="M${x1} ${y1}L${x2} ${y2}"/>`).join("")}</g>` : "");
@@ -211,9 +222,9 @@ function shelfSvg(o) {
   return `<svg viewBox="-1 -1 ${W + 2} ${HH + H + 2}" aria-label="Kutunun önden görünüşü">
     <rect x="0" y="0" width="${W}" height="${HH + H}" rx=".6" fill="${o.color.hex}"/>
     <g fill="#fff"><path d="${EURO}" transform="translate(${W / 2} ${HOLE_K}) "/></g>
-    ${headerFront()}<line x1="0" y1="${HH}" x2="${W}" y2="${HH}" stroke="#000" stroke-opacity=".25" stroke-width=".3"/>
+    ${headerFront(o)}<line x1="0" y1="${HH}" x2="${W}" y2="${HH}" stroke="#000" stroke-opacity=".25" stroke-width=".3"/>
     <g transform="translate(0 ${HH})">${front(o)}${o.win ? `<circle cx="${W / 2}" cy="${WIN_Y}" r="${WIN_R}" fill="#f6f1ea"/>` +
-      roundTagSvg("ÖRNEK", DESIGNS[o.color.design], SITE_URL, "").replace('<svg class="disc"', `<svg x="${W / 2 - 15}" y="${WIN_Y - 15}" width="30" height="30"`) : ""}</g></svg>`;
+      roundTagSvg("ÖRNEK", o.color.tag, SITE_URL, "").replace('<svg class="disc"', `<svg x="${W / 2 - 15}" y="${WIN_Y - 15}" width="30" height="30"`) : ""}</g></svg>`;
 }
 
 function render() {
@@ -225,11 +236,12 @@ function render() {
   const two = 2 * g.w + 6 <= 287, x0 = two ? (297 - (2 * g.w + 6)) / 2 : (297 - g.w) / 2, y0 = (210 - g.h) / 2;
   document.getElementById("sheets").innerHTML = `<div class="sheet"><svg viewBox="0 0 297 210">${at2(x0, y0, boxSvg(opt, "a"))}${two ? at2(x0 + g.w + 6, y0, boxSvg(opt, "b")) : ""}</svg></div>`;
   document.querySelectorAll("#colors .swb").forEach((el, i) => el.setAttribute("aria-pressed", COLORS[i] === opt.color));
+  document.getElementById("cname").textContent = `${opt.color.name}${opt.color.fil && opt.color.fil !== opt.color.name ? ` (${opt.color.fil})` : ""} · ${opt.color.hex}. Gövde renklerinin adı ve kodu 3D sayfasındaki Renkler tablosundan gelir.`;
 }
 const at2 = (x, y, s) => `<g transform="translate(${x} ${y})">${s}</g>`;
 
 document.getElementById("colors").innerHTML = COLORS.map((c, i) =>
-  `<button type="button" class="swb" data-i="${i}" title="${c.name}" aria-label="${c.name}" style="background:${c.hex}"></button>`).join("");
+  `<button type="button" class="swb" data-i="${i}" title="${esc(c.name)}" aria-label="${esc(c.name)}" style="background:${c.hex}"></button>`).join("");
 document.getElementById("colors").onclick = ev => { const b = ev.target.closest("[data-i]"); if (b) { opt.color = COLORS[+b.dataset.i]; render(); } };
 document.getElementById("depth").onchange = ev => { opt.D = +ev.target.value; render(); };
 document.getElementById("win").onchange = ev => { opt.win = ev.target.value === "1"; render(); };
