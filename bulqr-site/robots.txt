@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://bulqr.com.tr/sitemap.xml

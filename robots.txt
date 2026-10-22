@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /uretim/
+Disallow: /pazarlama/
+Disallow: /bulqr-site/
+Sitemap: https://tasma.bulqr.com.tr/sitemap.xml
