@@ -53,7 +53,7 @@ begin
 end $$;
 revoke all on function public.tasma_admin_check(text) from public, anon, authenticated;  -- yalnızca içeriden
 
-create or replace function public.tasma_version() returns integer language sql immutable as 'select 2';
+create or replace function public.tasma_version() returns integer language sql immutable as 'select 3';
 
 -- ---------------------------------------------------------------- rozetler
 -- source = 'admin': yönetimden üretilip basılan (PIN kartıyla verilir, sahibi QR'ı okutup numarasını bağlar)
@@ -78,6 +78,9 @@ create table if not exists public.tasma_tags (
   locked_until timestamptz
 );
 create index if not exists tasma_tags_created_idx on public.tasma_tags (created_at);
+-- sürüm 3: "PIN'imi unuttum" için kurtarma e-postası (isteğe bağlı; yalnızca PIN göndermek için kullanılır)
+alter table public.tasma_tags add column if not exists email text;
+create index if not exists tasma_tags_email_idx on public.tasma_tags (lower(email)) where email is not null;
 alter table public.tasma_tags enable row level security;
 revoke all on public.tasma_tags from anon, authenticated;
 
@@ -329,7 +332,7 @@ begin
   if v_err is not null then return public.tasma_pin_error(v_code, v_err); end if;
   select * into t from tasma_tags where code = v_code;
   return json_build_object('ok', true, 'claimed', t.phone is not null, 'phone', t.phone, 'pet_name', t.pet_name, 'notes', t.notes,
-    'reward', t.reward, 'lost', t.lost, 'backup_phone', t.backup_phone, 'backup_name', t.backup_name);
+    'reward', t.reward, 'lost', t.lost, 'backup_phone', t.backup_phone, 'backup_name', t.backup_name, 'email', t.email);
 end $$;
 
 -- ---------------------------------------------------------------- yönetim: basılan rozetler
@@ -479,6 +482,8 @@ update public.tasma_shop_settings set product_text = 'Tasmaya takılan, halka de
     'Su geçirmez QR rozet seti: aynı QR 7 farklı ölçüde 29 adet. Birini tasmaya takın, yedekleri kafese, mama kabına, çantaya yapıştırın.');  -- eski varsayılan metinler
 -- sürüm 3: tasmaya takılan fiziksel rozet; epoksi (price) ve metal (price_metal) fiyatları
 alter table public.tasma_shop_settings add column if not exists price_metal integer not null default 250;
+-- sürüm 3: müşteriye giden e-postaların (PIN'imi unuttum) gönderen adresi; Resend'de doğrulanmış alan adından olmalı
+alter table public.tasma_shop_settings add column if not exists mail_from text;
 alter table public.tasma_shop_settings enable row level security;
 revoke all on public.tasma_shop_settings from anon, authenticated;
 
@@ -532,7 +537,7 @@ begin
   if coalesce(s.resend_api_key, '') <> '' and coalesce(s.notify_email, '') <> '' then
     execute 'select net.http_post(url := $1, body := $2, headers := $3)'
       using 'https://api.resend.com/emails',
-            jsonb_build_object('from', 'Tasma QR <onboarding@resend.dev>', 'to', jsonb_build_array(s.notify_email),
+            jsonb_build_object('from', coalesce(nullif(trim(s.mail_from), ''), 'Tasma QR <onboarding@resend.dev>'), 'to', jsonb_build_array(s.notify_email),
               'subject', p_subject, 'text', p_text),
             jsonb_build_object('Content-Type', 'application/json', 'Authorization', 'Bearer ' || s.resend_api_key);
     sent := true;
@@ -725,6 +730,128 @@ begin
   where id = p_id;
 end $$;
 
+-- ---------------------------------------------------------------- PIN'imi unuttum (e-postayla)
+-- Sahip rozetine bir kurtarma e-postası kaydeder (PIN ile). PIN'i unutunca e-postasını yazar; o e-postaya kayıtlı
+-- rozetlerin kodu, PIN'i ve düzenleme bağlantısı gönderilir. E-posta, Ayarlar'daki Resend anahtarıyla gider.
+-- Müşterilere ulaşması için Resend'de alan adı doğrulanmalı (Resend > Domains > bulqr.com.tr, verilen DNS kayıtları
+-- Cloudflare'e eklenir) ve Ayarlar'da gönderen adresi ör. Tasma QR <pin@bulqr.com.tr> yapılmalı.
+create table if not exists public.tasma_pin_mail_log (
+  id bigint generated always as identity primary key,
+  email text not null,
+  sent boolean not null default false,
+  created_at timestamptz not null default now()
+);
+create index if not exists tasma_pin_mail_log_idx on public.tasma_pin_mail_log (email, created_at);
+alter table public.tasma_pin_mail_log enable row level security;
+revoke all on public.tasma_pin_mail_log from anon, authenticated;
+
+create or replace function public.tasma_email_ok(p_email text) returns boolean language sql immutable
+  as $q$ select coalesce(p_email, '') ~ '^[^@\s<>",;]+@[^@\s<>",;]+\.[^@\s<>",;]+$' and length(p_email) <= 254 $q$;
+
+-- Müşteriye e-posta (Resend). Gönderildiyse true.
+create or replace function public.tasma_mail(p_to text, p_subject text, p_text text)
+returns boolean
+language plpgsql security definer set search_path = public
+as $$
+declare s tasma_shop_settings;
+begin
+  select * into s from tasma_shop_settings where id = 1;
+  if coalesce(s.resend_api_key, '') = '' or to_regprocedure('net.http_post(text,jsonb,jsonb,jsonb,integer)') is null then return false; end if;
+  execute 'select net.http_post(url := $1, body := $2, headers := $3)'
+    using 'https://api.resend.com/emails',
+          jsonb_build_object('from', coalesce(nullif(trim(s.mail_from), ''), 'Tasma QR <onboarding@resend.dev>'),
+            'to', jsonb_build_array(p_to), 'subject', p_subject, 'text', p_text),
+          jsonb_build_object('Content-Type', 'application/json', 'Authorization', 'Bearer ' || s.resend_api_key);
+  return true;
+exception when others then
+  raise warning 'Tasma QR e-postası gönderilemedi: %', sqlerrm;
+  return false;
+end $$;
+revoke all on function public.tasma_mail(text, text, text) from public, anon, authenticated;  -- yalnızca içeriden
+
+-- Kurtarma e-postasını kaydet / kaldır (PIN ile). Boş = kaldır. {ok, email}
+create or replace function public.tasma_tag_email_set(p_code text, p_pin text, p_email text)
+returns json
+language plpgsql security definer set search_path = public
+as $$
+declare
+  v_code text := upper(trim(coalesce(p_code, '')));
+  v_email text := nullif(lower(trim(coalesce(p_email, ''))), '');
+  v_err text := public.tasma_check_pin(v_code, p_pin);
+begin
+  if v_err is not null then return public.tasma_pin_error(v_code, v_err); end if;
+  if v_email is not null and not public.tasma_email_ok(v_email) then return json_build_object('ok', false, 'error', 'bad_email'); end if;
+  update tasma_tags set email = v_email, updated_at = now() where code = v_code;
+  return json_build_object('ok', true, 'email', v_email);
+end $$;
+
+-- PIN'imi unuttum. p_code verilirse yalnızca o rozet, verilmezse bu e-postaya kayıtlı tüm rozetler gönderilir.
+-- Kimin hangi e-postayı kaydettiği anlaşılmasın diye eşleşme olsa da olmasa da aynı yanıt döner: {ok:true}.
+-- Hata: bad_email | busy (çok sık istek) | mail_off (e-posta gönderimi kurulu değil)
+create or replace function public.tasma_pin_forgot(p_email text, p_code text default null)
+returns json
+language plpgsql security definer set search_path = public
+as $$
+declare
+  v_email text := lower(trim(coalesce(p_email, '')));
+  v_code text := nullif(upper(trim(coalesce(p_code, ''))), '');
+  s tasma_shop_settings;
+  v_list text := '';
+  v_n integer := 0;
+  t record;
+begin
+  if not public.tasma_email_ok(v_email) then return json_build_object('ok', false, 'error', 'bad_email'); end if;
+  select * into s from tasma_shop_settings where id = 1;
+  if coalesce(s.resend_api_key, '') = '' or to_regprocedure('net.http_post(text,jsonb,jsonb,jsonb,integer)') is null then
+    return json_build_object('ok', false, 'error', 'mail_off');
+  end if;
+  delete from tasma_pin_mail_log where created_at < now() - interval '2 days';
+  -- sınır: aynı e-postaya saatte 3, toplamda saatte 60 istek
+  if (select count(*) from tasma_pin_mail_log where email = v_email and created_at > now() - interval '1 hour') >= 3
+     or (select count(*) from tasma_pin_mail_log where created_at > now() - interval '1 hour') >= 60 then
+    return json_build_object('ok', false, 'error', 'busy');
+  end if;
+
+  for t in select code, pin, pet_name from tasma_tags
+           where lower(email) = v_email and (v_code is null or code = v_code) order by created_at limit 20 loop
+    v_n := v_n + 1;
+    v_list := v_list || E'\n' || coalesce(nullif(t.pet_name, '') || E'\n', '') ||
+      'Rozet kodu: ' || t.code || E'\nPIN: ' || t.pin ||
+      E'\nBilgileri değiştir: https://tasma.bulqr.com.tr/?k=' || t.code || E'&duzenle\n';
+  end loop;
+
+  insert into tasma_pin_mail_log (email, sent) values (v_email, v_n > 0);
+  if v_n = 0 then return json_build_object('ok', true); end if;
+
+  perform public.tasma_mail(v_email, 'Tasma QR · PIN''iniz',
+    'Merhaba,' || E'\n\n' || 'PIN''imi unuttum isteğiniz üzerine Tasma QR rozet bilgileriniz:' || E'\n' || v_list || E'\n' ||
+    'Bağlantıyı açıp PIN''i girerek evcil hayvanınızın bilgilerini değiştirebilir, kayıp modunu açabilirsiniz.' || E'\n\n' ||
+    '🔒 Bu e-postayı kimseyle paylaşmayın: PIN''i bilen rozetin bilgilerini değiştirebilir.' || E'\n' ||
+    'Bu isteği siz yapmadıysanız e-postayı silebilirsiniz; bilgileriniz değişmedi.' || E'\n\n' || 'Tasma QR · https://tasma.bulqr.com.tr');
+  return json_build_object('ok', true);
+end $$;
+
+-- Yönetim: PIN e-postalarının gönderen adresi. Boş = onboarding@resend.dev (yalnızca Resend hesabı sahibine ulaşır)
+create or replace function public.tasma_admin_mail_from_set(p_key text, p_from text)
+returns void
+language plpgsql security definer set search_path = public
+as $$
+begin
+  perform public.tasma_admin_check(p_key);
+  update tasma_shop_settings set mail_from = nullif(left(trim(coalesce(p_from, '')), 120), ''), updated_at = now() where id = 1;
+end $$;
+
+-- Yönetim: kurtarma e-postası kayıtlı rozet sayısı ve son 2 günün istekleri
+create or replace function public.tasma_admin_pin_stats(p_key text)
+returns json
+language plpgsql security definer set search_path = public
+as $$
+begin
+  perform public.tasma_admin_check(p_key);
+  return json_build_object('with_email', (select count(*) from tasma_tags where email is not null),
+    'requests', (select count(*) from tasma_pin_mail_log), 'sent', (select count(*) from tasma_pin_mail_log where sent));
+end $$;
+
 -- ---------------------------------------------------------------- yetkiler: herkese açık API (anon) yalnızca bu fonksiyonları çağırabilir
 do $$
 declare f text;
@@ -754,7 +881,12 @@ begin
     'tasma_admin_shop_set(text, boolean, integer, text, text, text, text, text, text, text, text, text, text, integer)',
     'tasma_admin_notify_test(text)',
     'tasma_admin_orders(text)',
-    'tasma_admin_order_update(text, bigint, text, text, text)'
+    'tasma_admin_order_update(text, bigint, text, text, text)',
+    'tasma_email_ok(text)',
+    'tasma_tag_email_set(text, text, text)',
+    'tasma_pin_forgot(text, text)',
+    'tasma_admin_mail_from_set(text, text)',
+    'tasma_admin_pin_stats(text)'
   ] loop
     execute format('revoke all on function public.%s from public', f);
     execute format('grant execute on function public.%s to anon, authenticated', f);

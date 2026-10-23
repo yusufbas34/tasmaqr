@@ -166,7 +166,7 @@ Toplanan veri türleri:
 | Tür | Toplanıyor | Paylaşılıyor* | İsteğe bağlı mı | Amaç |
 |---|---|---|---|---|
 | Kişisel bilgi › Ad | Evet (yedek kişinin adı; siparişte ad soyad) | Hayır | İsteğe bağlı | Uygulama işlevi |
-| Kişisel bilgi › E-posta | Evet (yalnızca siparişte) | Hayır | İsteğe bağlı | Uygulama işlevi, iletişim |
+| Kişisel bilgi › E-posta | Evet (siparişte ve isteğe bağlı kurtarma e-postası) | Hayır | İsteğe bağlı | Uygulama işlevi, hesap yönetimi, iletişim |
 | Kişisel bilgi › Telefon numarası | Evet | Hayır | Zorunlu (uygulamanın amacı) | Uygulama işlevi |
 | Kişisel bilgi › Adres | Evet (yalnızca siparişte) | Hayır | İsteğe bağlı | Uygulama işlevi (kargo) |
 | Uygulama etkinliği › Diğer kullanıcı tarafından oluşturulan içerik (hayvanın adı, bulan kişiye not, ödül notu) | Evet | Hayır | İsteğe bağlı | Uygulama işlevi |

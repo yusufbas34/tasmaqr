@@ -572,6 +572,45 @@ function showFound(code, tag) {
   };
 }
 
+// ---------------------------------------------------------------- PIN'imi unuttum (supabase/kurulum.sql sürüm 3)
+// Sahip rozetine isteğe bağlı bir kurtarma e-postası kaydeder; PIN'i unutunca kod ve PIN o adrese gönderilir.
+const profileEmail = () => (store.get("address", {}).email || "").trim();
+const emailOk = e => /^[^@\s<>",;]+@[^@\s<>",;]+\.[^@\s<>",;]+$/.test(e);
+async function setRecoveryEmail(code, pin, email) {
+  try { return !!(await rpc("tasma_tag_email_set", {p_code: code, p_pin: pin, p_email: email || ""}))?.ok; } catch (e) { return false; }
+}
+function showForgot(code = "", tag = null, msg = "", email = profileEmail()) {
+  const back = code ? (tag ? () => showPinGate(code, tag) : null) : null;
+  show(`
+    ${code && tag ? petBadge(tag.pet_name || "", code, tag.lost) : ""}
+    <h1>🔑 PIN'imi unuttum</h1>
+    <p>Rozetinize kurtarma e-postası kaydettiyseniz adresinizi yazın; ${code ? "bu rozetin" : "o adrese kayıtlı rozetlerin"} kodunu ve PIN'ini e-postanıza gönderelim.</p>
+    ${msg}
+    <form id="ff" novalidate>
+      <label for="f-email">E-posta adresiniz</label>
+      <input id="f-email" type="email" inputmode="email" autocomplete="email" placeholder="ornek@mail.com" value="${esc(email)}">
+      <button class="btn" type="submit">PIN'imi gönder</button>
+    </form>
+    <div class="note" style="margin-top:18px"><b>E-posta kaydetmediyseniz:</b> PIN, rozeti oluşturduğunuz telefonda <b>Rozetlerim</b>'de, hazır rozetlerde ise rozetle gelen kartta ve kitapçığın 3. sayfasında yazar. Bulamazsanız Instagram'dan <a href="${IG_URL}" target="_blank" rel="noopener">@tasmaqr</a>'a rozet kodunuzla yazın.</div>
+    <p class="small"><a href="#" id="f-back">Geri dön</a></p>`, "mid");
+  const g = id => document.getElementById(id);
+  g("f-back").onclick = ev => { ev.preventDefault(); back ? back() : history.length > 1 ? history.back() : location.assign(BASE); };
+  if (!email) g("f-email").focus();
+  g("ff").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const e = g("f-email").value.trim();
+    const say = (t, ok) => showForgot(code, tag, `<div class="msg ${ok ? "ok" : "err"}" role="${ok ? "status" : "alert"}">${t}</div>`, e);
+    if (!emailOk(e)) return say("E-posta adresi geçersiz.");
+    ev.submitter && (ev.submitter.disabled = true);
+    let r;
+    try { r = await rpc("tasma_pin_forgot", {p_email: e, p_code: code || null}); }
+    catch (x) { return say(x.status === 404 ? "E-postayla PIN gönderimi henüz kurulu değil. Aşağıdaki yollardan PIN'inizi bulabilirsiniz." : "Bağlantı hatası. İnternetinizi kontrol edip tekrar deneyin."); }
+    if (r?.ok) return say(`<b>Gönderildi.</b> Bu adres ${code ? "bu rozete" : "bir rozete"} kayıtlıysa kod ve PIN birkaç dakika içinde e-postanıza gelir. Gelmezse <b>Spam / Gereksiz</b> klasörüne de bakın.`, true);
+    say({bad_email: "E-posta adresi geçersiz.", busy: "Çok sık denediniz. Bir saat sonra tekrar deneyin.",
+      mail_off: "E-postayla PIN gönderimi şu an kapalı. Aşağıdaki yollardan PIN'inizi bulabilirsiniz."}[r?.error] || "Gönderilemedi, tekrar deneyin.");
+  });
+}
+
 // ---------------------------------------------------------------- sahibi: rozeti bağla / düzenle (PIN ile)
 // Sahip girişi: önce PIN, PIN doğrulanınca bilgiler ve form açılır. İlk bağlamada da önce karttaki PIN istenir.
 function showPinGate(code, tag, error = "") {
@@ -591,7 +630,9 @@ function showPinGate(code, tag, error = "") {
       ${known ? `<span class="hint">PIN bu cihazda kayıtlı olduğu için dolduruldu.</span>` : `<span class="hint">${claim ? "PIN, rozetle birlikte gelen kartta yazar." : "PIN'i rozeti oluşturduğunuz cihazda Rozetlerim'de ya da rozetle gelen kartta bulabilirsiniz."}</span>`}
       <button class="btn" type="submit">Devam</button>
     </form>
+    ${claim ? "" : `<p class="small" style="text-align:center"><a href="#" id="g-forgot">🔑 PIN'imi unuttum</a></p>`}
     <p class="small"><a href="${esc(back)}">Vazgeç</a></p>`, "mid");
+  document.getElementById("g-forgot")?.addEventListener("click", ev => { ev.preventDefault(); showForgot(code, tag); });
   const input = document.getElementById("g-pin");
   if (!known) input.focus();
   document.getElementById("gf").addEventListener("submit", async ev => {
@@ -620,7 +661,8 @@ function showEdit(code, tag, error = "", v = null, pin = "") {
   if (!/^\d{6}$/.test(pin)) return showPinGate(code, tag, error);
   const claim = !tag.phone, own = findTag(code);
   v ||= {name: tag.pet_name || own?.name || "", phone: prettyPhone(tag.phone), lost: !!tag.lost, reward: tag.reward || "",
-    notes: tag.notes || "", backup: prettyPhone(tag.backup_phone), backupName: tag.backup_name || ""};
+    notes: tag.notes || "", backup: prettyPhone(tag.backup_phone), backupName: tag.backup_name || "",
+    email: "email" in tag ? tag.email || (claim ? profileEmail() : "") : null};
   const val = k => `value="${esc(v[k] || "")}"`;
   show(`
     ${petBadge(v.name, code, v.lost)}
@@ -643,6 +685,9 @@ function showEdit(code, tag, error = "", v = null, pin = "") {
           <input id="e-backup" type="tel" inputmode="tel" placeholder="05xx xxx xx xx" ${val("backup")}></div>
         <div><label for="e-bname">Yedek kişinin adı</label><input id="e-bname" maxlength="40" placeholder="ör. Eşim Ayşe" ${val("backupName")}></div>
       </div>
+      ${v.email === null ? "" : `<label for="e-email">Kurtarma e-postası <span class="opt">(isteğe bağlı)</span></label>
+      <input id="e-email" type="email" inputmode="email" autocomplete="email" placeholder="ornek@mail.com" ${val("email")}>
+      <span class="hint">PIN'inizi unutursanız “PIN'imi unuttum” ile bu adrese göndeririz. QR'ı okutan kimse görmez.</span>`}
       <button class="btn" type="submit">${claim ? "Rozeti bağla" : "Kaydet"}</button>
     </form>
     ${claim ? "" : `<button class="btn ghost" type="button" id="del" style="color:var(--err)">🗑 Rozeti sil</button>`}
@@ -656,12 +701,14 @@ function showEdit(code, tag, error = "", v = null, pin = "") {
     ev.preventDefault();
     const g = id => document.getElementById(id);
     const nv = {name: g("e-name").value.trim(), phone: g("e-phone").value.trim(), lost: g("e-lost").checked, reward: g("e-reward").value.trim(),
-      notes: g("e-notes").value.trim(), backup: g("e-backup").value.trim(), backupName: g("e-bname").value.trim(), pin};
+      notes: g("e-notes").value.trim(), backup: g("e-backup").value.trim(), backupName: g("e-bname").value.trim(), pin,
+      email: g("e-email") ? g("e-email").value.trim() : null};
     const again = msg => showEdit(code, tag, msg, nv, pin);
     const phone = normalizePhone(nv.phone), backup = nv.backup ? normalizePhone(nv.backup) : null;
     if (!nv.name) return again("Evcil hayvanınızın adını yazın.");
     if (!phone) return again("Numara geçersiz. Örnek: 0532 123 45 67");
     if (nv.backup && !backup) return again("Yedek numara geçersiz. İstemiyorsanız boş bırakın.");
+    if (nv.email && !emailOk(nv.email)) return again("Kurtarma e-postası geçersiz. İstemiyorsanız boş bırakın.");
     ev.submitter && (ev.submitter.disabled = true);
     let res;
     try {
@@ -669,6 +716,7 @@ function showEdit(code, tag, error = "", v = null, pin = "") {
         p_lost: nv.lost, p_reward: nv.reward, p_backup_phone: backup, p_backup_name: nv.backupName, p_claim: claim});
     } catch (e) { return again("Bağlantı hatası. İnternetinizi kontrol edip tekrar deneyin."); }
     if (res?.ok) {
+      if (nv.email !== null && nv.email.toLowerCase() !== (tag.email || "")) await setRecoveryEmail(code, nv.pin, nv.email);
       saveTag({code, pin: nv.pin, name: nv.name, phone});
       return showSaved(code, nv.name, phone, claim, nv.lost, pin);
     }
@@ -1023,7 +1071,7 @@ function showFaq() {
     <details><summary>Konumum kaydediliyor mu?</summary><p>Yalnızca bulan kişi “Konumumu sahibine gönder” butonuna basıp izin verirse kaydedilir ve yalnızca rozetin sahibi görür. QR'ı okutmak tek başına konum göndermez.</p></details>
     <details><summary>Rozeti silebilir miyim?</summary><p>Evet. Rozetinizin sayfasından ya da “Bilgileri düzenleyin” ekranından PIN'inizle silebilirsiniz; QR o andan itibaren hiçbir bilgi göstermez ve okutmalar, konumlar da silinir.</p></details>
     <details><summary>Mikroçipin yerine geçer mi?</summary><p>Hayır. Mikroçip yasal zorunluluktur ve kalıcıdır; Tasma QR rozeti, evcil hayvanınızı bulan kişinin size dakikalar içinde ulaşabilmesi için ek bir önlemdir.</p></details>
-    <details><summary>PIN'imi kaybedersem?</summary><p>Rozeti bu cihazda oluşturduysanız PIN <b>Rozetlerim</b>'de yazar. Değilse talep formunun not alanından bize yazın, yardımcı olalım.</p></details>`, "mid");
+    <details><summary>PIN'imi kaybedersem?</summary><p>Rozeti bu cihazda oluşturduysanız PIN <b>Rozetlerim</b>'de yazar. Rozetinize kurtarma e-postası kaydettiyseniz rozeti okutun, “Sahibi misiniz?” ekranında <b>🔑 PIN'imi unuttum</b>'a basın; kod ve PIN e-postanıza gelir. Kurtarma e-postasını bilgileri düzenlerken ya da uygulamada Profil'den ekleyebilirsiniz. Hiçbiri yoksa Instagram'dan rozet kodunuzla bize yazın, yardımcı olalım.</p></details>`, "mid");
 }
 
 // ---------------------------------------------------------------- site: hazır rozet talep formu
@@ -1171,7 +1219,7 @@ function showProfile(saved = false) {
   const p = store.get("address", {}), val = k => `value="${esc(p[k] || "")}"`;
   const on = NATIVE?.notificationsEnabled?.();
   show(`
-    ${saved ? `<div class="msg ok" role="status">Kaydedildi. Sipariş formu bu bilgilerle otomatik dolar.</div>` : ""}
+    ${saved ? `<div class="msg ok" role="status">Kaydedildi. Sipariş formu bu bilgilerle otomatik dolar.${typeof saved === "number" ? ` E-posta ${saved} rozete kurtarma e-postası olarak kaydedildi.` : ""}</div>` : ""}
     <div class="card">
       <h2>Teslimat bilgilerim</h2>
       <form id="pf" novalidate>
@@ -1179,6 +1227,7 @@ function showProfile(saved = false) {
         <label for="p-name">Ad soyad</label><input id="p-name" autocomplete="name" ${val("name")}>
         <label for="p-phone">Telefon</label><input id="p-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" ${val("phone")}>
         <label for="p-email">E-posta <span class="opt">(isteğe bağlı)</span></label><input id="p-email" type="email" inputmode="email" autocomplete="email" ${val("email")}>
+        <span class="hint">Rozetlerinize kurtarma e-postası olarak da kaydedilir: PIN'inizi unutursanız bu adrese göndeririz.</span>
         <div class="row2">
           <div><label for="p-city">İl</label><input id="p-city" autocomplete="address-level1" ${val("city")}></div>
           <div><label for="p-district">İlçe</label><input id="p-district" autocomplete="address-level2" ${val("district")}></div>
@@ -1202,6 +1251,7 @@ function showProfile(saved = false) {
       <a href="#nasil">📖 Nasıl çalışır</a>
       <a href="#sss">❓ Sık sorulanlar</a>
       <a href="#talep">📝 Hazır rozet iste</a>
+      <button type="button" id="forgot">🔑 PIN'imi unuttum</button>
       <button type="button" id="share">👋 Arkadaşına öner</button>
       <a href="${IG_URL}" target="_blank" rel="noopener">📷 Instagram'da takip edin · @tasmaqr</a>
       <a href="${esc(SITE_URL)}">🌐 Web sitesi</a>
@@ -1212,6 +1262,7 @@ function showProfile(saved = false) {
       Tasma QR ${APP ? `· Sürüm ${esc(NATIVE.versionName?.() || "")}` : ""}</p>`, "mid");
   const g = id => document.getElementById(id);
   g("replay").onclick = openIntro;
+  g("forgot").onclick = () => showForgot();
   g("share").onclick = shareApp;
   g("wipe").onclick = wipeAll;
   g("notif-on")?.addEventListener("click", () => NATIVE.enableNotifications?.());
@@ -1222,9 +1273,13 @@ function showProfile(saved = false) {
     const d = {name: v("name"), phone: v("phone"), email: v("email"), city: v("city"), district: v("district"), address: v("address")};
     const fail = t => { g("pf-msg").innerHTML = `<div class="msg err" role="alert">${esc(t)}</div>`; };
     if (d.phone && !normalizePhone(d.phone)) return fail("Telefon numarası geçersiz. Örnek: 0532 123 45 67");
-    if (d.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) return fail("E-posta adresi geçersiz.");
+    if (d.email && !emailOk(d.email)) return fail("E-posta adresi geçersiz.");
+    const changed = d.email.toLowerCase() !== profileEmail().toLowerCase();
     store.set("address", d);
-    showProfile(true);
+    if (!changed || !d.email) return showProfile(true);
+    ev.submitter && (ev.submitter.disabled = true);
+    Promise.all(myTags().filter(t => t.pin).map(t => setRecoveryEmail(t.code, t.pin, d.email)))
+      .then(r => showProfile(r.filter(Boolean).length || true));
   });
 }
 // İzin penceresi kapanınca ya da ayarlardan dönünce (MainActivity çağırır)
@@ -1278,6 +1333,7 @@ function showCreate(error = "", v = {}) {
     }
     store.set("lastPhone", v.phone); store.set("lastDesign", v.design);
     saveTag({code: res.code, pin: res.pin, name: v.name, phone, design: v.design, created: Date.now()});
+    if (profileEmail()) setRecoveryEmail(res.code, res.pin, profileEmail());
     location.replace(`#kunye/${encodeURIComponent(res.code)}/yeni`);
   });
 }
@@ -2641,6 +2697,7 @@ function validIban(iban) {
 
 async function showSettings(newCount, error = "") {
   const shop = await loadShopAdmin();
+  const pinStats = shop && "mail_from" in shop ? await rpc("tasma_admin_pin_stats", {p_key: adminKey}).catch(() => null) : null;
   show(`
     ${tabsHtml(newCount)}
     ${shop ? "" : setupHtml("Sipariş sistemi kurulu değil.")}
@@ -2685,6 +2742,20 @@ async function showSettings(newCount, error = "") {
       <label for="s-resend">Resend API anahtarı</label><input id="s-resend" autocomplete="off" placeholder="re_…" value="${esc(shop.resend_api_key || "")}">
       <label for="s-notify">Bildirim e-postası</label><input id="s-notify" type="email" value="${esc(shop.notify_email || "")}">
 
+      <h2>“PIN'imi unuttum” e-postası</h2>
+      ${"mail_from" in shop ? `<p class="hint">Sahip PIN'ini unutunca rozetine kaydettiği kurtarma e-postasına kod ve PIN gönderilir (yukarıdaki Resend anahtarıyla).
+        ${pinStats ? `Kurtarma e-postası kayıtlı rozet: <b>${pinStats.with_email}</b> · son 2 günde istek: <b>${pinStats.requests}</b> (gönderilen ${pinStats.sent}).` : ""}</p>
+      <details class="howto"><summary>Müşterilere ulaşması için (bir kerelik)</summary>
+        <ol>
+          <li>Resend'de <b>Domains › Add Domain</b> ile <b>bulqr.com.tr</b>'yi ekleyin.</li>
+          <li>Resend'in verdiği DNS kayıtlarını (TXT / MX) Cloudflare'de <b>DNS › Records</b>'a aynen ekleyin, bulut gri kalsın. Resend'de “Verified” görünene kadar bekleyin.</li>
+          <li>Aşağıya gönderen adresini yazıp Kaydet'e basın, ör. <code>Tasma QR &lt;pin@bulqr.com.tr&gt;</code>.</li>
+        </ol>
+        Gönderen adresi boşsa e-posta <code>onboarding@resend.dev</code>'den gider ve yalnızca Resend hesabının sahibine ulaşır.
+      </details>
+      <label for="s-from">Gönderen adresi</label><input id="s-from" autocomplete="off" placeholder="Tasma QR <pin@bulqr.com.tr>" value="${esc(shop.mail_from || "")}">`
+      : setupHtml("“PIN'imi unuttum” e-postası kurulu değil: Supabase SQL Editor'da güncel supabase/kurulum.sql dosyasını çalıştırın.")}
+
       <button class="btn" type="submit">Kaydet</button>
       <button class="btn ghost" type="button" id="notify-test">Deneme bildirimi gönder</button>
       <p class="hint" style="margin-top:12px">IBAN ve alıcı adı girilmeden satış açılmaz. Değişiklikler siteye hemen yansır.</p>
@@ -2725,6 +2796,8 @@ async function showSettings(newCount, error = "") {
     if (!(priceMetal >= 0)) return showSettings(newCount, "Metal rozet fiyatı geçersiz.");
     if (!(price >= 0)) return showSettings(newCount, "Fiyat geçersiz.");
     if (g("s-notify") && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(g("s-notify"))) return showSettings(newCount, "Bildirim e-postası geçersiz.");
+    const from = document.getElementById("s-from") ? g("s-from") : null;
+    if (from && !/^([^<>]*<)?[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+>?$/.test(from)) return showSettings(newCount, "Gönderen adresi geçersiz. Ör. Tasma QR <pin@bulqr.com.tr>");
     const args = {p_key: adminKey, p_active: active, p_price: price, p_iban: iban, p_account_name: g("s-name"),
       p_bank_name: g("s-bank"), p_printer_email: g("s-printer"), p_shipping_text: g("s-ship"), p_product_text: g("s-product"),
       p_telegram_bot_token: g("s-tg-token"), p_telegram_chat_id: g("s-tg-chat"), p_resend_api_key: g("s-resend"), p_notify_email: g("s-notify")};
@@ -2736,6 +2809,7 @@ async function showSettings(newCount, error = "") {
         old = true;
         await rpc("tasma_admin_shop_set", args);
       });
+      if (from !== null) await rpc("tasma_admin_mail_from_set", {p_key: adminKey, p_from: from});
       await showSettings(newCount, old ? "Ayarlar kaydedildi, ama metal rozet fiyatı kaydedilemedi: veritabanı eski sürümde. Supabase SQL Editor'da güncel supabase/kurulum.sql dosyasını çalıştırın; metal rozet siparişleri de ancak o zaman çalışır." : "");
       toast(active ? "Kaydedildi. Satış açık." : "Kaydedildi. Satış kapalı.");
     } catch (e) { showSettings(newCount, "Kaydedilemedi: " + e.message); }
