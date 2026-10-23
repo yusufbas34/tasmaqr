@@ -57,3 +57,8 @@ Google Play için: [android/GOOGLE_PLAY.md](android/GOOGLE_PLAY.md). Ayrıntıla
 - `uretim/kutu/`: rozet + katlanmış kitapçık için asma kulaklı ince karton kutu (56×78 mm iç ölçü, kalınlık 6/8/10 mm; A4 yatay 2 kutu, SVG indirme)
 - Instagram: https://www.instagram.com/tasmaqr (sitede alt bölüm ve ana sayfa, uygulamada Profilim, kitapçık ve kartvizitte)
 - `pazarlama/`: 90 günlük büyüme planı ve takip listesi, Instagram görsel kiti (`kit.html` → `node pazarlama/uret.js`)
+
+## MemoryQR
+
+`memoryqr/` klasörü ayrı bir üründür: düğün, nişan, kına ve mezuniyet için QR'lı ortak fotoğraf albümü (30 gün saklama).
+Kurulum ve ayrıntılar: [memoryqr/README.md](memoryqr/README.md).
