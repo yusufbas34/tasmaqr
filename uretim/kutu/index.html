@@ -32,6 +32,9 @@ button{background:var(--band);color:#fff;border:0;border-radius:10px;padding:11p
 .views #flat>svg,.views #front>svg{width:100%;height:auto;background:#fff;border-radius:10px}
 .shelf{text-align:center}.views #front>svg{max-width:190px;background:none}
 .shelf figcaption,.flatcap{color:var(--muted);font-size:14px;margin-top:6px}
+.files{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.files a{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;text-decoration:none;color:var(--ink);font-weight:600}
+.files a i{width:18px;height:18px;border-radius:50%;flex:none;box-shadow:0 0 0 1px var(--line)}.files a small{color:var(--muted);font-weight:400;margin-left:auto}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--muted);margin-top:8px}
 .legend i{display:inline-block;width:26px;border-top:2px solid #111;vertical-align:middle;margin-right:6px}.legend i.f{border-top-style:dashed}
 ol li{margin-bottom:6px}
@@ -74,9 +77,25 @@ table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--li
     </div>
     <div class="bar2" style="margin-top:16px">
       <button id="print">A4'e yazdır (2 kutu)</button>
-      <button class="ghostb" id="svg">SVG indir (matbaa / kesim makinesi)</button>
+      <button class="ghostb" id="svg">SVG indir (kesim makinesi)</button>
       <span class="hint">Yazdırırken: yatay, ölçek %100 / Gerçek boyut, 250–350 g/m² karton.</span>
     </div>
+  </div>
+
+  <h2>Matbaa dosyaları</h2>
+  <div class="card">
+    <p class="hint" style="margin-top:0">Yazılar eğriye çevrilmiş (convert to outlines), yazı tipi gerektirmeyen PDF'ler. Her dosyada 2 sayfa var:
+      <b>1. sayfa baskı</b> (2 mm taşma paylı), <b>2. sayfa bıçak / kesim çizgisi</b> (düz: kesim, kesikli: katlama; pembe renkte). Ölçü 137 × 154 mm, kalınlık 8 mm, ön yüzde rozet resmi.</p>
+    <div class="files">
+        <a href="matbaa/kutu-marka-turuncu-B8501A-8mm.pdf" download><i style="background:#B8501A"></i>Marka turuncu <small>#B8501A</small></a>
+        <a href="matbaa/kutu-acik-mavi-9BC4DF-8mm.pdf" download><i style="background:#9BC4DF"></i>Açık mavi <small>#9BC4DF</small></a>
+        <a href="matbaa/kutu-pembe-F4C2C1-8mm.pdf" download><i style="background:#F4C2C1"></i>Açık pembe <small>#F4C2C1</small></a>
+        <a href="matbaa/kutu-kirmizi-C62828-8mm.pdf" download><i style="background:#C62828"></i>Kırmızı <small>#C62828</small></a>
+        <a href="matbaa/kutu-yesil-1F7A4A-8mm.pdf" download><i style="background:#1F7A4A"></i>Yeşil <small>#1F7A4A</small></a>
+        <a href="matbaa/kutu-pembe-E05A8A-8mm.pdf" download><i style="background:#E05A8A"></i>Pembe <small>#E05A8A</small></a>
+        <a href="matbaa/kutu-mor-kedi-8A6FB3-8mm.pdf" download><i style="background:#8A6FB3"></i>Mor (kedi) <small>#8A6FB3</small></a>
+    </div>
+    <p class="hint">Başka renk, kalınlık ya da pencereli ön yüz gerekirse bu dosyalar yeniden üretilebilir (bkz. <code>matbaa/OKUBENI.md</code>).</p>
   </div>
 
   <h2>Önizleme</h2>
