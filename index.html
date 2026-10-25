@@ -908,13 +908,13 @@ document.getElementById("back").onclick = () => history.length > 1 ? history.bac
 // ---------------------------------------------------------------- site: ana sayfa
 // Ürün fotoğrafları (shared/foto). Yakın çekimlerdeki QR siteyi açan örnek QR'dır; gerçek rozet kodu yoktur.
 const PHOTOS = [
-  {src: "rozet-pembe.jpg", alt: "Kahverengi deri tasmaya takılı pembe Tasma QR rozeti", cap: "Pembe · deri tasma", close: true},
-  {src: "rozet-mavi.jpg", alt: "Lacivert dokuma tasmaya takılı açık mavi Tasma QR rozeti", cap: "Açık mavi · dokuma tasma", close: true},
+  {src: "rozet-pembe.jpg", alt: "Kahverengi deri tasmaya takılı pembe Tasma QR rozeti", cap: "", close: true},
+  {src: "rozet-mavi.jpg", alt: "Lacivert dokuma tasmaya takılı açık mavi Tasma QR rozeti", cap: "", close: true},
   {src: "kopek-golden.jpg", alt: "Tasmasında pembe QR rozet olan golden retriever", cap: "Evde de, dışarıda da"},
   {src: "kopek-park.jpg", alt: "Parkta tasmasında mavi QR rozet olan border collie", cap: "Parkta güvende"},
 ];
 const photoGallery = (list, cls = "") => `<div class="gallery ${cls}">${list.map(f =>
-  `<figure><img src="shared/foto/${f.src}" alt="${esc(f.alt)}" width="624" height="624" loading="lazy" decoding="async"><figcaption>${esc(f.cap)}</figcaption></figure>`).join("")}</div>`;
+  `<figure><img src="shared/foto/${f.src}" alt="${esc(f.alt)}" width="624" height="624" loading="lazy" decoding="async">${f.cap ? `<figcaption>${esc(f.cap)}</figcaption>` : ""}</figure>`).join("")}</div>`;
 
 function showHome() {
   show(`
