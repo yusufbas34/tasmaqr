@@ -353,6 +353,13 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 4px #b8501a1f}
 .feature .ic{background:linear-gradient(135deg,#fbe1cf,#fbeee5);border-radius:14px}
 .steps li::before{background:linear-gradient(135deg,#e8742a,#b8501a);box-shadow:0 4px 10px #b8501a40}
 .sec-head h2,section > h2{font-size:30px;letter-spacing:-.01em}
+.gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0 0 6px}
+.gallery.two{grid-template-columns:repeat(2,minmax(0,1fr));max-width:820px;margin:0 auto 26px}
+@media (max-width:760px){.gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+.gallery figure{margin:0;position:relative;border-radius:18px;overflow:hidden;background:var(--line);box-shadow:0 10px 26px rgba(0,0,0,.10)}
+.gallery img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;transition:transform .4s}
+.gallery figure:hover img{transform:scale(1.04)}
+.gallery figcaption{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.55);color:#fff;font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;backdrop-filter:blur(4px)}
 /* giriş bandı: tam genişlik koyu turuncu */
 .hero-band{position:relative;color:#fff;margin:-26px 0 0;padding:44px 0 54px}
 .hero-band::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:100vw;transform:translateX(-50%);z-index:-1;
@@ -916,6 +923,16 @@ function setChrome({kind = "none", nav = null, tab = null, title = "Tasma QR", b
 document.getElementById("back").onclick = () => history.length > 1 ? history.back() : (location.hash = "#kunyelerim");
 
 // ---------------------------------------------------------------- site: ana sayfa
+// Ürün fotoğrafları (shared/foto). Yakın çekimlerdeki QR siteyi açan örnek QR'dır; gerçek rozet kodu yoktur.
+const PHOTOS = [
+  {src: "rozet-pembe.jpg", alt: "Kahverengi deri tasmaya takılı pembe Tasma QR rozeti", cap: "Pembe · deri tasma", close: true},
+  {src: "rozet-mavi.jpg", alt: "Lacivert dokuma tasmaya takılı açık mavi Tasma QR rozeti", cap: "Açık mavi · dokuma tasma", close: true},
+  {src: "kopek-golden.jpg", alt: "Tasmasında pembe QR rozet olan golden retriever", cap: "Evde de, dışarıda da"},
+  {src: "kopek-park.jpg", alt: "Parkta tasmasında mavi QR rozet olan border collie", cap: "Parkta güvende"},
+];
+const photoGallery = (list, cls = "") => `<div class="gallery ${cls}">${list.map(f =>
+  `<figure><img src="shared/foto/${f.src}" alt="${esc(f.alt)}" width="624" height="624" loading="lazy" decoding="async"><figcaption>${esc(f.cap)}</figcaption></figure>`).join("")}</div>`;
+
 function showHome() {
   show(`
     <div class="hero-band"><div class="hero">
@@ -940,6 +957,11 @@ function showHome() {
       <div><b>0 TL</b><span>oluşturmak ücretsiz</span></div>
       <div><b>🔒 PIN</b><span>bilgileri yalnızca siz değiştirirsiniz</span></div>
     </div>
+
+    <section>
+      <div class="sec-head"><h2>Tasmada böyle duruyor</h2><a href="#urunler">Rozetleri incele →</a></div>
+      ${photoGallery(PHOTOS)}
+    </section>
 
     <section>
       <div class="features">
@@ -1032,6 +1054,7 @@ function showProducts() {
     <div class="page-head"><span class="eyebrow">Rozetler</span>
       <h1>Tasmaya takılan gerçek bir rozet</h1>
       <p>Yapıştırma değil: halka delikli, künye gibi doğrudan tasmanın D halkasına takılan rozet. Halkasıyla birlikte kapınıza gelir.</p></div>
+    ${photoGallery(PHOTOS.filter(f => f.close), "two")}
     <div id="prods">${productCards({design: "turuncu", name: randomOf(SAMPLE_NAMES), size: "y30"})}</div>
     <ul class="specs">
       <li><b>Ölçüler:</b> Ø25 mm (kedi, minik ırk köpek), Ø30 mm (küçük-orta boy), Ø35 mm (orta-büyük boy); halka deliği kulakta.</li>
