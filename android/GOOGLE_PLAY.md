@@ -207,7 +207,7 @@ Yoldan geçen herkes numaranızı göremez. Numaranız güvenli sunucuda durur; 
 "Kalp ilacı kullanıyor", "çekingendir, yavaş yaklaşın" gibi bilgileri ve yedek bir numarayı bulan kişi görür.
 
 ★ Tasarımını seç, rozetin kapına gelsin
-12 tasarım, Ø25'ten Ø35 mm'ye ölçüler. Ücretsiz oluşturup evde yazdırın ya da renkli epoksi veya paslanmaz çelik lazer rozetinizi sipariş edin; halkasıyla gelir, tasmanın D halkasına takarsınız.
+12 tasarım, Ø30 ve Ø35 mm ölçüler. Ücretsiz oluşturup evde yazdırın ya da 3D baskı gövdeli, su geçirmez sticker'lı rozetinizi sipariş edin; halkasıyla gelir, tasmanın D halkasına takarsınız.
 
 Hesap açmanız gerekmez. Reklam yok. Verilerinizi istediğiniz an uygulamadan silebilirsiniz.
 
@@ -222,7 +222,7 @@ Not: Tasma QR mikroçipin yerine geçmez; evcil hayvanınızı bulan kişinin si
 **Web sitesi:** `https://tasma.bulqr.com.tr/`
 **Instagram:** `https://www.instagram.com/tasmaqr` (tam açıklamanın sonuna “Instagram: @tasmaqr” satırı eklendi)
 
-**İlk sürüm notu:** `İlk sürüm: QR rozet oluşturma, kayıp modu, konum bildirimi, renkli epoksi ve metal rozet siparişi.`
+**İlk sürüm notu:** `İlk sürüm: QR rozet oluşturma, kayıp modu, konum bildirimi, 3D baskı gövdeli su geçirmez rozet siparişi.`
 
 **Görseller** (`android/store/`):
 
@@ -257,8 +257,8 @@ Ekran görüntüleri yeni düzene göre yenilendi (`android/store/screen-5`, `sc
 
 ### Sürüm notu (kapalı test ve ilk yayın)
 
-- **Türkçe:** `İlk sürüm: QR rozet oluşturma, kayıp modu, konum ve okutma bildirimi, 12 tasarım, epoksi ve metal rozet siparişi.`
-- **English:** `First release: create QR pet tags, lost mode, location and scan notifications, 12 designs, epoxy and metal tag orders.`
+- **Türkçe:** `İlk sürüm: QR rozet oluşturma, kayıp modu, konum ve okutma bildirimi, 12 tasarım, 3D baskı gövdeli su geçirmez rozet siparişi ve hazır rozet talebi.`
+- **English:** `First release: create QR pet tags, lost mode, location and scan notifications, 12 designs, 3D-printed waterproof tag orders and ready-made tag requests.`
 
 ### Üretim erişimi başvurusu (14 gün sonra) cevap taslakları
 Play Console sorularına kendi deneyiminizle tamamlayın; testte gerçekten olanları yazın.

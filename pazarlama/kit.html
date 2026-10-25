@@ -78,10 +78,10 @@ add("acilis-1-merhaba", 1080, 1350, "orange", frame(`
     <span class="pill" style="font-size:36px;padding:10px 26px">YENİ HESAP 🎉 KAYDIR →</span>
     <h1 class="h" style="font-size:112px;margin-top:24px">Merhaba!<br>Biz <span class="mark">Tasma QR.</span></h1>
     <p class="p" style="font-size:44px;margin-top:20px">Kedi, köpek ve tüm dostlar için tasmaya takılan akıllı QR künye.</p>`,
-  fan(["kedi", "Minnoş"], ["turuncu", "Zeytin"], ["klasik", "Pamuk", "metal"]), 90, 140) + brand(50));
+  fan(["kedi", "Minnoş"], ["turuncu", "Zeytin"], ["klasik", "Pamuk"]), 90, 140) + brand(50));
 add("acilis-2-nasil", 1080, 1350, "cream", `<div style="position:absolute;left:70px;right:70px;top:80px;bottom:150px;display:flex;flex-direction:column;gap:26px;justify-content:center">
     <h1 class="h" style="font-size:104px">Nasıl çalışır?</h1>
-    ${[["Rozetini oluştur", "Adı, telefonun, tasarım. Bir dakika, ücretsiz; hesap yok."], ["Tasmaya tak", "Epoksi ya da metal rozetin halkasıyla gelir."],
+    ${[["Rozetini oluştur", "Adı, telefonun, tasarım. Bir dakika, ücretsiz; hesap yok."], ["Tasmaya tak", "3D baskı gövdeli su geçirmez rozetin halkasıyla gelir."],
        ["Bulan kişi okutur", "Seni tek dokunuşla arar, konumunu gönderir."], ["Kaybolursa kayıp modu", "Okutan herkes kırmızı “KAYIP!” uyarısını görür."]]
       .map(([t, d], i) => `<div class="tip"><span class="num">${i + 1}</span><div><h1 class="h" style="font-size:50px">${t}</h1><p>${d}</p></div></div>`).join("")}
   </div>` + brand(50, true));
@@ -134,7 +134,7 @@ add("reels-1-kapi-acik-kaldi", 1080, 1920, "orange", frame(`
 add("reels-2-kunyeye-numara-kazima", 1080, 1920, "cream", frame(`
     <h1 class="h" style="font-size:132px">Künyeye <span class="strike">0532 •••</span><br>numaranı kazıtma!</h1>
     <p class="p" style="font-size:50px;margin-top:22px">Numara değişince künye çöpe gider. QR rozette numaran yazmaz, PIN'inle saniyede değişir.</p>`,
-  badge("klasik", "Pamuk", "metal", "transform:rotate(-4deg)")) + brand(120, true));
+  badge("klasik", "Pamuk", "", "transform:rotate(-4deg)")) + brand(120, true));
 
 add("reels-3-konum-geldi", 1080, 1920, "navy", frame(`
     <span class="chip" style="font-size:40px;padding:12px 28px">📍 KONUM BİLDİRİMİ</span>
@@ -152,8 +152,8 @@ add("reels-4-kayip-modu", 1080, 1920, "red", frame(`
 add("reels-5-hangisi-yakisir", 1080, 1920, "orange", frame(`<div style="text-align:center">
     <span class="pill" style="font-size:40px;padding:12px 30px">YORUMA YAZ 👇</span>
     <h1 class="h" style="font-size:150px;margin-top:26px">Hangisi <span class="mark">seninkine</span> yakışır?</h1>
-    <p class="p" style="font-size:50px;margin-top:20px">${Object.keys(DESIGNS).length} renkli tasarım ya da paslanmaz metal.</p></div>`,
-  fan(["kirmizi", "Bobi"], ["sari", "Fındık"], ["klasik", "Pamuk", "metal"])) + brand(120));
+    <p class="p" style="font-size:50px;margin-top:20px">${Object.keys(DESIGNS).length} tasarım, istediğin gövde rengi.</p></div>`,
+  fan(["kirmizi", "Bobi"], ["sari", "Fındık"], ["klasik", "Pamuk"])) + brand(120));
 
 add("reels-6-saglik-notu", 1080, 1920, "cream", frame(`
     <h1 class="h" style="font-size:132px">“Çekingendir, <span class="mark">yavaş yaklaşın.”</span></h1>
@@ -176,7 +176,7 @@ add("gonderi-a1-kapak", 1080, 1350, "orange", frame(`
   badge("turuncu", "Zeytin", "epoksi", "transform:rotate(5deg)"), 90, 140) + brand(50));
 [["gonderi-a2-adim1", "1", "Rozetini oluştur", "Evcil hayvanının adı, telefonun, tasarım. Bir dakika, ücretsiz; hesap yok.", "kirmizi", "Bobi", "epoksi"],
  ["gonderi-a3-adim2", "2", "Notunu yaz", "Sağlık, karakter, yedek numara. Bulan kişi görür; numaran rozette yazmaz.", "yesil", "Karabaş", "epoksi"],
- ["gonderi-a4-adim3", "3", "Tasmaya tak", "Evde yazdır ya da epoksi / metal rozetin halkasıyla kapına gelsin.", "klasik", "Pamuk", "metal"]]
+ ["gonderi-a4-adim3", "3", "Tasmaya tak", "Evde yazdır ya da su geçirmez 3D rozetin halkasıyla kapına gelsin.", "klasik", "Pamuk", "metal"]]
   .forEach(([n, no, t, d, des, nm, kind]) => { const c = n.endsWith("adim2"); add(n, 1080, 1350, c ? "cream" : "orange", frame(`
     <div style="display:flex;gap:30px;align-items:center"><span class="num">${no}</span><h1 class="h" style="font-size:96px">${t}</h1></div>
     <p class="p" style="font-size:44px;margin-top:24px">${d}</p>`, badge(des, nm, kind), 90, 140) + brand(50, c)); });

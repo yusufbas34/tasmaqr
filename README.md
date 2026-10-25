@@ -16,10 +16,10 @@ Evcil hayvanların tasmasına künye gibi takılan QR rozet. Rozeti okutan kişi
 - **Rozetlerim** (`#kunyelerim`): bu cihazdaki rozetler, okutma sayısı, son konumlar, yazdırma ve PDF
 - **12 tasarım, 7 ölçü**: yuvarlak Ø25–Ø40 mm, dikdörtgen 35×50–50×75 mm
 - **Silme**: sahibi PIN ile rozeti siler (okutmalar ve konumlar da silinir; yönetimden basılan rozet boşa çıkar ve PIN kartıyla yeniden bağlanabilir). Yönetimde kullanılmamış rozetler silinebilir
-- **Tasmaya takılan fiziksel rozet**: kulaklı (halka delikli) yuvarlak rozet, iki tip: renkli epoksi (UV baskı + epoksi kubbe) ve metal (paslanmaz çelik, lazer kazıma); Ø25/30/35 mm. Tipe göre fiyat yönetimden ayarlanır
-- **Üretim dosyası**: sipariş başına gerçek mm ölçülü SVG (kırmızı = kesim, metalde siyah = kazıma) ve epoksi için PDF; baskıcıya hazır e-posta metni
+- **Tasmaya takılan rozet**: 3D yazıcıda basılan kulaklı (halka delikli) PETG gövde + çukurunda su geçirmez lamine QR sticker; Ø30/35 mm, gövde rengi seçilir, 399 TL (Ayarlar'dan değişir). İki yol: kendi tasarla (indir ya da sipariş et) · hazır rozet (standart SAHİBİMİ ARA, renk seçilir)
+- **Üretim dosyası**: sipariş başına gerçek ölçülü yuvarlak QR etiket PDF'i (gövde rengi notuyla); gövdeler ve stok etiketleri `uretim/3d/` sayfasından
 - **Hazır rozet talep formu** (rozet tipi, tasarım, ölçü) ve **rozet siparişi** (IBAN ile ödeme, Telegram/e-posta bildirimi)
-- **Yönetim** (`?admin`): PIN kartlı rozet üretme/yazdırma, **fabrika paketi** (listedeki rozetler için QR listesi CSV + metal/epoksi SVG, tek ZIP; PIN içermez), talepler, siparişler, satış ayarları
+- **Yönetim** (`?admin`): PIN kartlı rozet üretme/yazdırma, gövde renkleri, talepler, siparişler, satış ayarları
 - **Kartvizit** sekmesi: 85×55 mm kartvizit (ön: marka ve rozet, arka: ad, ünvan, iletişim ve siteyi açan QR); A4'e 10 adet arkalı önlü ve matbaa için 3 mm taşma paylı PDF
 - **Stok partisi kitapçıkları**: Sahibimi Ara (stok) partisinde her rozete kendi kodu ve PIN'i basılı A7 kullanım kitapçığı (A4'ten 4, arkalı önlü kısa kenar); kapak QR'ı Instagram'ı, "Uygulamayı indirin" QR'ı Google Play'i açar
 - **Kullanım kitapçığı** sekmesi: rozeti alan kişiye 4 sayfalık tanıtım ve kullanım kılavuzu (kurulum, kayıp olursa, bilgileri güncelleme, bakım). Sayfalar A7 (74×105 mm); kapak tezgâhta dikkat çeken yüzdür. A4 yatay arkalı önlü basılır, 4'e kesilip her parça bir kez katlanınca 4 sıralı kitapçık çıkar; ayrıca A6 dijital PDF

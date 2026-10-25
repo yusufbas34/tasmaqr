@@ -69,7 +69,7 @@ input[type=password]{width:100%;padding:9px;border:2px solid var(--line);border-
 <main>
   <section class="noprint">
     <h1>3D baskı gövde + QR etiket</h1>
-    <p class="lead">Rozetin gövdesi 3D yazıcıda basılır. Önündeki çukura su geçirmez QR etiket yapıştırılır, üstüne şeffaf epoksi dökülür.
+    <p class="lead">Rozetin gövdesi 3D yazıcıda basılır. Önündeki çukura su geçirmez, lamine QR etiket yapıştırılır.
       QR'ı yazıcı değil etiket taşıdığı için her zaman net okunur. Aynı gövde 5 renkte basılır, etiketin rengi gövdeye uyar.</p>
     <div class="card">
       <div class="colors" id="colors"></div>
@@ -102,7 +102,7 @@ input[type=password]{width:100%;padding:9px;border:2px solid var(--line);border-
         <li><b>Gövde:</b> 3MF dosyasını açıp her gövdeye kendi rengindeki filamenti atayın. Malzeme PETG ya da ASA olsun (PLA suda ve güneşte bozulur).
           0,2 mm katman, 4 duvar, %100 doluluk. Çukurlu yüz yukarı bakar, destek gerekmez.</li>
         <li><b>Etiket:</b> Aşağıdan etiket sayfasını su geçirmez vinile (lazer ya da mürekkep püskürtmeli yazıcı vinili) %100 ölçekle basın, üstüne şeffaf laminasyon yapıştırın, daireleri kesin.</li>
-        <li><b>Montaj:</b> Etiketi gövdenin çukuruna aynı renkteki gövdeye yapıştırın. Üstüne çukuru dolduracak kadar (yaklaşık 0,8 mm) UV reçine ya da 2 bileşenli epoksi damlatıp kürleyin.</li>
+        <li><b>Montaj:</b> Lamine etiketi aynı renkteki gövdenin çukuruna ortalayıp bastırarak yapıştırın. Kenarlarının iyice oturduğundan emin olun.</li>
         <li><b>Kontrol:</b> Her rozeti telefonla okutun, sonra halkayı (split ring) takıp paketleyin. PIN kartını aynı kodlu poşete koyun.</li>
       </ol>
     </div>
@@ -236,7 +236,7 @@ const saveColors = () => { try { localStorage.setItem("tasmaqr-3d-renk", JSON.st
 const NAMES = {lacivert: "klasik", turuncu: "turuncu", "kırmızı": "kirmizi", kirmizi: "kirmizi", "yeşil": "yesil", yesil: "yesil", pembe: "pembe"};
 const $ = id => document.getElementById(id);
 $("batch").innerHTML = `<option value="">Kodları elle gireceğim</option>` + BATCHES.map((b, i) =>
-  `<option value="${i}">${new Date(b.date).toLocaleDateString("tr-TR")} · ${b.codes.length} rozet · ${b.kind === "metal" ? "metal" : "epoksi"} · ${b.codes[0]}…</option>`).join("");
+  `<option value="${i}">${new Date(b.date).toLocaleDateString("tr-TR")} · ${b.codes.length} rozet · ${b.codes[0]}…</option>`).join("");
 $("batch").onchange = () => { const b = BATCHES[$("batch").value]; if (b) { $("codes").value = b.codes.join("\n"); renderSheets(); } };
 
 function readCodes() {
@@ -320,6 +320,7 @@ $("guides").onclick = async ev => {
 };
 const q = new URLSearchParams(location.search);
 if (q.get("olcu")) document.getElementById("size").value = q.get("olcu");
+if (q.get("kodlar")) $("codes").value = q.get("kodlar").split(/[,\s]+/).filter(Boolean).join("\n");
 if (q.get("parti")) { const i = BATCHES.findIndex(b => b.date === q.get("parti")); if (i >= 0) { $("batch").value = i; $("codes").value = BATCHES[i].codes.join("\n"); } }
 renderSheets();
 </script>

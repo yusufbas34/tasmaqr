@@ -1,6 +1,6 @@
 # Tasma QR · 3D baskı gövde + QR etiket
 
-Evcil hayvan tasmasına halkayla takılan yuvarlak rozet gövdesi. Önündeki çukura QR etiket yapıştırılır, üstü epoksiyle kaplanır.
+Evcil hayvan tasmasına halkayla takılan yuvarlak rozet gövdesi. Önündeki çukura su geçirmez, lamine QR etiket yapıştırılır.
 
 ## Dosyalar
 
@@ -36,6 +36,5 @@ Evcil hayvan tasmasına halkayla takılan yuvarlak rozet gövdesi. Önündeki ç
 
 1. Etiket sayfasını su geçirmez beyaz vinile %100 ölçekle basın, üstüne şeffaf laminasyon yapıştırın, daireleri kesin.
    Gerçek ürün için kodlar Yönetim › Sahibimi Ara (stok) partisinden gelir. Kodları `uretim/3d/` sayfasındaki kutuya yapıştırıp etiket sayfasını oradan basın.
-2. Etiketi **aynı renkteki** gövdenin çukuruna ortalayıp yapıştırın.
-3. Üstüne çukuru dolduracak kadar (yaklaşık 0,8 mm) UV reçine ya da 2 bileşenli epoksi damlatın, kabarcıkları alıp kürleyin.
-4. Her rozeti telefonla okutup kontrol edin. Halkayı takın, aynı kodlu PIN kartıyla birlikte poşetleyin.
+2. Lamine etiketi **aynı renkteki** gövdenin çukuruna ortalayıp bastırarak yapıştırın.
+3. Her rozeti telefonla okutup kontrol edin. Halkayı takın, aynı kodlu PIN kartıyla birlikte poşetleyin.

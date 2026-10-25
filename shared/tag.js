@@ -109,49 +109,61 @@ function tagHtml(code, design, {link = tagLink(code), name = "", round = true} =
 }
 
 // ---------------------------------------------------------------- tasmaya takılan fiziksel rozet
-// Kulaklı yuvarlak rozet: üstte halka deliği olan bir kulak. viewBox 0 -16 100 116 (çap 100 birim + 16 birim kulak).
-// kind: "epoksi" (renkli UV baskı + şeffaf epoksi kubbe) ya da "metal" (paslanmaz çelik, lazer kazıma, tek renk)
-// file: üretim dosyası (parlama yok; kesim çizgisi kırmızı, metalde kazınacak yerler siyah)
+// Kulaklı yuvarlak rozet: 3D yazıcıda basılan gövde (kenar ve kulak gövde renginde), gövdenin çukuruna
+// yapıştırılan su geçirmez lamine QR sticker. viewBox 0 -16 100 116 (çap 100 birim + 16 birim kulak).
 const PRODUCTS = {
-  epoksi: {name: "Renkli epoksi rozet", short: "Epoksi", desc: "Alüminyum gövde, UV renkli baskı, üstü şeffaf epoksi kubbe. Seçtiğiniz tasarım birebir basılır; su ve çizilmeye dayanıklı."},
-  metal:  {name: "Metal lazer rozet", short: "Metal", desc: "Paslanmaz çelik, QR ve ad lazerle kazınır. Solmaz, paslanmaz; en dayanıklı seçenek. Tek renk (metal üzerine koyu kazıma)."},
+  "3d": {name: "QR rozet", short: "3D rozet", desc: "3D yazıcıda basılan dayanıklı PETG gövde, üstünde su geçirmez lamine QR sticker. Tasarımınız birebir basılır; halkasıyla gelir, tasmaya takılır."},
 };
-const BADGE_SIZES = {"y25": "Ø25 mm (kedi, minik ırk köpek)", "y30": "Ø30 mm (küçük-orta boy)", "y35": "Ø35 mm (orta-büyük boy)"};
+const PRODUCT_KIND = "3d";
+// Gövde (filament) renkleri: yönetimde Ayarlar'dan değiştirilir (tasma_shop_info.body_colors); bu liste yedektir
+const BODY_COLORS = [
+  {key: "klasik", name: "Lacivert", hex: "#163A7A"},
+  {key: "turuncu", name: "Turuncu", hex: "#E8742A"},
+  {key: "kirmizi", name: "Kırmızı", hex: "#C62828"},
+  {key: "yesil", name: "Yeşil", hex: "#1F7A4A"},
+  {key: "pembe", name: "Pembe", hex: "#E05A8A"},
+];
+const bodyColors = shop => Array.isArray(shop?.body_colors) && shop.body_colors.length ? shop.body_colors : BODY_COLORS;
+const bodyOf = (key, shop) => bodyColors(shop).find(c => c.key === key) || null;
+// Hazır (stok) rozet: gövde rengine uyan etiket tasarımı; üstte standart SAHİBİMİ ARA yazar
+const designForBody = key => DESIGNS[key] ? key : "klasik";
+const BADGE_SIZES = {"y30": "Ø30 mm (kedi, küçük ırk)", "y35": "Ø35 mm (orta-büyük boy)"};
+const badgeSize = s => BADGE_SIZES[s] ? s : "y30";
 const TAB = 16; // kulak yüksekliği (birim); gerçek ölçü = çap × 0,16
+const STICKER = .85; // sticker çapı / gövde çapı (Ø35 gövde → Ø30 sticker)
 
 // top: üst yazıyı zorlar (isimsiz stok rozet); verilmezse hayvanın adı, ad da yoksa tasarımın yazısı
-function badgeSvg(code, design, {link = tagLink(code), name = "", kind = "epoksi", file = false, top: topText = ""} = {}) {
-  const id = "tb" + (++tagUid), metal = kind === "metal";
-  const D = metal ? {ring: "none", ink: "#2b3038", accent: "#2b3038", icon: "paw", side: "paw", top: "BENİ BULDUN!"} : DESIGNS[DESIGNS[design] ? design : "klasik"];
+// body: gövde rengi (hex); verilmezse etiketin halka rengi
+function badgeSvg(code, design, {link = tagLink(code), name = "", body = "", top: topText = ""} = {}) {
+  const id = "tb" + (++tagUid), D = DESIGNS[DESIGNS[design] ? design : "klasik"];
+  const B = body || (D.ring === "#fff" ? "#e6e1d8" : D.ring);
   const top = topText ? upTR(topText) : name ? upTR(name) : D.top;
   const fsTop = Math.min(11.5, 104 / (top.length * .58)).toFixed(2);
-  const rt = 39.6, rb = 46.4, ink = file && metal ? "#000" : D.ink;
+  const rt = 39.6, rb = 46.4;
   const font = `font-family="'Barlow Condensed','Arial Narrow',Arial,sans-serif" font-weight="700"`;
   const outline = `M38 1.98V-4a12 12 0 0 1 24 0V1.98A49.5 49.5 0 1 1 38 1.98z`; // daire (r 49,5) + kulak
-  const side = x => metal ? icon("paw", ink, `x="${x - 3.6}" y="46.4" width="7.2" height="7.2"`)
-    : icon(D.side, sideColor(D), `x="${x - 3.6}" y="46.4" width="7.2" height="7.2"`);
-  const fill = metal ? (file ? "none" : `url(#${id}m)`) : D.ring;
+  const side = x => icon(D.side, sideColor(D), `x="${x - 3.6}" y="46.4" width="7.2" height="7.2"`);
   return `<svg class="tagbadge" viewBox="0 -${TAB} 100 ${100 + TAB}" aria-hidden="true">
     <defs>
       <path id="${id}t" d="M${50 - rt} 50A${rt} ${rt} 0 0 1 ${50 + rt} 50"/><path id="${id}b" d="M${50 - rb} 50A${rb} ${rb} 0 0 0 ${50 + rb} 50"/>
       <mask id="${id}h"><rect x="-5" y="-20" width="110" height="125" fill="#fff"/><circle cx="50" cy="-5" r="5" fill="#000"/></mask>
-      <linearGradient id="${id}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f6f9"/><stop offset=".45" stop-color="#c3c9d2"/>
-        <stop offset=".7" stop-color="#eef1f5"/><stop offset="1" stop-color="#a9b1bc"/></linearGradient>
-      <radialGradient id="${id}g" cx=".3" cy=".3" r=".38"><stop offset="0" stop-color="#fff" stop-opacity="${metal ? .35 : .5}"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      <radialGradient id="${id}g" cx=".3" cy=".3" r=".38"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
     </defs>
     <g mask="url(#${id}h)">
-      <path d="${outline}" fill="${fill}" stroke="${file ? "#e4002b" : metal ? "#8e96a1" : D.line || D.ring}" stroke-width="${file ? .3 : 1}"/>
-      ${metal ? "" : `<circle cx="50" cy="50" r="36" fill="#fff" stroke="${D.line || "none"}" stroke-width=".8"/>`}
-      ${metal ? `<circle cx="50" cy="50" r="36.5" fill="none" stroke="${ink}" stroke-width="1"/>` : ""}
-      <text ${font} font-size="${fsTop}" fill="${ink}" letter-spacing=".5"><textPath href="#${id}t" startOffset="50%" text-anchor="middle">${esc(top)}</textPath></text>
-      <text ${font} font-size="8.6" fill="${ink}" letter-spacing=".5"><textPath href="#${id}b" startOffset="50%" text-anchor="middle">OKUT • SAHİBİMİ ARA</textPath></text>
-      ${side(7)}${side(93)}
-      ${icon(D.icon, metal ? ink : D.accent, `x="45" y="16" width="10" height="8"`)}
-      ${qrSvg(link, `x="26" y="26" width="48" height="48"`, metal ? {fg: ink, bg: null} : {})}
-      <text ${font} x="50" y="81.2" font-size="5.6" fill="${metal ? ink : "#333"}" text-anchor="middle" letter-spacing=".8">${esc(code)}</text>
-      ${file ? "" : `<path d="${outline}" fill="url(#${id}g)"/>`}
+      <path d="${outline}" fill="${B}" stroke="#000" stroke-opacity=".18" stroke-width=".8"/>
+      <circle cx="50" cy="50" r="${49.5 * STICKER + 1}" fill="#000" fill-opacity=".16"/>
+      <g transform="translate(50 50) scale(${STICKER}) translate(-50 -50)">
+        <circle cx="50" cy="50" r="49.5" fill="${D.ring}" stroke="${D.line || D.ring}" stroke-width="1"/>
+        <circle cx="50" cy="50" r="36" fill="#fff" stroke="${D.line || "none"}" stroke-width=".8"/>
+        <text ${font} font-size="${fsTop}" fill="${D.ink}" letter-spacing=".5"><textPath href="#${id}t" startOffset="50%" text-anchor="middle">${esc(top)}</textPath></text>
+        <text ${font} font-size="8.6" fill="${D.ink}" letter-spacing=".5"><textPath href="#${id}b" startOffset="50%" text-anchor="middle">OKUT • SAHİBİMİ ARA</textPath></text>
+        ${side(7)}${side(93)}
+        ${icon(D.icon, D.accent, `x="45" y="16" width="10" height="8"`)}
+        ${qrSvg(link, `x="26" y="26" width="48" height="48"`)}
+        <text ${font} x="50" y="81.2" font-size="5.6" fill="#333" text-anchor="middle" letter-spacing=".8">${esc(code)}</text>
+      </g>
+      <path d="${outline}" fill="url(#${id}g)"/>
     </g>
-    ${file ? `<circle cx="50" cy="-5" r="5" fill="none" stroke="#e4002b" stroke-width=".3"/>` : ""}
   </svg>`;
 }
 
@@ -160,15 +172,6 @@ const badgeAt = (code, design, size = "y30", opts = {}) => {
   const d = dims(size).w;
   return `<div class="badgebox" style="width:${d}mm;height:${(d * (100 + TAB) / 100).toFixed(2)}mm">${badgeSvg(code, design, opts)}</div>`;
 };
-
-// Üretim dosyası: gerçek mm ölçülü tek başına SVG (kırmızı = kesim, metalde siyah = kazıma)
-function badgeFileSvg(code, design, {link, name, kind, size, top}) {
-  const d = dims(size).w, h = d * (100 + TAB) / 100;
-  return `<?xml version="1.0" encoding="UTF-8"?>\n` + badgeSvg(code, design, {link, name, kind, top, file: true})
-    .replace('<svg class="tagbadge"', `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${d}mm" height="${h.toFixed(2)}mm"`)
-    .replace(/ href="#/g, ' xlink:href="#')
-    .replace(/\saria-hidden="true"/g, "");
-}
 
 // ---------------------------------------------------------------- baskı ölçüleri
 // y: yuvarlak (çap), k: dikdörtgen (en x boy)
