@@ -17,10 +17,20 @@
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="shared/fonts.css">
-<script src="shared/vendor/qrcode.js"></script>
-<link rel="stylesheet" href="shared/tag.css">
-<script src="shared/tag.js"></script>
-<script src="shared/intro.js"></script>
+<script>
+// Bir dosya eski önbellekten gelir ya da yüklenemezse sayfa "Yükleniyor"da kalmasın: yenile düğmesi gösterilir
+const stuck = () => setTimeout(() => {
+  const el = document.getElementById("app");
+  if (el && /Yükleniyor/.test(el.textContent) && el.textContent.length < 40)
+    el.innerHTML = '<div class="msg err" style="margin:20px 0">Sayfa yüklenemedi. Site yeni güncellendiyse yenilemek yeter.<br><button class="btn" type="button" onclick="location.reload()" style="margin-top:12px">↻ Yenile</button></div>';
+}, 1500);
+window.addEventListener("error", stuck);
+window.addEventListener("unhandledrejection", stuck);
+</script>
+<script src="shared/vendor/qrcode.js?v=20261026"></script>
+<link rel="stylesheet" href="shared/tag.css?v=20261026">
+<script src="shared/tag.js?v=20261026"></script>
+<script src="shared/intro.js?v=20261026"></script>
 <script>
   // ==================== AYARLAR (Supabase > Project Settings > API) ====================
   // Tasma QR Supabase projesi (supabase/kurulum.sql)
@@ -2167,8 +2177,8 @@ function loadCss(href) {
 
 async function showKit(newCount) {
   show(`${tabsHtml(newCount)}<p>Yükleniyor…</p>`, true);
-  loadCss("shared/kitap.css");
-  try { await loadScript("shared/kitap.js"); } catch (e) { return show(`${tabsHtml(newCount)}<div class="msg err">Kitapçık yüklenemedi, sayfayı yenileyin.</div>`, true); }
+  loadCss("shared/kitap.css?v=20261026");
+  try { await loadScript("shared/kitap.js?v=20261026"); } catch (e) { return show(`${tabsHtml(newCount)}<div class="msg err">Kitapçık yüklenemedi, sayfayı yenileyin.</div>`, true); }
   const opt = {site: SITE_URL, phone: pref("kit-phone", ""), instagram: pref("kit-ig", "tasmaqr"), email: pref("kit-mail", "")};
   const pages = kitPages(opt);
   show(`
@@ -2270,8 +2280,8 @@ async function showKit(newCount) {
 // ---------------------------------------------------------------- yönetim: kartvizit (85×55 mm; A4'e 10 adet ya da matbaa için taşma paylı)
 async function showCard(newCount) {
   show(`${tabsHtml(newCount)}<p>Yükleniyor…</p>`, true);
-  loadCss("shared/kitap.css");
-  try { await loadScript("shared/kitap.js"); } catch (e) { return show(`${tabsHtml(newCount)}<div class="msg err">Kartvizit yüklenemedi, sayfayı yenileyin.</div>`, true); }
+  loadCss("shared/kitap.css?v=20261026");
+  try { await loadScript("shared/kitap.js?v=20261026"); } catch (e) { return show(`${tabsHtml(newCount)}<div class="msg err">Kartvizit yüklenemedi, sayfayı yenileyin.</div>`, true); }
   const opt = {site: SITE_URL, name: pref("card-name", ""), title: pref("card-title", ""), phone: pref("kit-phone", ""), email: pref("kit-mail", ""), instagram: pref("kit-ig", "tasmaqr")};
   const {front, back} = cardFaces(opt);
   const sheet = face => `<div class="bc-sheet">${face.repeat(10)}</div>`;
@@ -2357,8 +2367,8 @@ async function showCard(newCount) {
 
 // Stok partisi için kişiye özel kullanım kitapçıkları (shared/kitap.js kitGuidesPdf)
 async function batchGuidesPdf(rows) {
-  loadCss("shared/kitap.css");
-  await Promise.all([loadScript("shared/kitap.js"), loadPdfLibs()]);
+  loadCss("shared/kitap.css?v=20261026");
+  await Promise.all([loadScript("shared/kitap.js?v=20261026"), loadPdfLibs()]);
   return kitGuidesPdf(rows, {site: SITE_URL, phone: pref("kit-phone", ""), instagram: pref("kit-ig", "tasmaqr"), email: pref("kit-mail", "")}, t => toast(t, 120000));
 }
 

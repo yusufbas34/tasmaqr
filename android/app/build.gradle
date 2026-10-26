@@ -9,6 +9,8 @@ def syncWebAssets = tasks.register("syncWebAssets", Sync) {
     from(rootProject.projectDir.parentFile) {
         include "index.html", "gizlilik.html", "shared/**"
     }
+    // sitedeki önbellek kırıcı ?v=… eki uygulama içi dosyalarda gerekmez (file:///android_asset)
+    filesMatching("index.html") { filter { line -> line.replaceAll(/\?v=\d+/, "") } }
     into webAssets
 }
 
