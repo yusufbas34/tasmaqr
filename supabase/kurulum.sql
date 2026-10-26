@@ -53,7 +53,7 @@ begin
 end $$;
 revoke all on function public.tasma_admin_check(text) from public, anon, authenticated;  -- yalnızca içeriden
 
-create or replace function public.tasma_version() returns integer language sql immutable as 'select 4';
+create or replace function public.tasma_version() returns integer language sql immutable as 'select 5';
 
 -- ---------------------------------------------------------------- rozetler
 -- source = 'admin': yönetimden üretilip basılan (PIN kartıyla verilir, sahibi QR'ı okutup numarasını bağlar)
@@ -647,6 +647,56 @@ begin
   return json_build_object('ok', true, 'code', o.code, 'token', o.token, 'amount', o.amount, 'status', o.status);
 end $$;
 
+-- sürüm 5: hazır rozet siparişi (ad basılmaz, standart SAHİBİMİ ARA). Rozet kodu yok: tag_code = 'HAZIR';
+-- yönetim stoktan aynı renkte bir rozet gönderir. design = etiket tasarımı (gövde rengine uyan), body = gövde rengi.
+create or replace function public.tasma_ready_order_create(
+  p_full_name text, p_phone text, p_email text, p_city text, p_district text, p_address text,
+  p_note text default null, p_device text default null, p_size text default 'y30', p_body text default null, p_design text default null)
+returns json
+language plpgsql security definer set search_path = public
+as $$
+declare
+  s tasma_shop_settings;
+  v_name text := left(trim(coalesce(p_full_name, '')), 80);
+  v_phone text := regexp_replace(coalesce(p_phone, ''), '[^0-9+]', '', 'g');
+  v_email text := nullif(lower(left(trim(coalesce(p_email, '')), 120)), '');
+  v_city text := left(trim(coalesce(p_city, '')), 40);
+  v_district text := left(trim(coalesce(p_district, '')), 60);
+  v_address text := left(trim(coalesce(p_address, '')), 400);
+  v_note text := nullif(left(trim(coalesce(p_note, '')), 300), '');
+  v_device text := nullif(left(trim(coalesce(p_device, '')), 64), '');
+  v_size text := case when p_size in ('y30', 'y35') then p_size else 'y30' end;
+  v_body text := nullif(left(lower(trim(coalesce(p_body, ''))), 20), '');
+  v_design text := left(lower(trim(coalesce(p_design, ''))), 20);
+  v_code text;
+  o tasma_orders;
+begin
+  select * into s from tasma_shop_settings where id = 1;
+  if not (s.active and coalesce(s.iban, '') <> '' and coalesce(s.account_name, '') <> '') then
+    return json_build_object('ok', false, 'error', 'closed');
+  end if;
+  if v_body is null or v_body !~ '^[a-z0-9_-]{2,20}$' then return json_build_object('ok', false, 'error', 'missing'); end if;
+  if v_design !~ '^[a-z]{2,20}$' then v_design := 'klasik'; end if;
+  if length(v_name) < 3 or v_city = '' or v_district = '' or length(v_address) < 10 then
+    return json_build_object('ok', false, 'error', 'missing');
+  end if;
+  if v_phone !~ '^\+[0-9]{10,15}$' then return json_build_object('ok', false, 'error', 'bad_phone'); end if;
+  if v_email is not null and v_email !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$' then return json_build_object('ok', false, 'error', 'bad_email'); end if;
+  if (select count(*) from tasma_orders where (phone = v_phone or (v_device is not null and device = v_device))
+        and created_at > now() - interval '1 day') >= 5
+    then return json_build_object('ok', false, 'error', 'too_many'); end if;
+  if (select count(*) from tasma_orders where created_at > now() - interval '1 minute') >= 20
+    then return json_build_object('ok', false, 'error', 'busy'); end if;
+  loop
+    v_code := 'TQ-' || translate(upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 6)), '01', 'XY');
+    exit when not exists (select 1 from tasma_orders where code = v_code);
+  end loop;
+  insert into tasma_orders (code, tag_code, design, full_name, phone, email, city, district, address, note, amount, device, kind, size, body)
+    values (v_code, 'HAZIR', v_design, v_name, v_phone, v_email, v_city, v_district, v_address, v_note, s.price, v_device, '3d', v_size, v_body)
+    returning * into o;
+  return json_build_object('ok', true, 'code', o.code, 'token', o.token, 'amount', o.amount, 'status', o.status);
+end $$;
+
 -- Müşteri "ödemeyi yaptım" der
 create or replace function public.tasma_order_paid(p_code text, p_token uuid)
 returns json
@@ -906,6 +956,7 @@ begin
     'tasma_shop_info()',
     'tasma_order_create(text, text, text, text, text, text, text, text, text, text, text, text, text)',
     'tasma_admin_colors_set(text, jsonb)',
+    'tasma_ready_order_create(text, text, text, text, text, text, text, text, text, text, text)',
     'tasma_order_paid(text, uuid)',
     'tasma_order_status(text[], uuid[])',
     'tasma_admin_shop_get(text)',

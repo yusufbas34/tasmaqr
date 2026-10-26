@@ -112,7 +112,7 @@ const INTRO_SLIDES = [
   {
     bg: "linear-gradient(160deg,#5b2a86,#1a0f2b)",
     title: "Tasarımını seç, 1 dakikada hazır",
-    text: `${Object.keys(DESIGNS).length} tasarım, Ø30 ve Ø35 mm ölçüler. Ücretsiz oluşturun; ister kendiniz yazdırın, ister 3D baskı gövdeli su geçirmez rozetiniz halkasıyla kapınıza gelsin.`,
+    text: `${Object.keys(DESIGNS).length} tasarım, Ø30 ve Ø35 mm ölçüler. Rozetini tasarla ya da hazır rozet seç; 3D baskı gövdeli su geçirmez rozetin halkasıyla kapına gelsin.`,
     art: () => `<div class="intro-fan" role="img" aria-label="Üç farklı tasarımda QR rozet">
       ${[["kirmizi", "Bobi"], ["klasik", "Pamuk"], ["sari", "Fındık"]].map(([d, n], i) =>
         `<div class="intro-card c${i}">${badgeAt("ÖRNEK", d, "y35", {name: n, link: SITE})}</div>`).join("")}
