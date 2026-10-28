@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Tasma QR SSS hikâyeleri</title>
+<!-- "SSS" öne çıkan hikâyeleri (1080x1920, her hikâyede bir soru bir cevap). PNG'ler pazarlama/sss-uret.js ile pazarlama/instagram/sss/ klasörüne üretilir. -->
+<link rel="stylesheet" href="../shared/fonts.css">
+<link rel="stylesheet" href="../shared/tag.css">
+<script src="../shared/vendor/qrcode.js"></script>
+<script src="../shared/tag.js"></script>
+<style>
+body{margin:0;background:#888;display:flex;flex-wrap:wrap;gap:40px;padding:40px;font-family:"Barlow",sans-serif}
+.ab{position:relative;overflow:hidden;flex:none;width:1080px;height:1920px;color:#fff}
+.orange{background:radial-gradient(120% 80% at 80% 10%,#e8742a 0%,#b8501a 55%,#6e2c0c 100%)}
+.navy{background:radial-gradient(120% 80% at 20% 0%,#2a4f9a 0%,#163a7a 55%,#0a1838 100%)}
+.h{font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;line-height:1;margin:0}
+.mark{color:#ffd400}
+/* Instagram üst 250 px ve alt 340 px'i kendi yazılarıyla kapatır: içerik arada kalır */
+.box{position:absolute;left:80px;right:80px;top:250px;bottom:340px;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:12px;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.35);border-radius:999px;font-weight:700;font-size:38px;padding:10px 28px}
+.count{font:700 40px "Barlow Condensed",sans-serif;opacity:.8}
+.q{margin-top:44px}
+.q .h{font-size:var(--qs,118px)}
+.a{margin-top:44px;background:#fff;color:#2a1a10;border-radius:40px;padding:44px 48px;box-shadow:0 30px 60px rgba(0,0,0,.3);position:relative}
+.a::before{content:"";position:absolute;top:-26px;left:70px;border:28px solid transparent;border-top:0;border-bottom:28px solid #fff}
+.a p{margin:0;font-weight:600;font-size:var(--as,46px);line-height:1.28}
+.a b{color:#b8501a}
+.vis{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.vis .fit{filter:drop-shadow(0 30px 50px rgba(0,0,0,.35))}
+.brand{position:absolute;left:0;right:0;bottom:250px;display:flex;align-items:center;justify-content:center;gap:16px;font-weight:700;font-size:38px}
+.brand img{border-radius:22%}
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script>
+const SITE = "https://tasma.bulqr.com.tr/";
+const LINK = SITE + "?r=sss";
+// [soru, cevap, gövde rengi, tasarım, rozetteki ad]
+const QA = [
+  ["Tasma QR <span class='mark'>nedir?</span>", "Tasmaya takılan QR rozet. Dostunu bulan kişi rozeti okutur, <b>seni tek dokunuşla arar</b>, istersen konumunu da gönderir.", "turuncu", "turuncu", "Zeytin"],
+  ["Bulan kişinin <span class='mark'>uygulama indirmesi</span> gerekir mi?", "Hayır. Telefon kamerasıyla okutması yeterli, <b>sayfa kendiliğinden açılır.</b> Uygulama ya da üyelik gerekmez.", "klasik", "klasik", "Pamuk"],
+  ["Numaram <span class='mark'>herkese görünür</span> mü?", "Rozette numaran <b>yazmaz.</b> Yalnızca QR'ı okutan kişi seni arayabilsin diye arama ekranında görür.", "yesil", "yesil", "Karabaş"],
+  ["Numaram <span class='mark'>değişirse</span> ne olacak?", "Rozeti okut, <b>“Bilgileri düzenleyin”</b>e dokun, PIN'inle yeni numaranı gir. Rozeti yeniden bastırmana gerek yok.", "kirmizi", "kirmizi", "Bobi"],
+  ["Rozet <span class='mark'>neyden</span> yapılıyor?", "Gövde 3D yazıcıda dayanıklı <b>PETG</b> plastikten basılır, üstüne <b>su geçirmez lamine QR sticker</b> yapıştırılır. Suya ve güneşe dayanır, hafiftir.", "pembe", "pembe", "Lokum"],
+  ["Fiyatı <span class='mark'>ne kadar?</span>", "Tek ürün, tek fiyat: <b>399 TL</b>, halkasıyla birlikte. Ödeme havale/EFT; ödemen onaylanınca rozetin üretilip kargoya verilir.", "turuncu", "turuncu", "Fındık"],
+  ["Kendi tasarımım mı, <span class='mark'>hazır rozet</span> mi?", "<b>Kendi tasarımında</b> dostunun adı ve seçtiğin tasarım basılır. <b>Hazır rozette</b> “SAHİBİMİ ARA” yazar, gövde rengini seçersin; bilgilerini PIN kartıyla girersin.", "klasik", "klasik", "", "SAHİBİMİ ARA"],
+  ["<span class='mark'>Kediler</span> için de olur mu?", "Evet! Tasma takan her dost için uygun. Kediler için hafif <b>Ø30 mm</b> rozeti ve <b>güvenlik kilitli</b> (çekince açılan) kedi tasmasını öneririz.", "pembe", "kedi", "Minnoş"],
+  ["Dostum <span class='mark'>kaybolursa?</span>", "Tek dokunuşla <b>kayıp modunu</b> aç: rozeti okutan herkes kırmızı “KAYIP!” uyarısını ve ödül notunu görür, okutulunca sana bildirim gelir.", "kirmizi", "kirmizi", "Bobi"],
+  ["Konumum <span class='mark'>kaydediliyor</span> mu?", "Hayır. Yalnızca bulan kişi <b>“Konumumu gönder”</b>e basıp izin verirse kaydedilir ve <b>sadece sen</b> görürsün.", "yesil", "yesil", "Karabaş"],
+  ["<span class='mark'>Mikroçipin</span> yerine geçer mi?", "Hayır. Mikroçip yasal zorunluluk ve kalıcıdır. QR rozet, bulan kişinin <b>sana dakikalar içinde ulaşması</b> için ek bir önlemdir.", "klasik", "klasik", "Pamuk"],
+  ["<span class='mark'>PIN'imi</span> unutursam?", "Kurtarma e-postası eklediysen rozeti okut, <b>“🔑 PIN'imi unuttum”</b>a bas; PIN e-postana gelir. Yoksa rozet kodunla bize DM at.", "turuncu", "turuncu", "Zeytin"],
+  ["Nasıl <span class='mark'>sipariş</span> veririm?", "Profildeki bağlantıdan <b>tasma.bulqr.com.tr</b>: rozetini tasarla ya da hazır rozet seç, gövde rengini ve adresini yaz, havale/EFT ile öde.", "turuncu", "turuncu", "Fındık"],
+];
+const logo = px => `<img src="../shared/logo.svg" width="${px}" height="${px}" alt="">`;
+const AB = QA.map(([q, a, body, design, name, top], i) => {
+  const n = String(i + 1).padStart(2, "0");
+  const hex = bodyOf(body)?.hex;
+  return `<div class="ab ${i % 2 ? "navy" : "orange"}" data-name="sss-${n}">
+    <div class="box">
+      <div class="top"><span class="chip">💬 SIK SORULANLAR</span><span class="count">${i + 1} / ${QA.length}</span></div>
+      <div class="q"><h1 class="h">${q}</h1></div>
+      <div class="a"><p>${a}</p></div>
+      <div class="vis"><div class="fit">${badgeAt("SAB3C9D2", design, "y35", {name, link: LINK, body: hex, ...(top ? {top} : {})})}</div></div>
+    </div>
+    <div class="brand">${logo(58)}Tasma QR · tasma.bulqr.com.tr</div>
+  </div>`;
+});
+document.getElementById("out").outerHTML = AB.join("");
+// soru ve cevap uzunsa yazı küçülür, rozet kalan alana sığar
+function fitAll() {
+  document.querySelectorAll(".ab").forEach(ab => {
+    const box = ab.querySelector(".box"), vis = ab.querySelector(".vis"), f = vis.firstElementChild;
+    for (let qs = 118, as = 46; qs > 70; qs -= 4, as -= 1) {
+      box.style.setProperty("--qs", qs + "px"); box.style.setProperty("--as", as + "px");
+      if (vis.clientHeight >= 380) break;
+    }
+    f.style.zoom = 1;
+    const r = f.getBoundingClientRect(), z = Math.min(vis.clientHeight * .9 / r.height, vis.clientWidth * .9 / r.width, 3);
+    f.style.zoom = z.toFixed(3);
+  });
+}
+document.fonts.ready.then(fitAll);
+</script>
+</body>
+</html>
