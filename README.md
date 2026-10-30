@@ -16,7 +16,7 @@ Evcil hayvanların tasmasına künye gibi takılan QR rozet. Rozeti okutan kişi
 - **Rozetlerim** (`#kunyelerim`): bu cihazdaki rozetler, okutma sayısı, son konumlar, yazdırma ve PDF
 - **12 tasarım, 7 ölçü**: yuvarlak Ø25–Ø40 mm, dikdörtgen 35×50–50×75 mm
 - **Silme**: sahibi PIN ile rozeti siler (okutmalar ve konumlar da silinir; yönetimden basılan rozet boşa çıkar ve PIN kartıyla yeniden bağlanabilir). Yönetimde kullanılmamış rozetler silinebilir
-- **Tasmaya takılan rozet**: 3D yazıcıda basılan kulaklı (halka delikli) PETG gövde + çukurunda su geçirmez lamine QR sticker; Ø30/35 mm, gövde rengi seçilir, 399 TL (Ayarlar'dan değişir). İki yol: kendi tasarla (indir ya da sipariş et) · hazır rozet (standart SAHİBİMİ ARA, renk seçilir)
+- **Tasmaya takılan rozet**: 3D yazıcıda basılan kulaklı (halka delikli) PETG gövde + çukurunda su geçirmez lamine QR sticker; Ø30/35 mm, gövde rengi seçilir. İki yol: kendi tasarla 399 TL · hazır rozet 250 TL (standart SAHİBİMİ ARA, renk seçilir). Fiyatlar Ayarlar'dan değişir
 - **Üretim dosyası**: sipariş başına gerçek ölçülü yuvarlak QR etiket PDF'i (gövde rengi notuyla); gövdeler ve stok etiketleri `uretim/3d/` sayfasından
 - **Hazır rozet talep formu** (rozet tipi, tasarım, ölçü) ve **rozet siparişi** (IBAN ile ödeme, Telegram/e-posta bildirimi)
 - **Yönetim** (`?admin`): PIN kartlı rozet üretme/yazdırma, gövde renkleri, talepler, siparişler, satış ayarları

@@ -53,7 +53,7 @@ begin
 end $$;
 revoke all on function public.tasma_admin_check(text) from public, anon, authenticated;  -- yalnızca içeriden
 
-create or replace function public.tasma_version() returns integer language sql immutable as 'select 5';
+create or replace function public.tasma_version() returns integer language sql immutable as 'select 6';
 
 -- ---------------------------------------------------------------- rozetler
 -- source = 'admin': yönetimden üretilip basılan (PIN kartıyla verilir, sahibi QR'ı okutup numarasını bağlar)
@@ -492,6 +492,13 @@ update public.tasma_shop_settings set body_colors = '[{"key":"klasik","name":"La
   where body_colors is null;
 update public.tasma_shop_settings set product_text = 'Tasmaya takılan QR rozet: 3D yazıcıda basılan dayanıklı gövde, üstünde su geçirmez lamine QR sticker. Halkasıyla birlikte kargolanır; hemen tasmanın D halkasına takabilirsiniz.'
   where product_text = 'Tasmaya takılan, halka delikli QR rozet. Halkasıyla birlikte kargolanır; hemen tasmanın D halkasına takabilirsiniz.';
+-- sürüm 6: hazır rozet (SAHİBİMİ ARA) ayrı fiyatlı, 250 TL; kendi tasarımın rozeti (price) 399 TL
+do $$ begin
+  if not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'tasma_shop_settings' and column_name = 'price_ready') then
+    alter table public.tasma_shop_settings add column price_ready integer not null default 250;
+    update public.tasma_shop_settings set price = 399;  -- ilk kurulumda: özel tasarım 399 TL
+  end if;
+end $$;
 alter table public.tasma_shop_settings enable row level security;
 revoke all on public.tasma_shop_settings from anon, authenticated;
 
@@ -584,7 +591,7 @@ returns json
 language sql stable security definer set search_path = public
 as $$
   select json_build_object('active', active and coalesce(iban, '') <> '' and coalesce(account_name, '') <> '',
-    'price', price, 'iban', iban, 'account_name', account_name, 'bank_name', bank_name,
+    'price', price, 'price_ready', price_ready, 'iban', iban, 'account_name', account_name, 'bank_name', bank_name,
     'shipping_text', shipping_text, 'product_text', product_text, 'body_colors', body_colors)
   from tasma_shop_settings where id = 1;
 $$;
@@ -692,7 +699,7 @@ begin
     exit when not exists (select 1 from tasma_orders where code = v_code);
   end loop;
   insert into tasma_orders (code, tag_code, design, full_name, phone, email, city, district, address, note, amount, device, kind, size, body)
-    values (v_code, 'HAZIR', v_design, v_name, v_phone, v_email, v_city, v_district, v_address, v_note, s.price, v_device, '3d', v_size, v_body)
+    values (v_code, 'HAZIR', v_design, v_name, v_phone, v_email, v_city, v_district, v_address, v_note, s.price_ready, v_device, '3d', v_size, v_body)
     returning * into o;
   return json_build_object('ok', true, 'code', o.code, 'token', o.token, 'amount', o.amount, 'status', o.status);
 end $$;
@@ -734,9 +741,10 @@ begin
 end $$;
 
 drop function if exists public.tasma_admin_shop_set(text, boolean, integer, text, text, text, text, text, text, text, text, text, text);  -- sürüm 1 imzası
+drop function if exists public.tasma_admin_shop_set(text, boolean, integer, text, text, text, text, text, text, text, text, text, text, integer);  -- sürüm 3 imzası
 create or replace function public.tasma_admin_shop_set(p_key text, p_active boolean, p_price integer, p_iban text,
   p_account_name text, p_bank_name text, p_printer_email text, p_shipping_text text, p_product_text text,
-  p_telegram_bot_token text, p_telegram_chat_id text, p_resend_api_key text, p_notify_email text, p_price_metal integer default null)
+  p_telegram_bot_token text, p_telegram_chat_id text, p_resend_api_key text, p_notify_email text, p_price_metal integer default null, p_price_ready integer default null)
 returns void
 language plpgsql security definer set search_path = public
 as $$
@@ -746,6 +754,7 @@ begin
     active = coalesce(p_active, false),
     price = greatest(coalesce(p_price, 150), 0),
     price_metal = greatest(coalesce(p_price_metal, price_metal), 0),
+    price_ready = greatest(coalesce(p_price_ready, price_ready), 0),
     iban = nullif(upper(regexp_replace(coalesce(p_iban, ''), '\s', '', 'g')), ''),
     account_name = nullif(trim(coalesce(p_account_name, '')), ''),
     bank_name = nullif(trim(coalesce(p_bank_name, '')), ''),
@@ -960,7 +969,7 @@ begin
     'tasma_order_paid(text, uuid)',
     'tasma_order_status(text[], uuid[])',
     'tasma_admin_shop_get(text)',
-    'tasma_admin_shop_set(text, boolean, integer, text, text, text, text, text, text, text, text, text, text, integer)',
+    'tasma_admin_shop_set(text, boolean, integer, text, text, text, text, text, text, text, text, text, text, integer, integer)',
     'tasma_admin_notify_test(text)',
     'tasma_admin_orders(text)',
     'tasma_admin_order_update(text, bigint, text, text, text)',

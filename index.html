@@ -947,7 +947,7 @@ function showHome() {
     <div class="strip">
       <div><b>1 dk</b><span>kurulum, hesap yok</span></div>
       <div><b>${Object.keys(DESIGNS).length}</b><span>rozet tasarımı</span></div>
-      <div><b>${PRICE} TL</b><span>su geçirmez 3D baskı rozet</span></div>
+      <div><b>${PRICE_READY} TL'den</b><span>su geçirmez 3D baskı rozet</span></div>
       <div><b>🔒 PIN</b><span>bilgileri yalnızca siz değiştirirsiniz</span></div>
     </div>
 
@@ -1117,7 +1117,7 @@ async function showRequest(error = "", v = null) {
       <div class="preview"><div style="zoom:1.8">${badgeAt("ÖRNEK", designForBody(v.body), badgeSize(v.size), {link: SITE, top: "SAHİBİMİ ARA", body: body?.hex})}</div></div>
       ${error ? `<div class="msg err" role="alert" style="margin-top:14px">${esc(error)}</div>` : ""}
       <form id="hf" novalidate>
-        <p class="hint" style="margin-top:0"><b>${esc(PRODUCTS[PRODUCT_KIND].name)} · ${esc(shopPrice(shop))} TL.</b> ${esc(shop.shipping_text || "")}</p>
+        <p class="hint" style="margin-top:0"><b>Hazır rozet · ${esc(shopReadyPrice(shop))} TL.</b> ${esc(shop.shipping_text || "")}</p>
         <label>Gövde rengi</label>${bodyChips(v.body, shop)}
         <label for="h-size">Ölçü</label>
         <select id="h-size" class="big">${Object.entries(BADGE_SIZES).map(([k, n]) => `<option value="${k}"${k === badgeSize(v.size) ? " selected" : ""}>${esc(n)}</option>`).join("")}</select>
@@ -1130,7 +1130,7 @@ async function showRequest(error = "", v = null) {
         </div>
         <label for="h-address">Açık adres</label><textarea id="h-address" rows="3" maxlength="400" autocomplete="street-address">${esc(v.address || "")}</textarea>
         <label for="h-note">Not <span class="opt">(isteğe bağlı)</span></label><input id="h-note" maxlength="300" ${val("note")}>
-        <button class="btn" type="submit">Siparişi oluştur · ${esc(shopPrice(shop))} TL</button>
+        <button class="btn" type="submit">Siparişi oluştur · ${esc(shopReadyPrice(shop))} TL</button>
         <span class="hint">Sonraki adımda havale / EFT bilgilerini göreceksiniz.</span>
       </form>
     </div>`, "mid");
@@ -1584,6 +1584,9 @@ const OLD_PRODUCT_TEXTS = ["Su geçirmez vinil sticker sayfası: aynı QR 7 fark
 const productText = shop => !shop?.product_text || OLD_PRODUCT_TEXTS.includes(shop.product_text.trim()) ? PRODUCT_TEXT : shop.product_text;
 const PRICE = 399; // TL; sitede gerçek fiyat yönetimdeki Ayarlar'dan gelir (tasma_shop_info.price)
 const shopPrice = shop => shop?.price ?? PRICE;
+// Hazır rozet (SAHİBİMİ ARA) ayrı fiyatlı; eski veritabanında hazır rozet de tek fiyattan (price) satılır
+const PRICE_READY = 250;
+const shopReadyPrice = shop => shop && !("price_ready" in shop) ? shopPrice(shop) : shop?.price_ready ?? PRICE_READY;
 // Rozet edinmenin iki yolu: kendi tasarımını yap (sipariş et) · hazır rozet sipariş ver (renk seç, standart SAHİBİMİ ARA)
 function productCards({design = "turuncu", name = "", shop = null, size = "y30"} = {}) {
   const colors = bodyColors(shop), b1 = colors.find(c => c.key === design) || colors[0], b2 = colors[1] || colors[0];
@@ -1596,7 +1599,7 @@ function productCards({design = "turuncu", name = "", shop = null, size = "y30"}
     <a class="product" href="#talep">
       ${badgeAt("ÖRNEK", designForBody(b2.key), size, {link: SITE, top: "SAHİBİMİ ARA", body: b2.hex})}
       <div><b>2 · Hazır rozet sipariş ver</b><span>Ad basılmaz, üstünde standart “SAHİBİMİ ARA” yazar. Gövde rengini seçin; rozet PIN kartı ve kullanım kitapçığıyla gelir, bilgilerinizi siz girersiniz.</span>
-        <div class="price">${esc(shopPrice(shop))} TL</div></div>
+        <div class="price">${esc(shopReadyPrice(shop))} TL</div></div>
     </a>
   </div>`;
 }
@@ -2659,14 +2662,19 @@ async function showSettings(newCount, error = "") {
   show(`
     ${tabsHtml(newCount)}
     ${shop ? "" : setupHtml("Sipariş sistemi kurulu değil.")}
-    ${shop && !("body_colors" in shop) ? setupHtml("Veritabanı güncel değil: gövde renkleri, 399 TL tek fiyat ve siparişte gövde rengi için güncel kurulum dosyasını çalıştırın.") : ""}
+    ${shop && !("body_colors" in shop) ? setupHtml("Veritabanı güncel değil: gövde renkleri ve siparişte gövde rengi için güncel kurulum dosyasını çalıştırın.") : ""}
+    ${shop && "body_colors" in shop && !("price_ready" in shop) ? setupHtml("Hazır rozet fiyatı ayrı değil: hazır rozete ayrı fiyat (250 TL) için güncel kurulum dosyasını çalıştırın.") : ""}
     ${error ? `<div class="msg err">${esc(error)}</div>` : ""}
     ${shop ? `
     <form id="sf" class="card" style="max-width:560px" novalidate>
       <h2>Tasmaya takılan rozet satışı</h2>
       <label class="check"><input type="checkbox" id="s-active"${shop.active ? " checked" : ""}> Satış açık (sitede sipariş alınsın)</label>
-      <label for="s-price">Rozet fiyatı (TL) <span class="opt">3D baskı gövde + su geçirmez sticker</span></label>
-      <input id="s-price" type="number" inputmode="numeric" min="0" value="${esc(shop.price ?? PRICE)}">
+      <div class="row2">
+        <div><label for="s-price">Kendi tasarımı (TL) <span class="opt">ad + tasarım basılır</span></label>
+          <input id="s-price" type="number" inputmode="numeric" min="0" value="${esc(shop.price ?? PRICE)}"></div>
+        ${"price_ready" in shop ? `<div><label for="s-price-ready">Hazır rozet (TL) <span class="opt">SAHİBİMİ ARA</span></label>
+          <input id="s-price-ready" type="number" inputmode="numeric" min="0" value="${esc(shop.price_ready ?? PRICE_READY)}"></div>` : ""}
+      </div>
 
       <h2>Gövde renkleri</h2>
       <p class="hint">Sitede sipariş ve hazır rozet formunda seçilen filament renkleri. Elinizdeki makaralara göre düzenleyin.</p>
@@ -2768,7 +2776,8 @@ async function showSettings(newCount, error = "") {
     if (iban && !validIban(iban)) return showSettings(newCount, "IBAN hatalı görünüyor: TR ile başlayan 26 karakter olmalı ve kontrol hanesi tutmalı.");
     if (active && (!iban || !g("s-name"))) return showSettings(newCount, "Satışı açmak için IBAN ve alıcı adı gerekli.");
     const price = parseInt(g("s-price"), 10), colors = readColors();
-    if (!(price >= 0)) return showSettings(newCount, "Fiyat geçersiz.");
+    const priceReady = document.getElementById("s-price-ready") ? parseInt(g("s-price-ready"), 10) : null;
+    if (!(price >= 0) || (priceReady !== null && !(priceReady >= 0))) return showSettings(newCount, "Fiyat geçersiz.");
     if (!colors.length) return showSettings(newCount, "En az bir gövde rengi girin.");
     if (g("s-notify") && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(g("s-notify"))) return showSettings(newCount, "Bildirim e-postası geçersiz.");
     const from = document.getElementById("s-from") ? g("s-from") : null;
@@ -2776,6 +2785,7 @@ async function showSettings(newCount, error = "") {
     const args = {p_key: adminKey, p_active: active, p_price: price, p_iban: iban, p_account_name: g("s-name"),
       p_bank_name: g("s-bank"), p_printer_email: g("s-printer"), p_shipping_text: g("s-ship"), p_product_text: g("s-product"),
       p_telegram_bot_token: g("s-tg-token"), p_telegram_chat_id: g("s-tg-chat"), p_resend_api_key: g("s-resend"), p_notify_email: g("s-notify")};
+    if (priceReady !== null) args.p_price_ready = priceReady;
     try {
       let old = false;
       await rpc("tasma_admin_shop_set", args);
