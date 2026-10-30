@@ -4,6 +4,7 @@ Görseller `png/` klasöründe. Metni değiştirmek için `index.html`'i düzenl
 
 - `ortak-1-kapak` … `ortak-6-cta`: kaydırmalı gönderi, 1080×1350, bu sırayla
 - `ortak-hikaye`: hikâye, 1080×1920; kesikli kutunun üstüne bağlantı çıkartması (tasma.bulqr.com.tr) konur
+- `tanitim-1-nedir` … `tanitim-4-siparis`: sade, uygulama tanıtımı tarzında 4 sayfalık gönderi (kaynak `tanitim.html`): Nedir · Nasıl çalışır · Ne var · Sipariş
 
 En iyisi Instagram'ın **Ortak gönderi (Collab)** özelliği: gönderiyi sayfa paylaşır, ortak olarak @tasmaqr eklenir; gönderi iki hesapta da görünür, beğeni ve yorumlar ortak sayılır.
 
@@ -26,6 +27,26 @@ Hazır rozet 250 TL · kendi tasarımın 399 TL
 Dostunu seven birini etiketle, kaybolmadan önce hazır olsun 💛
 
 #tasmaqr #kayıpköpek #kayıpkedi #köpeksahibi #kedisahibi #evcilhayvan #köpek #kedi #petshop #qrkünye #istanbulköpek #sokakhayvanları
+```
+
+## Tanıtım gönderisi açıklaması (tanitim-1…4)
+
+```
+Tasma QR nedir? 🐾
+
+Kedin ya da köpeğin kaybolursa onu bulan kişinin seni tek dokunuşla aramasını sağlayan, tasmaya takılan QR rozet.
+
+1️⃣ Rozetini oluştur: adı, numaran, notun
+2️⃣ Tasmaya tak: halkasıyla kapına gelir
+3️⃣ Bulan kişi okutur: seni arar, konumunu gönderir
+
+🚨 Kayıp modu · 📍 Konum bildirimi · 🔒 Numaran gizli · 💊 Sağlık notu
+Uygulama gerekmez, telefon kamerası yeter.
+
+Hazır rozet 250 TL · kendi tasarımın 399 TL
+👉 tasma.bulqr.com.tr · @tasmaqr
+
+#tasmaqr #kayıpköpek #kayıpkedi #köpeksahibi #kedisahibi #evcilhayvan #qrkünye
 ```
 
 ## Sayfalara DM mesajı

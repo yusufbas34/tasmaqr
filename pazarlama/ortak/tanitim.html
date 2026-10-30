@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Tasma QR tanıtım gönderisi</title>
+<!-- 4 sayfalık tanıtım gönderisi (1080x1350): Nedir · Nasıl çalışır · Ne var · Sipariş. PNG'ler: node pazarlama/ortak/uret.js tanitim -->
+<link rel="stylesheet" href="../../shared/fonts.css">
+<link rel="stylesheet" href="../../shared/tag.css">
+<script src="../../shared/vendor/qrcode.js"></script>
+<script src="../../shared/tag.js"></script>
+<style>
+:root{--band:#b8501a;--deep:#6e2c0c;--ink:#2a1a10;--muted:#6a5d54;--cream:#f6f1ea;--soft:#efe3d6}
+body{margin:0;background:#888;display:flex;flex-wrap:wrap;gap:40px;padding:40px;font-family:"Barlow",sans-serif}
+.ab{position:relative;overflow:hidden;flex:none;width:1080px;height:1350px;background:var(--cream);color:var(--ink)}
+.blob{position:absolute;border-radius:50%;background:var(--soft)}
+.pawbg{position:absolute;opacity:.16}
+.h{font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;line-height:.96;margin:0;letter-spacing:-.01em}
+.c{color:var(--band)}
+.eyebrow{display:inline-block;background:var(--soft);color:var(--band);font:700 34px "Barlow Condensed",sans-serif;letter-spacing:.08em;border-radius:999px;padding:10px 28px}
+.lead{font-size:42px;line-height:1.32;color:var(--muted);font-weight:500;margin:0}
+.lead b{color:var(--ink)}
+.chips{display:flex;gap:16px;flex-wrap:wrap}
+.chip{background:#fff;border-radius:999px;padding:14px 22px;font-weight:700;font-size:30px;box-shadow:0 8px 24px rgba(110,44,12,.1)}
+.foot{position:absolute;left:0;right:0;bottom:0;height:170px;background:var(--band);color:#fff;display:flex;align-items:center;gap:28px;padding:0 60px}
+.foot img{border-radius:22%}
+.foot p{margin:0;font-size:36px;font-weight:700;line-height:1.2;flex:1}
+.foot span{font-size:34px;font-weight:700;opacity:.8}
+.count{position:absolute;top:60px;right:60px;background:var(--ink);color:#fff;border-radius:999px;font-size:32px;font-weight:700;padding:8px 24px}
+.steps{display:flex;flex-direction:column;gap:20px}
+.step{display:flex;gap:24px;align-items:center;background:#fff;border-radius:999px;padding:18px 34px 18px 18px;box-shadow:0 8px 24px rgba(110,44,12,.1)}
+.step .n{width:76px;height:76px;border-radius:50%;background:var(--band);color:#fff;display:flex;align-items:center;justify-content:center;font:700 40px "Barlow Condensed",sans-serif;flex:none}
+.step b{display:block;font-size:38px;line-height:1.1}
+.step span{display:block;font-size:30px;color:var(--muted);margin-top:2px}
+.cards{display:flex;flex-direction:column;gap:22px}
+.card{display:flex;gap:30px;align-items:center;background:#fff;border-radius:60px;padding:28px 40px 28px 26px;box-shadow:0 8px 24px rgba(110,44,12,.1)}
+.card .ic{width:100px;height:100px;border-radius:50%;background:var(--band);display:flex;align-items:center;justify-content:center;font-size:48px;flex:none}
+.card b{display:block;font-size:42px;line-height:1.1}
+.card span{display:block;font-size:32px;color:var(--muted);margin-top:4px;line-height:1.25}
+.phone{background:#111;border-radius:64px;padding:16px;box-shadow:0 40px 80px rgba(42,26,16,.3)}
+.phone img{display:block;width:100%;border-radius:50px}
+.dark{background:radial-gradient(120% 80% at 50% 0%,#e8742a 0%,#b8501a 50%,#6e2c0c 100%);color:#fff}
+.btns{display:flex;gap:22px;justify-content:center}
+.btn{background:#fff;color:var(--band);border-radius:26px;padding:22px 34px;font:700 44px "Barlow Condensed",sans-serif;box-shadow:0 20px 40px rgba(0,0,0,.25)}
+.btn small{display:block;font:600 26px "Barlow",sans-serif;color:var(--muted);margin-bottom:2px}
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script>
+const SITE = "https://tasma.bulqr.com.tr/", LINK = SITE + "?r=tanitim";
+const logo = (px, r = "22%") => `<img src="../../shared/logo.svg" width="${px}" height="${px}" alt="" style="border-radius:${r}">`;
+const paw = (x, y, s, rot = 0) => `<svg class="pawbg" style="left:${x}px;top:${y}px;transform:rotate(${rot}deg)" width="${s}" height="${s}" viewBox="0 0 24 24"><g fill="#b8501a"><ellipse cx="12" cy="16.2" rx="5.4" ry="4.6"/><ellipse cx="4.8" cy="10.2" rx="2.3" ry="2.9"/><ellipse cx="9.2" cy="5.4" rx="2.3" ry="3"/><ellipse cx="14.8" cy="5.4" rx="2.3" ry="3"/><ellipse cx="19.2" cy="10.2" rx="2.3" ry="2.9"/></g></svg>`;
+const foot = (t1, t2) => `<div class="foot">${logo(84)}<p>${t1}<br>${t2}</p><span>@tasmaqr</span></div>`;
+const badge = (design, body, name, opts = {}) => badgeAt("SAB3C9D2", design, "y35", {name, link: LINK, body: bodyOf(body)?.hex, ...opts});
+const AB = [];
+const add = (name, cls, html) => AB.push(`<div class="ab ${cls}" data-name="${name}">${html}</div>`);
+
+// 1 · Nedir?
+add("tanitim-1-nedir", "", `
+  <div class="blob" style="width:760px;height:760px;left:-240px;top:-260px"></div>
+  <div class="blob" style="width:620px;height:620px;right:-260px;top:520px"></div>
+  ${paw(800, 120, 190, 15)}
+  <div style="position:absolute;left:72px;top:96px;display:flex;align-items:center;gap:22px">${logo(96)}<span class="h" style="font-size:72px">Tasma QR</span></div>
+  <div style="position:absolute;left:72px;top:300px;width:600px">
+    <h1 class="h" style="font-size:168px">Tasma QR<br><span class="c">nedir?</span></h1>
+    <svg width="300" height="20" style="margin-top:18px"><path d="M4 14 Q150 2 296 10" stroke="#b8501a" stroke-width="9" fill="none" stroke-linecap="round"/></svg>
+  </div>
+  <div style="position:absolute;right:40px;top:360px;width:340px;height:420px;display:flex;align-items:center;justify-content:center;transform:rotate(8deg);filter:drop-shadow(0 30px 40px rgba(110,44,12,.3))"><div style="zoom:2.2">${badge("turuncu", "turuncu", "Zeytin")}</div></div>
+  <div style="position:absolute;left:72px;right:72px;top:790px">
+    <p class="lead">Kedin ya da köpeğin kaybolursa onu bulan kişinin <b>seni tek dokunuşla aramasını</b> sağlayan, tasmaya takılan QR rozet.</p>
+    <div class="chips" style="margin-top:30px;flex-wrap:nowrap"><span class="chip">📞 Tek dokunuşla ara</span><span class="chip">📍 Konum gönder</span><span class="chip">🚨 Kayıp modu</span></div>
+    <p style="margin:34px 0 0;font-size:36px;font-weight:700;color:var(--band)">Kaydır, tanıyalım →</p>
+  </div>
+  <div class="count">1/4</div>
+  ${foot("Kaybolursa,", "seni bulsunlar.")}`);
+
+// 2 · Nasıl çalışır
+add("tanitim-2-nasil", "", `
+  <div class="blob" style="width:700px;height:700px;right:-220px;top:-200px"></div>
+  <div style="position:absolute;left:72px;top:96px;width:560px">
+    <span class="eyebrow">NASIL ÇALIŞIR</span>
+    <h1 class="h" style="font-size:112px;margin-top:28px">Okut,<br><span class="c">sahibini</span><br>ara.</h1>
+    <p class="lead" style="font-size:36px;margin-top:24px">Bulan kişi telefon kamerasıyla okutur; <b>uygulama ya da üyelik gerekmez.</b> Numaran rozette yazmaz.</p>
+  </div>
+  <div style="position:absolute;right:-70px;top:120px;width:470px;transform:rotate(4deg)"><div class="phone"><img src="../ekran/bulan-kisi.png" alt=""></div></div>
+  <div class="steps" style="position:absolute;left:72px;width:560px;top:760px">
+    <div class="step"><span class="n">1</span><div><b>Rozetini oluştur</b><span>Adı, numaran, notun.</span></div></div>
+    <div class="step"><span class="n">2</span><div><b>Tasmaya tak</b><span>Halkasıyla kapına gelir.</span></div></div>
+    <div class="step"><span class="n">3</span><div><b>Bulan kişi okutur</b><span>Seni arar, konumunu gönderir.</span></div></div>
+  </div>
+  <div class="count">2/4</div>
+  ${foot("Uygulama gerekmez,", "kamera yeter.")}`);
+
+// 3 · Ne var
+add("tanitim-3-ozellik", "", `
+  <div class="blob" style="width:640px;height:640px;left:-260px;top:-240px"></div>
+  <div class="blob" style="width:560px;height:560px;right:-240px;bottom:120px"></div>
+  <div style="position:absolute;left:72px;right:72px;top:96px">
+    <span class="eyebrow">TASMA QR'DA NE VAR</span>
+    <h1 class="h" style="font-size:104px;margin-top:26px">Dört şey, <span class="c">tek rozet.</span></h1>
+  </div>
+  <div class="cards" style="position:absolute;left:72px;right:72px;top:370px">
+    <div class="card"><div class="ic">🚨</div><div><b>Kayıp modu</b><span>Okutan herkes kırmızı “KAYIP!” uyarısını ve ödül notunu görür.</span></div></div>
+    <div class="card"><div class="ic">📍</div><div><b>Konum bildirimi</b><span>Bulan kişi konumunu gönderir, telefonuna bildirim gelir.</span></div></div>
+    <div class="card"><div class="ic">🔒</div><div><b>Numaran gizli</b><span>Rozette yazmaz; bilgilerini PIN'inle saniyede değiştirirsin.</span></div></div>
+    <div class="card"><div class="ic">💊</div><div><b>Sağlık ve karakter notu</b><span>İlaç, huy, mikroçip bilgisi; bulan kişi doğru davranır.</span></div></div>
+  </div>
+  <div class="count">3/4</div>
+  ${foot("Su geçirmez 3D baskı rozet,", "halkasıyla birlikte.")}`);
+
+// 4 · Sipariş
+add("tanitim-4-siparis", "dark", `
+  ${paw(760, 150, 220, 18)}${paw(60, 900, 160, -12)}
+  <div style="position:absolute;left:0;right:0;top:90px;display:flex;flex-direction:column;align-items:center;text-align:center">
+    <div style="background:#fff;border-radius:26%;padding:14px;box-shadow:0 20px 40px rgba(0,0,0,.25)">${logo(150, "24%")}</div>
+    <h1 class="h" style="font-size:110px;margin-top:24px">Tasma QR</h1>
+    <p style="margin:10px 0 0;font-size:40px;font-weight:600;opacity:.85">Okut · Ara · Kavuş</p>
+    <div style="display:flex;gap:30px;margin-top:40px;align-items:flex-end">
+      <div style="transform:rotate(-8deg);zoom:2.1;filter:drop-shadow(0 20px 30px rgba(0,0,0,.3))">${badge("klasik", "klasik", "", {top: "SAHİBİMİ ARA"})}</div>
+      <div style="transform:rotate(8deg);zoom:2.1;filter:drop-shadow(0 20px 30px rgba(0,0,0,.3))">${badge("pembe", "pembe", "Lokum")}</div>
+    </div>
+    <h2 class="h" style="font-size:80px;margin-top:30px">Rozetini seç,<br><span style="color:#ffd400">kapına gelsin.</span></h2>
+    <div class="btns" style="margin-top:30px">
+      <div class="btn"><small>Hazır rozet</small>250 TL</div>
+      <div class="btn"><small>Kendi tasarımın</small>399 TL</div>
+    </div>
+    <p style="margin:28px 0 0;font:700 52px 'Barlow Condensed',sans-serif">tasma.bulqr.com.tr</p>
+    <p style="margin:6px 0 0;font-size:36px;font-weight:700;opacity:.8">@tasmaqr</p>
+  </div>
+  <div class="count" style="background:rgba(0,0,0,.35)">4/4</div>`);
+
+document.getElementById("out").outerHTML = AB.join("");
+</script>
+</body>
+</html>
