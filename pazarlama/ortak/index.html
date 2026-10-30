@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Tasma QR ortak paylaşım</title>
+<!-- Takipçisi yüksek sayfaların paylaşacağı kaydırmalı gönderi (1080x1350) ve hikâye (1080x1920). PNG'ler: node pazarlama/ortak/uret.js -->
+<link rel="stylesheet" href="../../shared/fonts.css">
+<style>
+body{margin:0;background:#888;display:flex;flex-wrap:wrap;gap:40px;padding:40px;font-family:"Barlow",sans-serif}
+.ab{position:relative;overflow:hidden;flex:none;color:#fff;background:#2a1a10}
+.ph{position:absolute;inset:0;background-size:cover;background-position:center}
+.shade-b{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,10,4,0) 35%,rgba(20,10,4,.55) 58%,rgba(20,10,4,.93) 100%)}
+.shade-t{position:absolute;inset:0;background:linear-gradient(0deg,rgba(20,10,4,0) 40%,rgba(20,10,4,.6) 70%,rgba(20,10,4,.9) 100%)}
+.txt{position:absolute;left:72px;right:72px}
+.h{font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;line-height:.98;margin:0;text-shadow:0 4px 24px rgba(0,0,0,.35)}
+.p{font-weight:600;line-height:1.28;margin:0;text-shadow:0 2px 14px rgba(0,0,0,.4)}
+.mark{color:#ffd400}
+.pill{display:inline-block;background:#ffd400;color:#2a1a10;font-weight:700;border-radius:999px;font-size:34px;padding:10px 26px}
+.count{position:absolute;top:56px;right:64px;font:700 34px "Barlow Condensed",sans-serif;background:rgba(0,0,0,.35);border-radius:999px;padding:6px 20px}
+.brand{position:absolute;left:72px;bottom:52px;display:flex;align-items:center;gap:16px;font-weight:700;font-size:34px}
+.brand img{border-radius:22%}
+.list{display:flex;flex-direction:column;gap:18px;margin-top:30px}
+.it{display:flex;gap:22px;align-items:flex-start;background:rgba(255,255,255,.13);border:2px solid rgba(255,255,255,.22);border-radius:26px;padding:20px 26px;backdrop-filter:blur(6px)}
+.it .ic{font-size:50px;line-height:1;flex:none;width:62px;text-align:center}
+.it b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:44px;line-height:1.05}
+.it span{display:block;font-size:30px;line-height:1.25;font-weight:600;opacity:.92;margin-top:4px}
+.cream{background:#f6f1ea;color:#2a1a10}
+.cream .it{background:#fff;border-color:#e2d8cd;backdrop-filter:none}
+.cream .mark{color:#b8501a}
+.price{display:flex;gap:22px;margin-top:30px}
+.price div{flex:1;background:#fff;color:#2a1a10;border-radius:28px;padding:24px 28px;box-shadow:0 20px 40px rgba(0,0,0,.3)}
+.price b{display:block;font:700 76px/1 "Barlow Condensed",sans-serif;color:#b8501a}
+.price span{display:block;font-size:28px;font-weight:600;margin-top:8px;line-height:1.25}
+.url{display:inline-block;background:#fff;color:#b8501a;font:700 56px "Barlow Condensed",sans-serif;border-radius:22px;padding:14px 34px;margin-top:30px;box-shadow:0 20px 40px rgba(0,0,0,.3)}
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script>
+const logo = px => `<img src="../../shared/logo.svg" width="${px}" height="${px}" alt="">`;
+const brand = `<div class="brand">${logo(56)}Tasma QR · @tasmaqr</div>`;
+const ph = (src, pos = "center") => `<div class="ph" style="background-image:url(${src});background-position:${pos}"></div>`;
+const AB = [];
+const N = 6;
+const add = (name, w, h, cls, html, i) => AB.push(`<div class="ab ${cls}" data-name="${name}" style="width:${w}px;height:${h}px">${html}${i ? `<div class="count">${i} / ${N}</div>` : ""}</div>`);
+
+// 1 · Kapak: kanca
+add("ortak-1-kapak", 1080, 1350, "", ph("foto/kedi-pencere.jpg", "40% center") + `<div class="shade-b"></div>
+  <div class="txt" style="bottom:150px">
+    <span class="pill">KAYDIR →</span>
+    <h1 class="h" style="font-size:118px;margin-top:24px">Kapı bir an <span class="mark">açık kaldı…</span></h1>
+    <p class="p" style="font-size:46px;margin-top:18px">Dostunu bulan kişi sana nasıl ulaşacak?</p>
+  </div>` + brand, 1);
+
+// 2 · Sorun
+add("ortak-2-sorun", 1080, 1350, "", ph("../../shared/foto/kopek-park.jpg", "center 30%") + `<div class="shade-b"></div>
+  <div class="txt" style="bottom:140px">
+    <h1 class="h" style="font-size:96px">Klasik künye <span class="mark">yetmiyor.</span></h1>
+    <div class="list">
+      <div class="it"><div class="ic">📵</div><div><b>Numara değişince çöpe gider</b><span>Kazınmış numara bir daha değişmez.</span></div></div>
+      <div class="it"><div class="ic">👀</div><div><b>Numaran herkesin önünde</b><span>Sokaktaki herkes telefonunu okur.</span></div></div>
+      <div class="it"><div class="ic">🤷</div><div><b>Bulan kişi ne yapacağını bilmez</b><span>İlaç, karakter, ödül… hiçbiri yazmıyor.</span></div></div>
+    </div>
+  </div>` + brand, 2);
+
+// 3 · Çözüm: nasıl çalışır
+add("ortak-3-cozum", 1080, 1350, "", ph("../../shared/foto/rozet-mavi.jpg", "center 40%") + `<div class="shade-t"></div>
+  <div class="txt" style="top:120px">
+    <span class="pill">ÇÖZÜM</span>
+    <h1 class="h" style="font-size:104px;margin-top:22px">Okut, <span class="mark">sahibini ara.</span></h1>
+    <p class="p" style="font-size:40px;margin-top:16px">Bulan kişi telefon kamerasıyla okutur, seni tek dokunuşla arar. Uygulama ya da üyelik gerekmez.</p>
+  </div>` + brand, 3);
+
+// 4 · Özellikler
+add("ortak-4-ozellik", 1080, 1350, "", ph("../../shared/foto/kopek-golden.jpg", "center 35%") + `<div class="shade-b" style="background:linear-gradient(180deg,rgba(20,10,4,.15) 0%,rgba(20,10,4,.65) 40%,rgba(20,10,4,.94) 100%)"></div>
+  <div class="txt" style="bottom:130px">
+    <h1 class="h" style="font-size:90px">Bir künyeden <span class="mark">çok daha fazlası</span></h1>
+    <div class="list" style="gap:14px">
+      <div class="it"><div class="ic">🚨</div><div><b>Kayıp modu</b><span>Okutan herkes kırmızı “KAYIP!” uyarısını ve ödül notunu görür.</span></div></div>
+      <div class="it"><div class="ic">📍</div><div><b>Konum bildirimi</b><span>Bulan kişi konumunu gönderir, telefonuna bildirim gelir.</span></div></div>
+      <div class="it"><div class="ic">🔒</div><div><b>Numaran rozette yazmaz</b><span>Bilgilerini PIN'inle saniyede değiştirirsin.</span></div></div>
+      <div class="it"><div class="ic">💊</div><div><b>Sağlık ve karakter notu</b><span>“Çekingendir, ilaç kullanıyor” gibi notları bulan kişi görür.</span></div></div>
+    </div>
+  </div>` + brand, 4);
+
+// 5 · Ürün ve fiyat (yazı üstte, fiyatlar altta: rozet ortada görünür)
+add("ortak-5-urun", 1080, 1350, "", ph("../../shared/foto/rozet-pembe.jpg", "center 30%") + `<div class="shade-t" style="background:linear-gradient(180deg,rgba(20,10,4,.92) 0%,rgba(20,10,4,.55) 26%,rgba(20,10,4,0) 42%,rgba(20,10,4,0) 70%,rgba(20,10,4,.85) 100%)"></div>
+  <div class="txt" style="top:110px">
+    <h1 class="h" style="font-size:92px">Suya, güneşe <span class="mark">dayanıklı.</span></h1>
+    <p class="p" style="font-size:36px;margin-top:14px">3D baskı PETG gövde + su geçirmez lamine QR sticker. Gövde rengini sen seç, halkasıyla kapına gelsin.</p>
+  </div>
+  <div class="txt" style="bottom:130px">
+    <div class="price">
+      <div><b>250 TL</b><span>Hazır rozet · “SAHİBİMİ ARA”</span></div>
+      <div><b>399 TL</b><span>Kendi tasarımın · dostunun adıyla</span></div>
+    </div>
+  </div>` + brand, 5);
+
+// 6 · Harekete geçirici
+add("ortak-6-cta", 1080, 1350, "", ph("foto/kopek-sokak.jpg", "30% center") + `<div class="shade-b" style="background:linear-gradient(180deg,rgba(20,10,4,0) 25%,rgba(20,10,4,.6) 50%,rgba(20,10,4,.94) 100%)"></div>
+  <div class="txt" style="bottom:150px">
+    <h1 class="h" style="font-size:112px">Kaybolmadan önce <span class="mark">hazır ol.</span></h1>
+    <p class="p" style="font-size:42px;margin-top:16px">Kedi, köpek ve tüm dostlar için. Mikroçipin yerine geçmez; bulan kişinin sana dakikalar içinde ulaşması içindir.</p>
+    <div class="url">tasma.bulqr.com.tr</div>
+  </div>` + brand, 6);
+
+// Hikâye 1080x1920: üst 250 / alt 340 px Instagram'a ait; bağlantı çıkartması için boş alan
+add("ortak-hikaye", 1080, 1920, "", ph("foto/kedi-pencere.jpg", "40% center") + `<div class="shade-b" style="background:linear-gradient(180deg,rgba(20,10,4,.55) 0%,rgba(20,10,4,0) 25%,rgba(20,10,4,0) 40%,rgba(20,10,4,.75) 62%,rgba(20,10,4,.95) 100%)"></div>
+  <div class="txt" style="top:260px;text-align:center"><span class="pill">🐾 DOSTLARIN GÜVENDE</span></div>
+  <div class="txt" style="bottom:560px;text-align:center">
+    <h1 class="h" style="font-size:128px">Okut, <span class="mark">sahibimi ara.</span></h1>
+    <p class="p" style="font-size:46px;margin-top:20px">Bulan kişi QR'ı okutur, seni tek dokunuşla arar. Kayıp modu, konum bildirimi, numaran gizli.</p>
+  </div>
+  <div style="position:absolute;left:150px;right:150px;bottom:360px;height:150px;border:5px dashed rgba(255,255,255,.75);border-radius:30px;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:700">👆 Bağlantı: tasma.bulqr.com.tr</div>`);
+
+document.getElementById("out").outerHTML = AB.join("");
+</script>
+</body>
+</html>
