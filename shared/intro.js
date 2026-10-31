@@ -39,7 +39,7 @@ const pin = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})"><p
 const INTRO_SLIDES = [
   {
     bg: "linear-gradient(160deg,#7a3412,#1f0f08)",
-    title: "Evcil hayvanınız bir anda gözden kaybolursa?",
+    title: "Sevimli dostunuz bir anda gözden kaybolursa?",
     text: "Açık kalan bir kapı, bir havai fişek sesi… En dikkatli sahiplerin bile başına gelir. Onu bulan kişi size nasıl ulaşacak?",
     art: () => `<svg viewBox="0 0 360 300" class="intro-art" role="img" aria-label="Parkta koşarak uzaklaşan bir köpek ve onu arayan sahibi">
       <rect width="360" height="300" rx="22" fill="#cfe9ff"/>
@@ -65,7 +65,7 @@ const INTRO_SLIDES = [
   {
     bg: "linear-gradient(160deg,#0c5e37,#06291a)",
     title: "Bulan kişi okutur, sizi tek dokunuşla arar",
-    text: "Telefon kamerasıyla okutan kişi evcil hayvanınızın adını ve notunuzu görür; uygulama indirmeden sizi arar ya da WhatsApp'tan yazar.",
+    text: "Telefon kamerasıyla okutan kişi dostunuzun adını ve notunuzu görür; uygulama indirmeden sizi arar ya da WhatsApp'tan yazar.",
     art: () => `<svg viewBox="0 0 360 300" class="intro-art" role="img" aria-label="Telefon kamerası rozetteki QR'ı tarıyor, ardından arama ekranı açılıyor">
       <rect width="360" height="300" rx="22" fill="#e6f4ec"/>
       <g transform="translate(46 26)">

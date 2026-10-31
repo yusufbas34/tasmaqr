@@ -34,7 +34,7 @@ Dostunu seven birini etiketle, kaybolmadan önce hazır olsun 💛
 ```
 Tasma QR nedir? 🐾
 
-Kedin ya da köpeğin kaybolursa onu bulan kişinin seni tek dokunuşla aramasını sağlayan, tasmaya takılan QR rozet.
+Sevimli dostun kaybolursa onu bulan kişinin seni tek dokunuşla aramasını sağlayan, tasmaya takılan QR rozet.
 
 1️⃣ Rozetini oluştur: adı, numaran, notun
 2️⃣ Tasmaya tak: halkasıyla kapına gelir
@@ -52,7 +52,7 @@ Hazır rozet 250 TL · kendi tasarımın 399 TL
 ## Sayfalara DM mesajı
 
 ```
-Merhaba 👋 Ben Tasma QR'ın kurucusuyum. Evcil hayvanların tasmasına takılan QR rozet yapıyoruz: hayvan kaybolursa bulan kişi rozeti okutup sahibini tek dokunuşla arıyor, konumunu gönderiyor.
+Merhaba 👋 Ben Tasma QR'ın kurucusuyum. Sevimli dostlarımızın tasmasına takılan QR rozet yapıyoruz: dostumuz kaybolursa onu bulan kişi rozeti okutup sahibini tek dokunuşla arıyor, konumunu gönderiyor.
 
 Sayfanızda ortak gönderi (collab) olarak paylaşmak ister misiniz? Görseller ve açıklama metni hazır, size göndereyim. Karşılığında [ücret / sayfanızın dostlarına hediye rozet / takipçilerinize indirim kodu] önerebilirim.
 

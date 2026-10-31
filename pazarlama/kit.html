@@ -127,7 +127,7 @@ add("hikaye-acilis", 1080, 1920, "orange", frame(`<div style="text-align:center"
 // ---------------- Reels kapakları 1080x1920 (yazılar üstte 250 px'ten sonra; alt 400 px'te yalnızca marka satırı)
 add("reels-1-kapi-acik-kaldi", 1080, 1920, "orange", frame(`
     <span class="pill" style="font-size:40px;padding:12px 30px">BİR AN DİKKATSİZLİK</span>
-    <h1 class="h" style="font-size:150px;margin-top:30px">Kapı açık kaldı, <span class="mark">hayvanın kaçtı.</span></h1>
+    <h1 class="h" style="font-size:150px;margin-top:30px">Kapı açık kaldı, <span class="mark">dostun kaçtı.</span></h1>
     <p class="p" style="font-size:52px;margin-top:22px">Onu bulan kişi seni nasıl arayacak?</p>`,
   collar("turuncu", "Zeytin", "#4a2410")) + brand(120));
 
@@ -174,7 +174,7 @@ add("gonderi-a1-kapak", 1080, 1350, "orange", frame(`
     <span class="pill" style="font-size:36px;padding:10px 26px">KAYDIR →</span>
     <h1 class="h" style="font-size:128px;margin-top:24px">3 adımda <span class="mark">QR rozetin</span> tasmada.</h1>`,
   badge("turuncu", "Zeytin", "epoksi", "transform:rotate(5deg)"), 90, 140) + brand(50));
-[["gonderi-a2-adim1", "1", "Rozetini oluştur", "Evcil hayvanının adı, telefonun, tasarım. Bir dakika, ücretsiz; hesap yok.", "kirmizi", "Bobi", "epoksi"],
+[["gonderi-a2-adim1", "1", "Rozetini oluştur", "Sevimli dostunun adı, telefonun, tasarım. Bir dakika, ücretsiz; hesap yok.", "kirmizi", "Bobi", "epoksi"],
  ["gonderi-a3-adim2", "2", "Notunu yaz", "Sağlık, karakter, yedek numara. Bulan kişi görür; numaran rozette yazmaz.", "yesil", "Karabaş", "epoksi"],
  ["gonderi-a4-adim3", "3", "Tasmaya tak", "Evde yazdır ya da su geçirmez 3D rozetin halkasıyla kapına gelsin.", "klasik", "Pamuk", "metal"]]
   .forEach(([n, no, t, d, des, nm, kind]) => { const c = n.endsWith("adim2"); add(n, 1080, 1350, c ? "cream" : "orange", frame(`
@@ -190,7 +190,7 @@ add("gonderi-a5-indir", 1080, 1350, "cream", `
 
 // ---------------- Gönderi B (kaydırmalı, kaydedilecek bilgi): hayvanın kaybolursa ilk saatler
 const tips = [
-  ["Sakin ol, hemen ara", "Kaybolduğu yerden başla, adını sakin sesle çağır. Koşup bağırmak korkmuş hayvanı uzaklaştırabilir."],
+  ["Sakin ol, hemen ara", "Kaybolduğu yerden başla, adını sakin sesle çağır. Koşup bağırmak korkmuş dostunu uzaklaştırabilir."],
   ["Kayıp modunu aç", "Tasma QR'da tek dokunuş: rozeti okutan herkes “KAYIP!” uyarısını ve ödül notunu görür."],
   ["Haber ver", "Mahalle ve site WhatsApp grupları, yakındaki veterinerler, pet shoplar, belediye hayvan bakımevi."],
   ["Fotoğraflı ilan paylaş", "Net bir fotoğraf, son görüldüğü yer ve saat. Telefonunu herkese açık yazmak yerine rozet bağlantısını kullan."],
@@ -198,7 +198,7 @@ const tips = [
 ];
 add("gonderi-b1-kapak", 1080, 1350, "red", frame(`
     <span class="pill" style="font-size:36px;padding:10px 26px">KAYDET 🔖</span>
-    <h1 class="h" style="font-size:124px;margin-top:24px">Hayvanın kaybolursa <span class="mark">ilk saatlerde</span> yapılacak 5 şey</h1>`,
+    <h1 class="h" style="font-size:124px;margin-top:24px">Dostun kaybolursa <span class="mark">ilk saatlerde</span> yapılacak 5 şey</h1>`,
   collar("kirmizi", "Bobi", "#2a1a10"), 90, 140) + brand(50));
 add("gonderi-b2-adimlar", 1080, 1350, "cream", `<div style="position:absolute;left:64px;right:64px;top:56px;bottom:130px;display:flex;flex-direction:column;gap:14px;justify-content:center">
     ${tips.map(([t, d], i) => `<div class="tip"><span class="num">${i + 1}</span><div><h1 class="h" style="font-size:46px">${t}</h1><p>${d}</p></div></div>`).join("")}
@@ -216,7 +216,7 @@ add("hikaye-baglanti", 1080, 1920, "orange", frame(`<div style="text-align:cente
   <div style="position:absolute;left:140px;right:140px;bottom:270px;height:150px;border:5px dashed rgba(255,255,255,.7);border-radius:30px;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700">👆 Bağlantı çıkartmasını buraya koy</div>`);
 add("hikaye-anket", 1080, 1920, "navy", frame(`<div style="text-align:center">
     <span class="chip" style="font-size:40px;padding:12px 28px">🐾 ANKET</span>
-    <h1 class="h" style="font-size:130px;margin-top:26px">Evcil hayvanının künyesinde <span class="mark">telefonun</span> yazıyor mu?</h1></div>`,
+    <h1 class="h" style="font-size:130px;margin-top:26px">Sevimli dostunun künyesinde <span class="mark">telefonun</span> yazıyor mu?</h1></div>`,
   `<div style="width:760px;height:300px;border:5px dashed rgba(255,255,255,.7);border-radius:30px;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700">👆 Anket çıkartmasını buraya koy</div>`, 250, 480) + brand(120));
 add("hikaye-sahiplendirme", 1080, 1920, "cream", frame(`<div style="text-align:center">
     <span class="pill" style="font-size:40px;padding:12px 30px">🏠 YENİ YUVA</span>

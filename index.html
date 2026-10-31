@@ -27,10 +27,10 @@ const stuck = () => setTimeout(() => {
 window.addEventListener("error", stuck);
 window.addEventListener("unhandledrejection", stuck);
 </script>
-<script src="shared/vendor/qrcode.js?v=2026102602"></script>
-<link rel="stylesheet" href="shared/tag.css?v=2026102602">
-<script src="shared/tag.js?v=2026102602"></script>
-<script src="shared/intro.js?v=2026102602"></script>
+<script src="shared/vendor/qrcode.js?v=2026103101"></script>
+<link rel="stylesheet" href="shared/tag.css?v=2026103101">
+<script src="shared/tag.js?v=2026103101"></script>
+<script src="shared/intro.js?v=2026103101"></script>
 <script>
   // ==================== AYARLAR (Supabase > Project Settings > API) ====================
   // Tasma QR Supabase projesi (supabase/kurulum.sql)
@@ -548,7 +548,7 @@ function confetti() {
 // ---------------------------------------------------------------- bulan kişi: QR okutulunca
 function showFound(code, tag) {
   const name = tag.pet_name || "", phone = tag.phone;
-  const hello = `Merhaba, ${name ? `${name} adlı evcil hayvanınızı` : "evcil hayvanınızı"} buldum (Tasma QR).`;
+  const hello = `Merhaba, ${name ? `${name} adlı sevimli dostunuzu` : "sevimli dostunuzu"} buldum (Tasma QR).`;
   const since = tag.lost_since ? ` (${ago(tag.lost_since)} kayıp olarak işaretlendi)` : "";
   const backup = tag.backup_phone ? `
     <div class="msg info" style="margin-top:18px">Ulaşamazsanız${tag.backup_name ? ` <b>${esc(tag.backup_name)}</b>` : ""}:
@@ -556,8 +556,8 @@ function showFound(code, tag) {
     <a class="btn ghost" href="tel:${esc(tag.backup_phone)}" style="margin-top:8px">Yedek numarayı ara</a>` : "";
   show(`
     ${petBadge(name, code, tag.lost)}
-    ${tag.lost ? `<div class="lost" role="alert"><b>🚨 ${name ? esc(upTR(name)) : "BU KÖPEK"} KAYIP!</b>Sahibi onu arıyor${esc(since)}.
-      Lütfen hemen arayın ve mümkünse hayvanı güvenli bir yerde tutun.${tag.reward ? `<span class="reward">Ödül: ${esc(tag.reward)}</span>` : ""}</div>` : ""}
+    ${tag.lost ? `<div class="lost" role="alert"><b>🚨 ${name ? esc(upTR(name)) : "BU SEVİMLİ DOST"} KAYIP!</b>Sahibi onu arıyor${esc(since)}.
+      Lütfen hemen arayın ve mümkünse onu güvenli bir yerde tutun.${tag.reward ? `<span class="reward">Ödül: ${esc(tag.reward)}</span>` : ""}</div>` : ""}
     <h1>${name ? `Merhaba, ben ${esc(name)}! 🐾` : "Merhaba, beni buldun! 🐾"}</h1>
     <p>Sahibime ulaşmama yardım eder misin? Aşağıdan arayabilir ya da bulunduğun yeri tek dokunuşla gönderebilirsin.</p>
     ${tag.notes ? `<div class="msg info"><b>Sahibimin notu:</b> ${esc(tag.notes)}</div>` : ""}
@@ -567,7 +567,7 @@ function showFound(code, tag) {
     <a class="btn ghost" href="${esc(waHref(phone, hello))}">💬 WhatsApp'tan yaz</a>
     <a class="btn ghost" href="${esc(smsHref(phone, hello))}">✉️ SMS gönder</a>
     ${backup}
-    <p class="small"><a href="${esc(editLink(code))}">Hayvanın sahibi misiniz? Bilgileri düzenleyin</a></p>`);
+    <p class="small"><a href="${esc(editLink(code))}">Bu sevimli dostun sahibi siz misiniz? Bilgileri düzenleyin 💛</a></p>`);
   const btn = document.getElementById("loc"), box = document.getElementById("locbox");
   const sendButtons = text => `<a class="btn" href="${esc(waHref(phone, text))}">WhatsApp'tan gönder</a>
     <a class="btn ghost" href="${esc(smsHref(phone, text))}">SMS ile gönder</a>`;
@@ -642,7 +642,7 @@ function showPinGate(code, tag, error = "") {
   show(`
     ${claim ? petBadge("", code) : petBadge(tag.pet_name, code, tag.lost)}
     <h1>${claim ? "Rozeti etkinleştirin" : "Rozetin sahibi misiniz?"}</h1>
-    <p>${claim ? "Bu rozet henüz kimseye bağlı değil. Önce rozetle gelen PIN kartındaki 6 haneli PIN'i girin; ardından evcil hayvanınızın ve sizin bilgilerinizi yazıp kaydedeceksiniz."
+    <p>${claim ? "Bu rozet henüz kimseye bağlı değil. Önce rozetle gelen PIN kartındaki 6 haneli PIN'i girin; ardından dostunuzun ve sizin bilgilerinizi yazıp kaydedeceksiniz."
               : "Bilgileri görmek ve değiştirmek için rozetin 6 haneli PIN'ini girin."}</p>
     ${error ? `<div class="msg err" role="alert">${esc(error)}</div>` : ""}
     <form id="gf" novalidate>
@@ -687,12 +687,12 @@ function showEdit(code, tag, error = "", v = null, pin = "") {
   const val = k => `value="${esc(v[k] || "")}"`;
   show(`
     ${petBadge(v.name, code, v.lost)}
-    <h1>${claim ? "Bu rozeti evcil hayvanınıza bağlayın" : "Rozet bilgilerini düzenleyin"}</h1>
+    <h1>${claim ? "Bu rozeti dostunuza bağlayın" : "Rozet bilgilerini düzenleyin"}</h1>
     <p>${claim ? "PIN doğrulandı ✓ Şimdi bilgilerinizi girip kaydedin. Bundan sonra QR'ı okutan herkes sizi arayabilecek."
               : "PIN doğrulandı ✓ Değişiklikler QR'ı okutan kişiye hemen yansır."}</p>
     ${error ? `<div class="msg err" role="alert">${esc(error)}</div>` : ""}
     <form id="f" novalidate>
-      <label for="e-name">Evcil hayvanınızın adı</label>
+      <label for="e-name">Sevimli dostunuzun adı</label>
       <input id="e-name" maxlength="20" autocomplete="off" placeholder="ör. Karabaş" ${val("name")}>
       <label for="e-phone">QR okutulunca aranacak numara</label>
       <input id="e-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" ${val("phone")}>
@@ -726,7 +726,7 @@ function showEdit(code, tag, error = "", v = null, pin = "") {
       email: g("e-email") ? g("e-email").value.trim() : null};
     const again = msg => showEdit(code, tag, msg, nv, pin);
     const phone = normalizePhone(nv.phone), backup = nv.backup ? normalizePhone(nv.backup) : null;
-    if (!nv.name) return again("Evcil hayvanınızın adını yazın.");
+    if (!nv.name) return again("Dostunuzun adını yazın.");
     if (!phone) return again("Numara geçersiz. Örnek: 0532 123 45 67");
     if (nv.backup && !backup) return again("Yedek numara geçersiz. İstemiyorsanız boş bırakın.");
     if (nv.email && !emailOk(nv.email)) return again("Kurtarma e-postası geçersiz. İstemiyorsanız boş bırakın.");
@@ -746,13 +746,13 @@ function showEdit(code, tag, error = "", v = null, pin = "") {
     again({bad_pin: claim ? "PIN hatalı. Rozetle gelen karttaki 6 haneli PIN'i girin." : "PIN hatalı. Rozeti oluştururken gösterilen ya da kartta yazan 6 haneli PIN'i girin.",
       locked: `Çok fazla yanlış deneme. ${res?.minutes || 15} dakika sonra tekrar deneyin.`,
       bad_phone: "Numara geçersiz. Örnek: 0532 123 45 67", bad_backup: "Yedek numara geçersiz.",
-      missing: "Evcil hayvanınızın adını yazın.", not_found: "Bu rozet bulunamadı."}[res?.error] || "Kaydedilemedi, tekrar deneyin.");
+      missing: "Dostunuzun adını yazın.", not_found: "Bu rozet bulunamadı."}[res?.error] || "Kaydedilemedi, tekrar deneyin.");
   });
 }
 
 // Sahibin kendi WhatsApp'ına (kendine mesaj) rozet bilgileri: hazır metin açılır, kişi yalnızca Gönder'e basar
 function waSelfLink(phone, {name, code, pin}) {
-  const text = ["🐾 Tasma QR rozet bilgilerim", name && `Evcil hayvan: ${name}`, `Rozet kodu: ${code}`, `PIN: ${pin}`,
+  const text = ["🐾 Tasma QR rozet bilgilerim", name && `Dostum: ${name}`, `Rozet kodu: ${code}`, `PIN: ${pin}`,
     `Rozet bağlantısı: ${tagLink(code)}`, "", "Bilgileri değiştirmek ve kayıp modunu açmak için bu PIN gerekir. Kimseyle paylaşmayın."].filter(x => x !== undefined && x !== null && x !== false).join("\n");
   return `https://wa.me/${digits(phone)}?text=${encodeURIComponent(text)}`;
 }
@@ -901,11 +901,11 @@ function setChrome({kind = "none", nav = null, tab = null, title = "Tasma QR", b
       <a class="cta" href="#olustur">Rozet oluştur</a></div>`;
     foot.innerHTML = `<div class="in">
       <div><a class="brand" href="#"><img src="shared/logo.svg" alt="" width="34" height="34">Tasma QR</a>
-        <p>Evcil hayvanınızın tasmasına takılan QR rozet. Bulan kişi tek dokunuşla sizi arar, yerini gönderir.</p></div>
+        <p>Dostunuzun tasmasına takılan QR rozet. Bulan kişi tek dokunuşla sizi arar, yerini gönderir.</p></div>
       <div><h3>Ürün</h3><a href="#nasil">Nasıl çalışır</a><a href="#urunler">Rozetler ve fiyatlar</a><a href="#talep">Hazır rozet sipariş ver</a><a href="#olustur">Rozetini tasarla</a></div>
       <div><h3>Destek</h3><a href="#sss">Sık sorulanlar</a><a href="#kunyelerim">Rozetlerim</a><a href="${esc(APK_URL)}">Android uygulaması</a><a href="gizlilik.html">Gizlilik politikası</a></div>
       <div><h3>Takip edin</h3><a href="${IG_URL}" target="_blank" rel="noopener">📷 Instagram · @tasmaqr</a><p style="margin-top:6px">Kayıp ilanları, ipuçları ve yeni tasarımlar.</p></div>
-      <div class="copy">© ${new Date().getFullYear()} Tasma QR · Mikroçipin yerine geçmez; evcil hayvanınızı bulan kişinin size dakikalar içinde ulaşması için ek bir önlemdir.</div></div>`;
+      <div class="copy">© ${new Date().getFullYear()} Tasma QR · Mikroçipin yerine geçmez; dostunuzu bulan kişinin size dakikalar içinde ulaşması için ek bir önlemdir.</div></div>`;
   }
   if (inApp) {
     document.getElementById("apptitle").textContent = title;
@@ -932,7 +932,7 @@ function showHome() {
       <div>
         <span class="eyebrow">Kedi, köpek ve tüm dostlar için akıllı künye</span>
         <h1>Kaybolursa, <em>onu size geri getirsin.</em></h1>
-        <p class="lead">Evcil hayvanınızın tasmasında künye gibi sallanan küçük bir rozet. Bulan kişi telefon kamerasıyla okutur; evcil hayvanınızın adını ve notunuzu görür, sizi <b>tek dokunuşla arar</b> ya da bulunduğu yeri gönderir.</p>
+        <p class="lead">Dostunuzun tasmasında künye gibi sallanan küçük bir rozet. Bulan kişi telefon kamerasıyla okutur; dostunuzun adını ve notunuzu görür, sizi <b>tek dokunuşla arar</b> ya da bulunduğu yeri gönderir.</p>
         <a class="btn cta" href="#olustur">Rozetimi tasarla</a>
         <a class="btn cta ghost" href="#urunler">Rozetleri incele</a>
         <ul class="trust"><li>Uygulama gerekmez</li><li>Numaranız rozette yazmaz</li><li>Bilgileri istediğiniz an değiştirin</li></ul>
@@ -959,7 +959,7 @@ function showHome() {
     <section>
       <div class="features">
         <div class="feature"><div class="ic">📞</div><b>Tek dokunuşla arama</b><p>Bulan kişi QR'ı okutur, karşısına “Sahibini ara” butonu çıkar. WhatsApp ve SMS de tek dokunuş.</p></div>
-        <div class="feature"><div class="ic">📍</div><b>Konum gönderme</b><p>Bulan kişi izin verirse evcil hayvanınızın bulunduğu yer haritayla size ulaşır.</p></div>
+        <div class="feature"><div class="ic">📍</div><b>Konum gönderme</b><p>Bulan kişi izin verirse dostunuzun bulunduğu yer haritayla size ulaşır.</p></div>
         <div class="feature"><div class="ic">🚨</div><b>Kayıp modu ve ödül</b><p>Kaybolduğunda bir dokunuşla açın; rozeti okutan kişi kırmızı “KAYIP” uyarısını görür.</p></div>
       </div>
     </section>
@@ -967,7 +967,7 @@ function showHome() {
     <section>
       <div class="sec-head"><h2>Nasıl çalışır?</h2><a href="#nasil">Ayrıntılı anlatım →</a></div>
       <ol class="steps">
-        <li><b>Rozetinizi oluşturun</b>Evcil hayvanınızın adını ve telefonunuzu girin, tasarımı seçin. Bir dakika sürer.</li>
+        <li><b>Rozetinizi oluşturun</b>Dostunuzun adını ve telefonunuzu girin, tasarımı seçin. Bir dakika sürer.</li>
         <li><b>Tasmaya takın</b>3D baskı gövdeli su geçirmez rozetiniz halkasıyla kapınıza gelir; tasmanın D halkasına takarsınız.</li>
         <li><b>Bulan kişi size ulaşır</b>Telefon kamerasıyla okutur, sizi arar ya da konumunu gönderir.</li>
       </ol>
@@ -993,7 +993,7 @@ function showHome() {
     <section><div class="ig-band"><div>${IG_ICON}<div><b>Instagram'da takip edin</b><span>Kayıp ilanları, ipuçları, yeni tasarımlar ve dostlarımızdan kareler.</span></div></div>
       <a class="btn" href="${IG_URL}" target="_blank" rel="noopener">@tasmaqr</a></div></section>
 
-    <div class="cta-band"><div><h2>Bir dakikada rozetinizi tasarlayın</h2><p>Evcil hayvanınızın adı ve sevdiğiniz tasarım; su geçirmez rozetiniz halkasıyla kapınıza gelsin. Ya da hazır rozet sipariş edin.</p></div>
+    <div class="cta-band"><div><h2>Bir dakikada rozetinizi tasarlayın</h2><p>Dostunuzun adı ve sevdiğiniz tasarım; su geçirmez rozetiniz halkasıyla kapınıza gelsin. Ya da hazır rozet sipariş edin.</p></div>
       <a class="btn" href="#olustur">Hemen başla</a></div>`, "wide");
   document.getElementById("another").onclick = () => { document.getElementById("sample").innerHTML = showcaseHtml(); };
   document.getElementById("intro").onclick = openIntro;
@@ -1009,10 +1009,10 @@ function showHow() {
   show(`
     <div class="page-head"><span class="eyebrow">Nasıl çalışır</span>
       <h1>Rozet tasmada, bilgiler sizin elinizde</h1>
-      <p>QR rozet evcil hayvanınızın bilgilerini taşımaz, onları gösteren sayfanın adresini taşır. Bu yüzden numaranızı, notunuzu ya da kayıp durumunu rozeti yeniden yaptırmadan değiştirirsiniz.</p></div>
+      <p>QR rozet dostunuzun bilgilerini taşımaz, onları gösteren sayfanın adresini taşır. Bu yüzden numaranızı, notunuzu ya da kayıp durumunu rozeti yeniden yaptırmadan değiştirirsiniz.</p></div>
     <section>
       <ol class="steps">
-        <li><b>Rozetinizi oluşturun</b>Evcil hayvanınızın adını ve size ulaşılacak numarayı girin, tasarımı seçin. Size bir PIN verilir; bilgileri bununla değiştirirsiniz.</li>
+        <li><b>Rozetinizi oluşturun</b>Dostunuzun adını ve size ulaşılacak numarayı girin, tasarımı seçin. Size bir PIN verilir; bilgileri bununla değiştirirsiniz.</li>
         <li><b>Rozetiniz gelsin</b>3D baskı gövdeli su geçirmez rozetinizi sipariş edin. Halkasıyla gelir, tasmanın D halkasına takarsınız.</li>
         <li><b>Kaybolursa kayıp modunu açın</b>Rozetinizin sayfasından tek dokunuşla açılır. Okutan kişi kırmızı “KAYIP” uyarısını ve ödül notunuzu görür.</li>
         <li><b>Bulan kişi size ulaşır</b>Telefon kamerasıyla okutur; sizi arar, WhatsApp'tan yazar ya da konumunu gönderir. Size bildirim gelir.</li>
@@ -1022,7 +1022,7 @@ function showHow() {
     <section>
       <h2>Bulan kişi ne görür?</h2>
       <div class="perks">
-        <div><b>Evcil hayvanınızın adı ve notunuz</b>“Çok uysaldır, tavuk alerjisi var” gibi bilgileri siz yazarsınız.</div>
+        <div><b>Dostunuzun adı ve notunuz</b>“Çok uysaldır, tavuk alerjisi var” gibi bilgileri siz yazarsınız.</div>
         <div><b>Sahibini ara</b>Kocaman bir arama butonu; yanında WhatsApp, SMS ve varsa yedek numara.</div>
         <div><b>Konumumu gönder</b>Bulan kişi izin verirse konumu rozet sayfanıza kaydedilir, mesaja harita bağlantısı eklenir.</div>
         <div><b>Kayıp uyarısı</b>Kayıp modu açıksa sayfanın en üstünde kırmızı uyarı ve ödül notu.</div>
@@ -1053,13 +1053,13 @@ function showProducts() {
       <li><b>Ölçüler:</b> Ø30 mm (kedi, küçük ırk), Ø35 mm (orta-büyük boy); halka deliği kulakta.</li>
       <li><b>Malzeme:</b> 3D baskı PETG gövde; çukurunda su geçirmez, lamine QR sticker. Suya, güneşe ve çizilmeye dayanıklı, hafif.</li>
       <li><b>QR hep aynı kalır:</b> Numara, not ya da kayıp durumu değişse de rozeti yeniden yaptırmanız gerekmez.</li>
-      <li><b>Renk ve tasarım:</b> Gövde rengini seçersiniz; kendi tasarladığınız rozette ${Object.keys(DESIGNS).length} etiket tasarımından biri ve evcil hayvanınızın adı basılır.</li>
+      <li><b>Renk ve tasarım:</b> Gövde rengini seçersiniz; kendi tasarladığınız rozette ${Object.keys(DESIGNS).length} etiket tasarımından biri ve dostunuzun adı basılır.</li>
     </ul>
     <p class="hint" id="shipnote"></p>
     <section style="margin-top:26px">
       <h2>Nasıl sipariş verilir?</h2>
       <ol class="steps">
-        <li><b>Rozetinizi tasarlayın</b>Evcil hayvanınızın adı, numaranız ve tasarım. Hazır rozet istiyorsanız bu adımı atlayın.</li>
+        <li><b>Rozetinizi tasarlayın</b>Dostunuzun adı, numaranız ve tasarım. Hazır rozet istiyorsanız bu adımı atlayın.</li>
         <li><b>Sipariş verin</b>Rozet sayfanızdan ölçüyü ve gövde rengini seçin, adresinizi yazın.</li>
         <li><b>Havale / EFT ile ödeyin</b>Ödemeniz onaylanınca rozetiniz üretilir ve kargoya verilir.</li>
       </ol>
@@ -1077,16 +1077,16 @@ function showFaq() {
   show(`
     <div class="page-head"><span class="eyebrow">SSS</span><h1>Sık sorulanlar</h1>
       <p>Aradığınızı bulamazsanız <a href="#talep" style="color:var(--band)">talep formunun</a> not alanından bize yazın.</p></div>
-    <details open><summary>Kediler ve diğer evcil hayvanlar için de olur mu?</summary><p>Evet. Tasma ya da göğüs tasması takan her dost için uygundur: kedi, köpek, gelincik, tavşan… Kediler için hafif Ø30 mm rozeti ve <b>güvenlik kilitli (çekince açılan) kedi tasmasını</b> öneririz.</p></details>
+    <details open><summary>Kediler ve diğer dostlar için de olur mu?</summary><p>Evet. Tasma ya da göğüs tasması takan her dost için uygundur: kedi, köpek, gelincik, tavşan… Kediler için hafif Ø30 mm rozeti ve <b>güvenlik kilitli (çekince açılan) kedi tasmasını</b> öneririz.</p></details>
     <details><summary>Rozeti tasmaya nasıl takarım?</summary><p>Rozetin üstündeki kulakta halka deliği vardır. Birlikte gelen çelik halkayı (split ring) bu delikten ve tasmanın D halkasından geçirmeniz yeterli; normal bir künye gibi sallanır.</p></details>
     <details><summary>Rozet neyden yapılıyor?</summary><p>Gövde 3D yazıcıda dayanıklı <b>PETG</b> plastikten basılır; ortasındaki çukura <b>su geçirmez, lamine QR sticker</b> yapıştırılır. Suya, güneşe ve çizilmeye dayanır, hafiftir. Gövdenin rengini siz seçersiniz.</p></details>
-    <details><summary>Hazır rozet ile kendi tasarladığım rozetin farkı ne?</summary><p><b>Kendi tasarladığınız rozette</b> evcil hayvanınızın adı ve seçtiğiniz tasarım basılır; rozetiniz bu tasarımla basılıp gönderilir. <b>Hazır rozette</b> ad basılmaz, üstünde standart “SAHİBİMİ ARA” yazar; yalnızca gövde rengini seçersiniz. Rozetle gelen PIN kartıyla bilgilerinizi siz girersiniz.</p></details>
+    <details><summary>Hazır rozet ile kendi tasarladığım rozetin farkı ne?</summary><p><b>Kendi tasarladığınız rozette</b> dostunuzun adı ve seçtiğiniz tasarım basılır; rozetiniz bu tasarımla basılıp gönderilir. <b>Hazır rozette</b> ad basılmaz, üstünde standart “SAHİBİMİ ARA” yazar; yalnızca gövde rengini seçersiniz. Rozetle gelen PIN kartıyla bilgilerinizi siz girersiniz.</p></details>
     <details><summary>Tasarımı sonradan değiştirebilir miyim?</summary><p>Tasarım rozetinizi oluştururken seçilir; siparişte isterseniz değiştirebilirsiniz. Rozet basıldıktan sonra tasarım değişmez, yeni tasarım için yeni rozet sipariş edilir. Numara, not ve kayıp durumu ise her zaman ücretsiz değişir.</p></details>
     <details><summary>Numaram herkese görünür mü?</summary><p>Rozette numaranız yazmaz. QR'ı okutan kişi sizi arayabilsin diye arama ekranında numaranızı görür.</p></details>
     <details><summary>Telefon numaram değişirse ne olacak?</summary><p>Rozeti okutun, sayfanın altındaki “Bilgileri düzenleyin” bağlantısına dokunun ve PIN'inizle yeni numaranızı girin. Rozeti yeniden basmanız gerekmez.</p></details>
     <details><summary>Konumum kaydediliyor mu?</summary><p>Yalnızca bulan kişi “Konumumu sahibine gönder” butonuna basıp izin verirse kaydedilir ve yalnızca rozetin sahibi görür. QR'ı okutmak tek başına konum göndermez.</p></details>
     <details><summary>Rozeti silebilir miyim?</summary><p>Evet. Rozetinizin sayfasından ya da “Bilgileri düzenleyin” ekranından PIN'inizle silebilirsiniz; QR o andan itibaren hiçbir bilgi göstermez ve okutmalar, konumlar da silinir.</p></details>
-    <details><summary>Mikroçipin yerine geçer mi?</summary><p>Hayır. Mikroçip yasal zorunluluktur ve kalıcıdır; Tasma QR rozeti, evcil hayvanınızı bulan kişinin size dakikalar içinde ulaşabilmesi için ek bir önlemdir.</p></details>
+    <details><summary>Mikroçipin yerine geçer mi?</summary><p>Hayır. Mikroçip yasal zorunluluktur ve kalıcıdır; Tasma QR rozeti, dostunuzu bulan kişinin size dakikalar içinde ulaşabilmesi için ek bir önlemdir.</p></details>
     <details><summary>PIN'imi kaybedersem?</summary><p>Rozeti bu cihazda oluşturduysanız PIN <b>Rozetlerim</b>'de yazar. Rozetinize kurtarma e-postası kaydettiyseniz rozeti okutun, “Sahibi misiniz?” ekranında <b>🔑 PIN'imi unuttum</b>'a basın; kod ve PIN e-postanıza gelir. Kurtarma e-postasını bilgileri düzenlerken ya da uygulamada Profil'den ekleyebilirsiniz. Hiçbiri yoksa Instagram'dan rozet kodunuzla bize yazın, yardımcı olalım.</p></details>`, "mid");
 }
 
@@ -1111,7 +1111,7 @@ async function showRequest(error = "", v = null) {
   const val = k => `value="${esc(v[k] || "")}"`, body = bodyOf(v.body, shop);
   show(`
     <div class="page-head"><span class="eyebrow">Hazır rozet</span><h1>Hazır rozet sipariş verin</h1>
-      <p>Üstünde standart <b>“SAHİBİMİ ARA”</b> yazan, 3D baskı gövdeli su geçirmez QR rozet. Rozetiniz PIN kartı ve kullanım kitapçığıyla gelir; evcil hayvanınızın bilgilerini siz girersiniz.
+      <p>Üstünde standart <b>“SAHİBİMİ ARA”</b> yazan, 3D baskı gövdeli su geçirmez QR rozet. Rozetiniz PIN kartı ve kullanım kitapçığıyla gelir; dostunuzun bilgilerini siz girersiniz.
         Adını ve tasarımını seçmek isterseniz <a href="#olustur" style="color:var(--band)">kendi rozetinizi tasarlayın</a>.</p></div>
     <div class="card">
       <div class="preview"><div style="zoom:1.8">${badgeAt("ÖRNEK", designForBody(v.body), badgeSize(v.size), {link: SITE, top: "SAHİBİMİ ARA", body: body?.hex})}</div></div>
@@ -1194,7 +1194,7 @@ function requestFormHtml(error = "", v = {}) {
       <div class="hp" aria-hidden="true"><label for="r-web">Web sitesi</label><input id="r-web" tabindex="-1" autocomplete="off"></div>
       <label class="check"><input type="checkbox" id="r-ok"${v.ok ? " checked" : ""}> Bilgilerimin yalnızca rozet talebimin işlenmesi ve benimle iletişim kurulması amacıyla kullanılmasını kabul ediyorum.</label>
       <button class="btn" type="submit">Talep gönder</button>
-      <span class="hint">Evcil hayvanınızın adını ve kendi tasarımınızı istiyorsanız <a href="#olustur">rozetinizi kendiniz tasarlayın</a>.</span>
+      <span class="hint">Dostunuzun adını ve kendi tasarımınızı istiyorsanız <a href="#olustur">rozetinizi kendiniz tasarlayın</a>.</span>
     </form>`;
 }
 
@@ -1277,7 +1277,7 @@ function showMyOrders() {
 }
 
 function shareApp() {
-  const text = `Evcil hayvanının tasmasına QR rozet: kaybolursa bulan kişi seni tek dokunuşla arasın, yerini göndersin. 👉 ${PLAY ? PLAY_URL : SITE_URL}`;
+  const text = `Sevimli dostunun tasmasına QR rozet: kaybolursa bulan kişi seni tek dokunuşla arasın, yerini göndersin. 👉 ${PLAY ? PLAY_URL : SITE_URL}`;
   if (!APP && navigator.share) return navigator.share({text}).catch(() => {});
   location.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
@@ -1306,7 +1306,7 @@ function showProfile(saved = false) {
     </div>
     ${APP ? `<div class="card" id="notif">
       <h2>Bildirimler</h2>
-      <p>Biri evcil hayvanınızın konumunu gönderdiğinde, kayıp modundayken rozet okutulduğunda ve siparişiniz ilerlediğinde haber veririz.</p>
+      <p>Biri dostunuzun konumunu gönderdiğinde, kayıp modundayken rozet okutulduğunda ve siparişiniz ilerlediğinde haber veririz.</p>
       <div class="msg ${on ? "ok" : "err"}"><b>${on ? "🔔 Bildirimler açık" : "🔕 Bildirimler kapalı"}</b></div>
       <button class="btn${on ? " ghost" : ""}" type="button" id="notif-on" style="margin-top:0">${on ? "Bildirim ayarlarını aç" : "Bildirimleri aç"}</button>
       ${on ? `<button class="btn ghost" type="button" id="notif-test">Deneme bildirimi gönder</button>` : ""}
@@ -1359,11 +1359,11 @@ function showCreate(error = "", v = {}) {
   show(`
     ${backLink("#", APP ? "Rozetlerim" : "Ana sayfa")}
     <h1>Kendi rozetinizi tasarlayın</h1>
-    <p>Evcil hayvanınızın adını ve size ulaşılacak numarayı girin, tasarımı seçin. Sonraki adımda gövde rengini ve ölçüyü seçip rozetinizi sipariş edersiniz.</p>
+    <p>Dostunuzun adını ve size ulaşılacak numarayı girin, tasarımı seçin. Sonraki adımda gövde rengini ve ölçüyü seçip rozetinizi sipariş edersiniz.</p>
     <div class="preview" id="pv">${preview()}</div>
     ${error ? `<div class="msg err" role="alert" style="margin-top:14px">${esc(error)}</div>` : ""}
     <form id="f" novalidate>
-      <label for="c-name">Evcil hayvanınızın adı</label>
+      <label for="c-name">Sevimli dostunuzun adı</label>
       <input id="c-name" maxlength="20" autocomplete="off" placeholder="ör. Karabaş" value="${esc(v.name)}">
       <label for="c-phone">QR okutulunca aranacak numara</label>
       <input id="c-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" value="${esc(v.phone)}">
@@ -1387,14 +1387,14 @@ function showCreate(error = "", v = {}) {
     ev.preventDefault();
     v.name = g("c-name").value.trim(); v.phone = g("c-phone").value.trim();
     const phone = normalizePhone(v.phone);
-    if (!v.name) return showCreate("Evcil hayvanınızın adını yazın.", v);
+    if (!v.name) return showCreate("Dostunuzun adını yazın.", v);
     if (!phone) return showCreate("Numara geçersiz. Örnek: 0532 123 45 67", v);
     ev.submitter && (ev.submitter.disabled = true, ev.submitter.textContent = "Oluşturuluyor…");
     let res;
     try { res = await rpc("tasma_tag_create", {p_pet_name: v.name, p_phone: phone, p_device: deviceId()}); }
     catch (e) { return showCreate(navigator.onLine === false ? "İnternet bağlantısı yok. Bağlanıp tekrar deneyin." : "Sunucuya ulaşılamadı, biraz sonra tekrar deneyin.", v); }
     if (!res?.ok) {
-      return showCreate({bad_phone: "Numara geçersiz. Örnek: 0532 123 45 67", missing: "Evcil hayvanınızın adını yazın.",
+      return showCreate({bad_phone: "Numara geçersiz. Örnek: 0532 123 45 67", missing: "Dostunuzun adını yazın.",
         too_many: "Bugün çok fazla rozet oluşturdunuz. Yarın tekrar deneyin ya da Rozetlerim'deki rozeti kullanın.",
         busy: "Şu an çok yoğun, birkaç dakika sonra tekrar deneyin."}[res?.error] || "Rozet oluşturulamadı, tekrar deneyin.", v);
     }
@@ -1593,7 +1593,7 @@ function productCards({design = "turuncu", name = "", shop = null, size = "y30"}
   return `<div class="products">
     <a class="product" href="#olustur">
       ${badgeAt("ÖRNEK", design, size, {name, link: SITE, body: b1.hex})}
-      <div><b>1 · Kendi tasarımını yap</b><span>Evcil hayvanınızın adı ve ${Object.keys(DESIGNS).length} tasarımdan biri; gövde rengini de siz seçin. 3D baskı gövdeli su geçirmez rozetiniz halkasıyla gelir.</span>
+      <div><b>1 · Kendi tasarımını yap</b><span>Dostunuzun adı ve ${Object.keys(DESIGNS).length} tasarımdan biri; gövde rengini de siz seçin. 3D baskı gövdeli su geçirmez rozetiniz halkasıyla gelir.</span>
         <div class="price">${esc(shopPrice(shop))} TL</div></div>
     </a>
     <a class="product" href="#talep">
@@ -1952,7 +1952,7 @@ async function showAdmin() {
       <a class="btn" href="uretim/3d/" target="_blank" style="text-decoration:none" title="3D baskı gövde dosyaları ve renkli QR etiket sayfası">🖨 3D üretim sayfası</a>
     </div>
     <p class="noprint">Talep edene rozet verirken tasarımı seçip <b>Yazdır ve ver</b> ya da <b>PDF kaydet ve ver</b>'e basın; rozet verildi olarak işaretlenip bu listeden kalkar.
-      Kişi QR'ı okutup hayvanının adını, numarasını ve PIN'i girdiğinde rozet çalışmaya başlar.
+      Kişi QR'ı okutup dostunun adını, numarasını ve PIN'i girdiğinde rozet çalışmaya başlar.
       Yazdırırken ölçek <b>%100 / Gerçek boyut</b> olmalı.</p>
     <div id="msg"></div>
     ${list.length ? "" : `<p>Bu listede rozet yok.${view === "ready" ? " Yeni rozet üretmek için “10 rozet daha üret”e basın." : ""}</p>`}
@@ -1960,7 +1960,7 @@ async function showAdmin() {
       ${list.map(r => `
         <div class="tag" data-code="${esc(r.code)}" data-state="${state(r)}">
           <div class="block">${tagHtml(r.code, designOf[r.code], {round})}
-            <div class="pin"><b>${esc(r.code)}</b> rozetinin PIN'i<span>${esc(r.pin)}</span><small>QR'ı okutup evcil hayvanınızı bağlamak ve bilgileri değiştirmek için gerekir. Bu kartı tasmada bırakmayın.</small></div>
+            <div class="pin"><b>${esc(r.code)}</b> rozetinin PIN'i<span>${esc(r.pin)}</span><small>QR'ı okutup dostunuzu bağlamak ve bilgileri değiştirmek için gerekir. Bu kartı tasmada bırakmayın.</small></div>
           </div>
           <div class="state noprint">
             <div>${label[state(r)]}${r.phone ? `: ${esc(r.pet_name || "")} · ${esc(prettyPhone(r.phone))}` : ""}</div>
@@ -2046,8 +2046,8 @@ const batchName = b => `sahibimi-ara-${b.date.slice(0, 10)}-${b.codes.length}-${
 const pinCardHtml = r => `<div class="stockpin">
   <div class="sp-head">${icon("paw", "#163a7a", 'width="5mm" height="5mm"')}<b>Tasma QR</b><span>Rozet kodu <b>${esc(r.code)}</b></span></div>
   <div class="sp-body">
-    <ol><li>Rozetteki QR'ı telefonunuzla okutun.</li><li>Aşağıdaki PIN'i girin, sonra evcil hayvanınızın adını ve telefon numaranızı yazıp kaydedin.</li>
-      <li>Hazır! Evcil hayvanınızı bulan kişi QR'ı okutunca sizi tek dokunuşla arar, konumunu gönderebilir.</li></ol>
+    <ol><li>Rozetteki QR'ı telefonunuzla okutun.</li><li>Aşağıdaki PIN'i girin, sonra dostunuzun adını ve telefon numaranızı yazıp kaydedin.</li>
+      <li>Hazır! Dostunuzu bulan kişi QR'ı okutunca sizi tek dokunuşla arar, konumunu gönderebilir.</li></ol>
     <div class="sp-pin">PIN<span>${esc(r.pin)}</span></div>
   </div>
   <small>Bu kartı saklayın, tasmaya takmayın. Bilgileri sonra da bu PIN ile değiştirirsiniz.</small>
@@ -2083,8 +2083,8 @@ async function showStock(rows, newCount) {
     <div class="stockwrap">
       <form id="stf" class="card" novalidate>
         <h2>OKUT • SAHİBİMİ ARA rozeti</h2>
-        <p class="hint">Hazır rozet: hayvan adı basılmaz, üstünde standart “SAHİBİMİ ARA” yazar. Her rozet ayrı bir koddur; alıcı QR'ı okutup
-          kutudan çıkan PIN kartıyla hayvanını bağlar. Gövde renklerini partiyi oluşturduktan sonra <b>3D etiket + renkler</b> sayfasında rozet rozet seçersiniz.</p>
+        <p class="hint">Hazır rozet: dostun adı basılmaz, üstünde standart “SAHİBİMİ ARA” yazar. Her rozet ayrı bir koddur; alıcı QR'ı okutup
+          kutudan çıkan PIN kartıyla dostunu bağlar. Gövde renklerini partiyi oluşturduktan sonra <b>3D etiket + renkler</b> sayfasında rozet rozet seçersiniz.</p>
         <div class="row2">
           <div><label for="st-n">Adet</label><input id="st-n" type="number" inputmode="numeric" min="1" max="500" value="${esc(f.n)}"></div>
           <div><label for="st-size">Ölçü</label><select id="st-size" class="big">${Object.entries(BADGE_SIZES).map(([k, n]) =>
@@ -2183,8 +2183,8 @@ function loadCss(href) {
 
 async function showKit(newCount) {
   show(`${tabsHtml(newCount)}<p>Yükleniyor…</p>`, true);
-  loadCss("shared/kitap.css?v=2026102602");
-  try { await loadScript("shared/kitap.js?v=2026102602"); } catch (e) { return show(`${tabsHtml(newCount)}<div class="msg err">Kitapçık yüklenemedi, sayfayı yenileyin.</div>`, true); }
+  loadCss("shared/kitap.css?v=2026103101");
+  try { await loadScript("shared/kitap.js?v=2026103101"); } catch (e) { return show(`${tabsHtml(newCount)}<div class="msg err">Kitapçık yüklenemedi, sayfayı yenileyin.</div>`, true); }
   const opt = {site: SITE_URL, phone: pref("kit-phone", ""), instagram: pref("kit-ig", "tasmaqr"), email: pref("kit-mail", "")};
   const pages = kitPages(opt);
   show(`
@@ -2286,8 +2286,8 @@ async function showKit(newCount) {
 // ---------------------------------------------------------------- yönetim: kartvizit (85×55 mm; A4'e 10 adet ya da matbaa için taşma paylı)
 async function showCard(newCount) {
   show(`${tabsHtml(newCount)}<p>Yükleniyor…</p>`, true);
-  loadCss("shared/kitap.css?v=2026102602");
-  try { await loadScript("shared/kitap.js?v=2026102602"); } catch (e) { return show(`${tabsHtml(newCount)}<div class="msg err">Kartvizit yüklenemedi, sayfayı yenileyin.</div>`, true); }
+  loadCss("shared/kitap.css?v=2026103101");
+  try { await loadScript("shared/kitap.js?v=2026103101"); } catch (e) { return show(`${tabsHtml(newCount)}<div class="msg err">Kartvizit yüklenemedi, sayfayı yenileyin.</div>`, true); }
   const opt = {site: SITE_URL, name: pref("card-name", ""), title: pref("card-title", ""), phone: pref("kit-phone", ""), email: pref("kit-mail", ""), instagram: pref("kit-ig", "tasmaqr")};
   const {front, back} = cardFaces(opt);
   const sheet = face => `<div class="bc-sheet">${face.repeat(10)}</div>`;
@@ -2373,8 +2373,8 @@ async function showCard(newCount) {
 
 // Stok partisi için kişiye özel kullanım kitapçıkları (shared/kitap.js kitGuidesPdf)
 async function batchGuidesPdf(rows) {
-  loadCss("shared/kitap.css?v=2026102602");
-  await Promise.all([loadScript("shared/kitap.js?v=2026102602"), loadPdfLibs()]);
+  loadCss("shared/kitap.css?v=2026103101");
+  await Promise.all([loadScript("shared/kitap.js?v=2026103101"), loadPdfLibs()]);
   return kitGuidesPdf(rows, {site: SITE_URL, phone: pref("kit-phone", ""), instagram: pref("kit-ig", "tasmaqr"), email: pref("kit-mail", "")}, t => toast(t, 120000));
 }
 

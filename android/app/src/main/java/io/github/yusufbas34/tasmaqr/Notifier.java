@@ -104,7 +104,7 @@ public class Notifier extends JobService {
     /** Rozetlerim'deki "Deneme bildirimi" butonu */
     static boolean showTest(Context ctx) {
         return post(ctx, CH_UPDATE, 999, "Bildirimler çalışıyor ✓",
-                "Evcil hayvanınız için konum gönderildiğinde, kayıp modundayken rozet okutulduğunda ve siparişiniz ilerlediğinde böyle haber vereceğiz.",
+                "Dostunuz için konum gönderildiğinde, kayıp modundayken rozet okutulduğunda ve siparişiniz ilerlediğinde böyle haber vereceğiz.",
                 open(ctx, null));
     }
 
@@ -124,7 +124,7 @@ public class Notifier extends JobService {
         for (int i = 0; i < rows.length(); i++) {
             JSONObject r = rows.getJSONObject(i);
             String code = r.optString("code"), name = r.isNull("pet_name") ? "" : r.optString("pet_name");
-            String who = name.isEmpty() ? "Evcil hayvanınız" : name;
+            String who = name.isEmpty() ? "Sevimli dostunuz" : name;
             JSONArray sightings = r.optJSONArray("sightings");
             String lastSighting = sightings != null && sightings.length() > 0 ? sightings.getJSONObject(0).optString("at") : "";
             long total = r.optLong("total");

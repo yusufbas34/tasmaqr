@@ -35,7 +35,7 @@ function kitPages(opt) {
       <h2 class="h-sec">3 adımda kurulum</h2>
       <ol class="ksteps">
         <li><div><b>QR'ı okutun</b><span>Telefon kameranızı rozetteki QR'a tutun, açılan bağlantıya dokunun. Uygulama indirmeniz gerekmez.</span></div></li>
-        <li><div><b>PIN'i girin, bilgilerinizi yazın</b><span>Önce <b>${opt.batch ? "3. sayfada yazan" : "PIN kartındaki"} 6 haneli PIN'i</b> girin. Ardından evcil hayvanınızın adını ve size ulaşılacak numarayı yazıp kaydedin; isterseniz not ve yedek numara ekleyin.</span></div></li>
+        <li><div><b>PIN'i girin, bilgilerinizi yazın</b><span>Önce <b>${opt.batch ? "3. sayfada yazan" : "PIN kartındaki"} 6 haneli PIN'i</b> girin. Ardından dostunuzun adını ve size ulaşılacak numarayı yazıp kaydedin; isterseniz not ve yedek numara ekleyin.</span></div></li>
         <li><div><b>Tasmaya takın</b><span>Halkayı rozetin kulağındaki delikten ve tasmanın D halkasından geçirin. Hazır!</span></div></li>
       </ol>
       <div class="tip"><b>Deneyin:</b> Kurulumdan sonra rozeti bir kez okutun; bulan kişinin göreceği ekranı siz de görün.</div>
@@ -56,7 +56,7 @@ function kitPages(opt) {
         <p>Rozeti okutun, <b>Bilgileri düzenleyin</b>'e dokunun, PIN'inizle kaydedin. Rozet aynı kalır.</p></div>
     </div>
     <div class="mine-box"><h3>Bilgilerim</h3>
-      <div class="fill"><div>Hayvanımın adı</div><div>Kayıtlı telefon</div>
+      <div class="fill"><div>Dostumun adı</div><div>Kayıtlı telefon</div>
         <div class="v">Rozet kodu<b data-fill="code"></b></div><div class="v">PIN<b data-fill="pin"></b></div></div></div>
     <div class="pno">3</div></div>`,
 
@@ -72,7 +72,7 @@ function kitPages(opt) {
         <p>Android uygulamasında rozetlerinizi, okutmaları ve gelen konumları görür; konum gelince bildirim alırsınız.</p></div>
       <div class="qrrow">${qrSvg(KIT_PLAY)}<div><b>Uygulamayı indirin</b><span>Okutun, Google Play'den kurun; rozetlerinizi yönetin, konum gelince haber alın.</span></div></div>
     </div>
-    <div class="contact"><div>${contact}</div><div style="text-align:right"><b>Tasma QR</b><span class="micro">Evcil hayvanınız için akıllı künye</span></div></div></div>`,
+    <div class="contact"><div>${contact}</div><div style="text-align:right"><b>Tasma QR</b><span class="micro">Sevimli dostunuz için akıllı künye</span></div></div></div>`,
   ];
 }
 
@@ -96,7 +96,7 @@ function cardFaces(opt) {
       <div class="bc-badge">${badgeAt("ÖRNEK", "klasik", "y30", {link: opt.site, name: "DOSTUM"})}</div>
     </div>`;
   const back = `<div class="bc bc-back">
-      <div class="bc-who">${opt.name ? `<b>${esc(opt.name)}</b>` : `<b>Tasma QR</b>`}<small>${esc(opt.title || "Evcil hayvan QR künye")}</small></div>
+      <div class="bc-who">${opt.name ? `<b>${esc(opt.name)}</b>` : `<b>Tasma QR</b>`}<small>${esc(opt.title || "Sevimli dostlar için QR künye")}</small></div>
       <div class="bc-lines">${lines}</div>
       <div class="bc-qr">${qrSvg(opt.site)}<span>Okut, ücretsiz dene</span></div>
       <div class="bc-bar"></div>
