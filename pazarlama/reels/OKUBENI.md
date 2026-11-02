@@ -4,11 +4,11 @@
 Kapak: `reels-1-kapak.jpg`
 
 Akış: Kapı açık kaldı → bulan kişi nasıl ulaşacak? → tasmada Tasma QR, okut → uygulama yok, tek dokunuşla arar →
-konum gelir → "Kaybolursa, QR bulsun." + tasma.bulqr.com.tr QR'ı
+konum gelir → "Kaybolursa, QR bulsun." + fiyatlar (250 / 399 TL) ve tasma.bulqr.com.tr QR'ı
 
 Açıklama:
 Kapı bir an açık kaldı… 🐾 Tasmasında Tasma QR olan dostunu bulan kişi QR'ı okutur, seni tek dokunuşla arar, konumunu gönderir. Uygulama indirmesine gerek yok.
-Ücretsiz rozetini oluştur 👉 bio'daki link (tasma.bulqr.com.tr)
+Hazır rozet 250 TL · kendi tasarımın 399 TL 👉 bio'daki link (tasma.bulqr.com.tr)
 #tasmaqr #kayıpköpek #kayıpkedi #evcilhayvan #köpek #kedi #qrkod #petshop
 
 Düzenlemek: `reels-1.html` (sahneler CSS animasyonu), sonra `node pazarlama/reels/render.js reels-1` (Playwright + ffmpeg).
