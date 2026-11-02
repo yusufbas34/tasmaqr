@@ -3,19 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Tasma QR</title>
-<meta name="description" content="Evcil hayvanınızın tasmasına QR rozet: bulan kişi tek dokunuşla sizi arasın, konumunu göndersin.">
+<title>Tasma QR · Köpek ve Kedi için QR Künye, Akıllı Tasma Rozeti</title>
+<meta name="description" content="Köpek ve kedi tasmasına QR künye: bulan kişi okutur, sizi tek dokunuşla arar, konumunu gönderir. Numaranız rozette yazmaz, kayıp modu var. Hazır rozet 250 TL.">
 <link rel="icon" type="image/svg+xml" href="shared/logo.svg">
+<link rel="apple-touch-icon" href="shared/icon-512.png">
 <meta name="theme-color" content="#b8501a">
+<script>
+// Rozet sayfaları (?k=KOD) ve yönetim (?admin) arama sonuçlarına çıkmasın
+if (/[?&](k|admin)(=|&|$)/.test(location.search)) document.write('<meta name="robots" content="noindex,nofollow">');
+</script>
 <link rel="canonical" href="https://tasma.bulqr.com.tr/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Tasma QR">
-<meta property="og:title" content="Tasma QR | Evcil hayvan QR künyesi">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:title" content="Tasma QR | Köpek ve kedi için QR künye">
 <meta property="og:description" content="Evcil dostunuzun tasmasına QR rozet: bulan kişi okutur, sizi tek dokunuşla arar, konumunu gönderir.">
 <meta property="og:url" content="https://tasma.bulqr.com.tr/">
 <meta property="og:image" content="https://tasma.bulqr.com.tr/og.png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"Organization","@id":"https://tasma.bulqr.com.tr/#org","name":"Tasma QR","url":"https://tasma.bulqr.com.tr/",
+  "logo":"https://tasma.bulqr.com.tr/shared/icon-512.png","sameAs":["https://www.instagram.com/tasmaqr","https://bulqr.com.tr/"]},
+ {"@type":"WebSite","@id":"https://tasma.bulqr.com.tr/#site","name":"Tasma QR","alternateName":"Tasma QR künye","url":"https://tasma.bulqr.com.tr/",
+  "inLanguage":"tr","publisher":{"@id":"https://tasma.bulqr.com.tr/#org"}},
+ {"@type":"Product","name":"Tasma QR rozet (QR künye)","brand":{"@type":"Brand","name":"Tasma QR"},
+  "description":"Köpek ve kedi tasmasına takılan QR künye: 3D baskı PETG gövde, su geçirmez lamine QR sticker. Bulan kişi okutur, sahibini tek dokunuşla arar, konumunu gönderir.",
+  "image":["https://tasma.bulqr.com.tr/shared/foto/rozet-pembe.jpg","https://tasma.bulqr.com.tr/shared/foto/rozet-mavi.jpg"],
+  "offers":{"@type":"AggregateOffer","priceCurrency":"TRY","lowPrice":"250","highPrice":"399","offerCount":"2","availability":"https://schema.org/InStock"}}
+]}
+</script>
 <link rel="stylesheet" href="shared/fonts.css">
 <script>
 // Bir dosya eski önbellekten gelir ya da yüklenemezse sayfa "Yükleniyor"da kalmasın: yenile düğmesi gösterilir
@@ -424,6 +442,11 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 4px #b8501a1f}
 <header class="site-top" id="sitetop" hidden></header>
 <header class="appbar" id="appbar" hidden><button type="button" id="back" aria-label="Geri" hidden>&#8592;</button><img src="shared/logo.svg" alt="" width="30" height="30"><span id="apptitle">Tasma QR</span></header>
 <main id="app"><p>Yükleniyor…</p></main>
+<noscript><div style="max-width:760px;margin:0 auto;padding:16px">
+  <h1>Tasma QR: köpek ve kedi için QR künye</h1>
+  <p>Dostunuzun tasmasına takılan QR rozet. Bulan kişi telefon kamerasıyla okutur, sizi tek dokunuşla arar, konumunu gönderir. Hazır rozet 250 TL, kendi tasarımınız 399 TL.</p>
+  <p><a href="qr-kunye.html">QR künye nasıl çalışır?</a> · <a href="kayip-kopek-rehberi.html">Köpeğim kayboldu, ne yapmalıyım?</a> · <a href="gizlilik.html">Gizlilik</a></p>
+</div></noscript>
 <footer class="site-foot" id="sitefoot" hidden></footer>
 <nav class="tabbar" id="tabbar" hidden aria-label="Ana menü">
   <a href="#" data-tab="home"><span aria-hidden="true">🏠</span><span>Ana sayfa</span></a>
@@ -891,7 +914,7 @@ function setChrome({kind = "none", nav = null, tab = null, title = "Tasma QR", b
   document.body.classList.toggle("has-tabbar", inApp && !!tab);
   top.hidden = foot.hidden = !site;
   bar.hidden = !inApp; tabs.hidden = !(inApp && tab);
-  document.title = title === "Tasma QR" ? "Tasma QR: evcil hayvanınız için QR rozet" : `${title} · Tasma QR`;
+  document.title = title === "Tasma QR" ? "Tasma QR · Köpek ve Kedi için QR Künye, Akıllı Tasma Rozeti" : `${title} · Tasma QR`;
   if (site) {
     const n = myTags().length;
     top.innerHTML = `<div class="in">
@@ -903,7 +926,7 @@ function setChrome({kind = "none", nav = null, tab = null, title = "Tasma QR", b
       <div><a class="brand" href="#"><img src="shared/logo.svg" alt="" width="34" height="34">Tasma QR</a>
         <p>Dostunuzun tasmasına takılan QR rozet. Bulan kişi tek dokunuşla sizi arar, yerini gönderir.</p></div>
       <div><h3>Ürün</h3><a href="#nasil">Nasıl çalışır</a><a href="#urunler">Rozetler ve fiyatlar</a><a href="#talep">Hazır rozet sipariş ver</a><a href="#olustur">Rozetini tasarla</a></div>
-      <div><h3>Destek</h3><a href="#sss">Sık sorulanlar</a><a href="#kunyelerim">Rozetlerim</a><a href="${esc(APK_URL)}">Android uygulaması</a><a href="gizlilik.html">Gizlilik politikası</a></div>
+      <div><h3>Destek</h3><a href="#sss">Sık sorulanlar</a><a href="qr-kunye.html">QR künye nedir?</a><a href="kayip-kopek-rehberi.html">Kayıp köpek rehberi</a><a href="#kunyelerim">Rozetlerim</a><a href="${esc(APK_URL)}">Android uygulaması</a><a href="gizlilik.html">Gizlilik politikası</a></div>
       <div><h3>Takip edin</h3><a href="${IG_URL}" target="_blank" rel="noopener">📷 Instagram · @tasmaqr</a><p style="margin-top:6px">Kayıp ilanları, ipuçları ve yeni tasarımlar.</p></div>
       <div class="copy">© ${new Date().getFullYear()} Tasma QR · Mikroçipin yerine geçmez; dostunuzu bulan kişinin size dakikalar içinde ulaşması için ek bir önlemdir.</div></div>`;
   }
