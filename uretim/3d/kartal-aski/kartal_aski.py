@@ -5,7 +5,7 @@
 #
 # Eksenler (mm): x = masa kenarı boyunca, y = masanın içine doğru (+), z = yukarı.
 # Masa üst yüzü z=0, masa ön kenarı y=0. Kelepçe ağzı z = 0 … -GAP.
-# Donanım: 1 × M8×50 cıvata (altıgen başlı), 1 × M8 somun.
+# Hazır donanım gerekmez: vida, somun ve pabuç da basılır.
 import os
 import numpy as np
 import trimesh
@@ -18,9 +18,10 @@ HW = 22.0          # kelepçe yarım genişliği (x)
 WALL = 9.0         # üst plaka ve ön kol kalınlığı
 DEPTH = 50.0       # üst plakanın masa üstündeki derinliği
 GAP = 50.0         # ağız: masa kalınlığı + baskı pabucu (18–42 mm masa)
-JAW = 14.0         # alt çene kalınlığı
+JAW = 16.0         # alt çene kalınlığı
 BOLT = (0.0, 26.0) # cıvata ekseni (x, y)
-BOLT_D, NUT_AF, NUT_H = 8.6, 13.4, 7.0
+PITCH, SCREW_MAJ, DEPTH_T, SCREW_L = 3.0, 16.0, 1.2, 48.0   # basılı vida: Ø16, adım 3
+NUT_AF, NUT_H = 26.0, 10.0                                    # basılı somun
 
 
 def smin(a, b, k):
@@ -132,39 +133,82 @@ def hexagon(af, h):
     return trimesh.creation.cylinder(radius=af / np.sqrt(3), height=h, sections=6)
 
 
+def thread(r_maj, r_min, length, pitch=PITCH, taper=1.5, n_th=144, per_pitch=24):
+    """Tek ağızlı, yamuk profilli dış diş (z = 0 … length). Uçlar diş dibine pahlanır."""
+    th = np.linspace(0, 2 * np.pi, n_th, endpoint=False)
+    zs = np.linspace(0, length, int(np.ceil(length / pitch * per_pitch)) + 1)
+    T, Z = np.meshgrid(th, zs, indexing="ij")
+    u = np.mod(Z / pitch - T / (2 * np.pi), 1.0)
+    x = (0.5 - np.abs(u - 0.5)) * 2                       # 0 dip, 1 tepe
+    f = np.clip((x - 0.1) / 0.7, 0, 1)
+    f = np.minimum(f, np.clip(np.minimum(Z, length - Z) / taper, 0, 1))
+    R = r_min + (r_maj - r_min) * f
+    V = np.stack([R * np.cos(T), R * np.sin(T), Z], axis=-1).reshape(-1, 3)
+    nz = len(zs)
+    idx = lambda i, j: (i % n_th) * nz + j
+    F = []
+    for i in range(n_th):
+        for j in range(nz - 1):
+            a, b, c, d = idx(i, j), idx(i + 1, j), idx(i + 1, j + 1), idx(i, j + 1)
+            F += [(a, b, c), (a, c, d)]
+    bot, top = len(V), len(V) + 1
+    V = np.vstack([V, [0, 0, 0], [0, 0, length]])
+    for i in range(n_th):
+        F += [(bot, idx(i + 1, 0), idx(i, 0)), (top, idx(i, nz - 1), idx(i + 1, nz - 1))]
+    m = trimesh.Trimesh(V, np.array(F), process=True)
+    if m.volume < 0:
+        m.invert()
+    return m
+
+
 def body():
     m = mesh_from_sdf(full_sdf, (-HW - 1, -55, -GAP - JAW - 2), (HW + 1, DEPTH + 2, 88))
-    hole = trimesh.creation.cylinder(radius=BOLT_D / 2, height=JAW * 3, sections=64)
+    hole = trimesh.creation.cylinder(radius=SCREW_MAJ / 2 + 0.6, height=JAW * 3, sections=96)
     hole.apply_translation([BOLT[0], BOLT[1], -GAP - JAW / 2])
-    nut = hexagon(NUT_AF, NUT_H * 2)
-    nut.apply_translation([BOLT[0], BOLT[1], -GAP])                    # somun yuvası çenenin üst yüzünde
-    return m.difference(hole, engine="manifold").difference(nut, engine="manifold")
+    pocket = hexagon(NUT_AF + 0.5, (NUT_H - 0.5) * 2)                 # somun yuvası çenenin üst yüzünde
+    pocket.apply_translation([BOLT[0], BOLT[1], -GAP])
+    return m.difference(hole, engine="manifold").difference(pocket, engine="manifold")
 
 
-def knob():
-    # tırtıllı topuz: altta cıvata başı yuvası, üstten şaft çıkar
-    r, h = 20.0, 14.0
-    k = trimesh.creation.cylinder(radius=r, height=h, sections=128)
-    for i in range(10):
-        a = 2 * np.pi * i / 10
-        c = trimesh.creation.cylinder(radius=4.2, height=h * 2, sections=48)
-        c.apply_translation([np.cos(a) * (r + 1.5), np.sin(a) * (r + 1.5), 0])
+def nut():
+    # basılı somun: altıgen, iç diş vidadan 0,4 mm boşluklu
+    n = hexagon(NUT_AF, NUT_H)
+    n.apply_translation([0, 0, NUT_H / 2])
+    tap = thread(SCREW_MAJ / 2 + 0.45, SCREW_MAJ / 2 - DEPTH_T + 0.45, NUT_H + 4, taper=0.01)
+    tap.apply_translation([0, 0, -2])
+    for z in (0, NUT_H):                                               # giriş pahları
+        ch = trimesh.creation.cone(radius=SCREW_MAJ / 2 + 1.2, height=SCREW_MAJ / 2 + 1.2, sections=96)
+        if z:
+            ch.apply_transform(trimesh.transformations.rotation_matrix(np.pi, [1, 0, 0]))
+        ch.apply_translation([0, 0, z - 1.2 if not z else z + 1.2])
+        n = n.difference(ch, engine="manifold")
+    return n.difference(tap, engine="manifold")
+
+
+def screw():
+    # sıkma vidası: tırtıllı topuz + Ø16 diş, topuz aşağı basılır
+    r, h = 21.0, 14.0
+    k = trimesh.creation.cylinder(radius=r, height=h, sections=160)
+    for i in range(12):
+        a = 2 * np.pi * i / 12
+        c = trimesh.creation.cylinder(radius=4.0, height=h * 2, sections=48)
+        c.apply_translation([np.cos(a) * (r + 1.8), np.sin(a) * (r + 1.8), 0])
         k = k.difference(c, engine="manifold")
-    head = hexagon(13.3, 6.0 * 2)
-    head.apply_translation([0, 0, -h / 2])
-    shaft = trimesh.creation.cylinder(radius=BOLT_D / 2, height=h * 2, sections=48)
-    k = k.difference(head, engine="manifold").difference(shaft, engine="manifold")
     k.apply_translation([0, 0, h / 2])
-    return k
+    neck = trimesh.creation.cylinder(radius=SCREW_MAJ / 2 - DEPTH_T + 0.3, height=4, sections=96)
+    neck.apply_translation([0, 0, h + 1])
+    t = thread(SCREW_MAJ / 2, SCREW_MAJ / 2 - DEPTH_T, SCREW_L)
+    t.apply_translation([0, 0, h])
+    return k.union(neck, engine="manifold").union(t, engine="manifold")
 
 
 def pad():
-    # masaya basan pabuç: cıvata ucu alttaki çukura oturur
-    p = trimesh.creation.cylinder(radius=14, height=6, sections=128)
-    rec = trimesh.creation.cylinder(radius=4.6, height=6, sections=48)
-    rec.apply_translation([0, 0, -3])
+    # masaya basan pabuç: vida ucu alttaki çukura oturur
+    p = trimesh.creation.cylinder(radius=15, height=7, sections=128)
+    rec = trimesh.creation.cylinder(radius=SCREW_MAJ / 2 + 0.5, height=7, sections=96)
+    rec.apply_translation([0, 0, -3.5])
     p = p.difference(rec, engine="manifold")
-    p.apply_translation([0, 0, 3])
+    p.apply_translation([0, 0, 3.5])
     return p
 
 
@@ -178,9 +222,10 @@ def print_pose(m):
 
 if __name__ == "__main__":
     b = body()
-    parts = {"kartal-aski-govde": b, "kartal-aski-govde-baski-yonu": print_pose(b), "kartal-aski-topuz": knob(), "kartal-aski-pabuc": pad()}
+    parts = {"kartal-aski-govde": b, "kartal-aski-govde-baski-yonu": print_pose(b),
+             "kartal-aski-vida": screw(), "kartal-aski-somun": nut(), "kartal-aski-pabuc": pad()}
     for name, m in parts.items():
         assert m.is_watertight, name
         m.export(os.path.join(HERE, f"{name}.stl"))
         e = m.bounds[1] - m.bounds[0]
-        print(f"{name}: {e[0]:.0f}×{e[1]:.0f}×{e[2]:.0f} mm, {m.volume/1000:.0f} cm³, {len(m.faces)} üçgen")
+        print(f"{name}: {e[0]:.1f}×{e[1]:.1f}×{e[2]:.1f} mm, {m.volume/1000:.1f} cm³, {len(m.faces)} üçgen")

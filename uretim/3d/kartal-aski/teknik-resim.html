@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><title>Kartal Askı · Teknik Resim</title>
+<style>
+@page { size: 420mm 297mm; margin: 0 }
+html, body { margin: 0; background: #fff; }
+body { width: 420mm; height: 297mm; position: relative; font-family: Inter, "DejaVu Sans", sans-serif; color: #111; }
+canvas { position: absolute; }
+svg#ov { position: absolute; left: 0; top: 0; width: 420mm; height: 297mm; }
+svg text { font-family: Inter, "DejaVu Sans", sans-serif; fill: #111; }
+</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<svg id="ov" viewBox="0 0 420 297" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="hatch" width="2.2" height="2.2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="2.2" stroke="#9a8a70" stroke-width="0.18"/>
+    </pattern>
+    <marker id="ar" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="2.6" markerHeight="2.6" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0,1.6 L10,5 L0,8.4 z" fill="#111"/>
+    </marker>
+  </defs>
+  <g id="g"></g>
+</svg>
+<script type="module">
+import * as THREE from 'three';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
+
+const MM = 96 / 25.4, DPR = 3.2;
+const NS = 'http://www.w3.org/2000/svg';
+const G = document.getElementById('g');
+function el(tag, attrs, parent = G) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
+function txt(x, y, s, o = {}) { const t = el('text', { x, y, 'font-size': o.size || 2.6, 'text-anchor': o.anchor || 'middle', 'font-weight': o.weight || 400, ...(o.rot ? { transform: `rotate(${o.rot} ${x} ${y})` } : {}), ...(o.fill ? { fill: o.fill } : {}) }); t.textContent = s; return t; }
+function line(x1, y1, x2, y2, w = 0.25, extra = {}) { return el('line', { x1, y1, x2, y2, stroke: '#111', 'stroke-width': w, ...extra }); }
+
+const loader = new STLLoader();
+async function load(n) {
+  const g = await loader.loadAsync(`./${n}.stl`);
+  g.deleteAttribute('normal');
+  const m = mergeVertices(g, 1e-3); m.computeVertexNormals(); return m;
+}
+const [govde, vida, somun, pabuc] = await Promise.all(['govde', 'vida', 'somun', 'pabuc'].map(load));
+
+// montaj konumları (mm) — masa 25 mm
+const DESK = 25, BOLT_Y = 26;
+const ASM = { govde: [0, 0, 0], somun: [0, BOLT_Y, -59.5], vida: [0, BOLT_Y, -90.5], pabuc: [0, BOLT_Y, -DESK - 7] };
+const EXP = { govde: [0, 0, 0], somun: [0, BOLT_Y, -36], vida: [0, BOLT_Y, -165], pabuc: [0, BOLT_Y, -16] };
+const GEO = { govde, vida, somun, pabuc };
+
+function drawMat(c) { return new THREE.MeshLambertMaterial({ color: c, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }); }
+const outlineMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, uniforms: { t: { value: 0.32 } },
+  vertexShader: 'uniform float t; void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position + normal * t, 1.0); }',
+  fragmentShader: 'void main(){ gl_FragColor = vec4(0.07,0.07,0.07,1.0); }'
+});
+
+function addPart(scene, name, pos, { color = 0xe6e6e3, render = false } = {}) {
+  const geo = GEO[name];
+  const mat = render ? new THREE.MeshStandardMaterial({ color, roughness: name === 'pabuc' ? 0.9 : 0.55, metalness: 0.0 })
+                     : drawMat(color);
+  const m = new THREE.Mesh(geo, mat); m.position.set(...pos); scene.add(m);
+  if (!render) {
+    const o = new THREE.Mesh(geo, outlineMat); o.position.set(...pos); scene.add(o);
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 38), new THREE.LineBasicMaterial({ color: 0x111111 }));
+    e.position.set(...pos); scene.add(e);
+  }
+  return m;
+}
+function lights(scene, strong = false) {
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb9b4aa, strong ? 1.6 : 2.1));
+  const d = new THREE.DirectionalLight(0xffffff, strong ? 2.2 : 1.1); d.position.set(140, -220, 260); scene.add(d);
+  const d2 = new THREE.DirectionalLight(0xffffff, strong ? 0.7 : 0.4); d2.position.set(-200, 120, 80); scene.add(d2);
+}
+
+// panel: kağıt üstündeki dikdörtgen (mm) + ortografik kamera (ölçek kağıt mm / model mm)
+function panel({ x, y, w, h, dir, up, center, scale = 1, build, persp = null, bg = null }) {
+  const cv = document.createElement('canvas');
+  Object.assign(cv.style, { left: x + 'mm', top: y + 'mm', width: w + 'mm', height: h + 'mm' });
+  document.body.insertBefore(cv, document.getElementById('ov'));
+  const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: !bg, preserveDrawingBuffer: true });
+  r.setPixelRatio(DPR); r.setSize(w * MM, h * MM, false);
+  if (bg) r.setClearColor(bg, 1);
+  r.outputColorSpace = THREE.SRGBColorSpace;
+  const scene = new THREE.Scene();
+  let cam;
+  const c = new THREE.Vector3(...center);
+  if (persp) {
+    cam = new THREE.PerspectiveCamera(persp.fov, w / h, 1, 5000);
+    cam.position.set(...persp.pos); cam.up.set(0, 0, 1); cam.lookAt(c);
+  } else {
+    const hw = w / 2 / scale, hh = h / 2 / scale;
+    cam = new THREE.OrthographicCamera(-hw, hw, hh, -hh, 1, 4000);
+    cam.position.copy(c).addScaledVector(new THREE.Vector3(...dir).normalize(), -1000);
+    cam.up.set(...up); cam.lookAt(c);
+  }
+  cam.updateMatrixWorld(); cam.updateProjectionMatrix();
+  build(scene);
+  r.render(scene, cam);
+  const P = (p) => { const v = new THREE.Vector3(...p).project(cam); return [x + (v.x + 1) / 2 * w, y + (1 - v.y) / 2 * h]; };
+  return { P, x, y, w, h };
+}
+
+// ölçü çizgileri (kağıt mm)
+function dim(A, B, axis, at, text, o = {}) {
+  const g = el('g', {});
+  const gap = 0.8, over = 1.6;
+  if (axis === 'v') {
+    for (const p of [A, B]) { const s = Math.sign(at - p[0]) || 1; line(p[0] + s * gap, p[1], at + s * over, p[1], 0.18, {}).remove(); el('line', { x1: p[0] + s * gap, y1: p[1], x2: at + s * over, y2: p[1], stroke: '#111', 'stroke-width': 0.18 }, g); }
+    el('line', { x1: at, y1: A[1], x2: at, y2: B[1], stroke: '#111', 'stroke-width': 0.18, 'marker-start': 'url(#ar)', 'marker-end': 'url(#ar)' }, g);
+    const my = (A[1] + B[1]) / 2 + (o.shift || 0);
+    const t = txt(at - 1.0, my, text, { rot: -90, size: o.size || 3.0 }); g.appendChild(t);
+  } else {
+    for (const p of [A, B]) { const s = Math.sign(at - p[1]) || 1; el('line', { x1: p[0], y1: p[1] + s * gap, x2: p[0], y2: at + s * over, stroke: '#111', 'stroke-width': 0.18 }, g); }
+    el('line', { x1: A[0], y1: at, x2: B[0], y2: at, stroke: '#111', 'stroke-width': 0.18, 'marker-start': 'url(#ar)', 'marker-end': 'url(#ar)' }, g);
+    const mx = (A[0] + B[0]) / 2 + (o.shift || 0);
+    const t = txt(mx, at - 1.0, text, { size: o.size || 3.0 }); g.appendChild(t);
+  }
+}
+function centerLine(a, b) { line(a[0], a[1], b[0], b[1], 0.18, { 'stroke-dasharray': '6 1.2 1 1.2' }); }
+function title(x, y, s, sub) { txt(x, y, s, { size: 3.4, weight: 700 }); if (sub) txt(x, y + 4, sub, { size: 2.5, fill: '#444' }); }
+function balloon(cx, cy, n, tx, ty) {
+  line(cx, cy, tx, ty, 0.18); el('circle', { cx: tx, cy: ty, r: 0.7, fill: '#111' });
+  el('circle', { cx, cy, r: 3.6, fill: '#fff', stroke: '#111', 'stroke-width': 0.3 }); txt(cx, cy + 1.25, n, { size: 3.6, weight: 700 });
+}
+
+const ALL = (scene, pos, opt) => { for (const n of ['govde', 'somun', 'vida', 'pabuc']) addPart(scene, n, pos[n], opt?.[n] || opt?.all); };
+
+// ---------- Görünüş 1: ana görünüş (yan, 1:1) ----------
+const V1 = panel({ x: 22, y: 12, w: 158, h: 196, dir: [-1, 0, 0], up: [0, 0, 1], center: [0, 4, -6], build: s => { lights(s); ALL(s, ASM); } });
+{
+  const P = V1.P;
+  // masa (çevre parça, kesit taralı)
+  const a = P([0, 0, 0]), b = P([0, 80, -DESK]);
+  el('rect', { x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1], fill: 'url(#hatch)', stroke: '#7a6a50', 'stroke-width': 0.25, 'stroke-dasharray': '4 1 1 1 1 1' });
+  txt(P([0, 62, 0])[0], P([0, 0, -DESK / 2])[1] + 1.1, 'MASA', { size: 2.6, fill: '#6a5a40', weight: 600 });
+  centerLine(P([0, BOLT_Y, -96]), P([0, BOLT_Y, -14]));
+  dim(P([0, -51.2, 84]), P([0, -51.2, -66]), 'v', P([0, -66, 0])[0], '150');
+  dim(P([0, 22, 84]), P([0, 22, 0]), 'v', P([0, 74, 0])[0], '84');
+  dim(P([0, 0, 0]), P([0, 0, -50]), 'v', P([0, 8, 0])[0], '50', { size: 2.8 });
+  dim(P([0, 42, -50]), P([0, 42, -66]), 'v', P([0, 54, 0])[0], '16', { size: 2.8 });
+  dim(P([0, 50, 9]), P([0, 50, 0]), 'v', P([0, 60, 0])[0], '9', { size: 2.8, shift: -6 });
+  dim(P([0, -51.2, -66]), P([0, 50, -66]), 'h', P([0, 0, -104])[1], '101');
+  dim(P([0, 0, -66]), P([0, BOLT_Y, -66]), 'h', P([0, 0, -97])[1], '26', { size: 2.8 });
+  dim(P([0, -51.2, -40]), P([0, 0, -40]), 'h', P([0, 0, -58])[1], '51', { size: 2.8 });
+  txt(P([0, -30, -64])[0] - 2, P([0, -30, -64])[1] + 2, 'pençe = askı kancası', { size: 2.3, fill: '#444' });
+    txt(P([0, 62, 0])[0], P([0, 0, -DESK / 2])[1] + 4.6, '15–45 mm', { size: 2.2, fill: '#6a5a40' });
+  title(V1.x + 42, V1.y + 6, 'ÖN GÖRÜNÜŞ', 'montajlı · masa 25 mm · 1:1');
+}
+
+// ---------- Görünüş 2: soldan görünüş (kartal önden, birinci açı → sağa) ----------
+const V2 = panel({ x: 182, y: 12, w: 56, h: 196, dir: [0, 1, 0], up: [0, 0, 1], center: [0, 0, -6], build: s => { lights(s); ALL(s, ASM); } });
+{
+  const P = V2.P;
+  centerLine(P([0, 0, 92]), P([0, 0, -98]));
+  dim(P([-20.7, 0, -90.5]), P([20.7, 0, -90.5]), 'h', P([0, 0, -100])[1], 'Ø42', { size: 2.8 });
+  title(V2.x + V2.w / 2, V2.y + 6, 'YAN GÖRÜNÜŞ');
+}
+
+// ---------- Görünüş 3: üstten (birinci açı → alta) ----------
+const V3 = panel({ x: 22, y: 210, w: 158, h: 75, dir: [0, 0, -1], up: [-1, 0, 0], center: [0, 4, 0], build: s => { lights(s); ALL(s, ASM); } });
+{
+  const P = V3.P;
+  dim(P([22, 50, 0]), P([-22, 50, 0]), 'v', P([0, 62, 0])[0], '44');
+  centerLine(P([-30, BOLT_Y, 0]), P([30, BOLT_Y, 0]));
+  title(V3.x + 26, V3.y + 6, 'ÜST GÖRÜNÜŞ');
+}
+
+// ---------- İzometrik render ----------
+const V4 = panel({ x: 242, y: 12, w: 168, h: 104, center: [0, 8, 2], persp: { fov: 26, pos: [-260, -330, 190] }, bg: 0xf4f2ee,
+  build: s => {
+    lights(s, true);
+    ALL(s, ASM, { govde: { color: 0x6b5139, render: true }, vida: { color: 0x2f3338, render: true }, somun: { color: 0x2f3338, render: true }, pabuc: { color: 0x1d1d1d, render: true } });
+    const desk = new THREE.Mesh(new THREE.BoxGeometry(170, 130, DESK), new THREE.MeshStandardMaterial({ color: 0xd8c3a0, roughness: 0.8, transparent: true, opacity: 0.55 }));
+    desk.position.set(0, 65, -DESK / 2); s.add(desk);
+  } });
+el('rect', { x: V4.x, y: V4.y, width: V4.w, height: V4.h, fill: 'none', stroke: '#111', 'stroke-width': 0.25 });
+txt(V4.x + 4, V4.y + 6, 'İZOMETRİK GÖRÜNÜŞ', { size: 3.4, weight: 700, anchor: 'start' });
+txt(V4.x + 4, V4.y + 10, 'masaya takılı, ölçeksiz', { size: 2.5, fill: '#444', anchor: 'start' });
+
+// ---------- Patlatılmış montaj ----------
+const V5 = panel({ x: 242, y: 118, w: 84, h: 112, center: [0, 14, -36], scale: 0.42, dir: [-1.3, -0.45, -0.55], up: [0, 0, 1],
+  build: s => { lights(s); ALL(s, EXP, { govde: { color: 0xe6e6e3 }, vida: { color: 0xc9cdd2 }, somun: { color: 0xc9cdd2 }, pabuc: { color: 0x9a9a9a } }); } });
+{
+  const P = V5.P;
+  centerLine(P([0, BOLT_Y, -170]), P([0, BOLT_Y, 2]));
+  const q = (n, p, bx, by) => { const t = P(p); balloon(bx, by, n, t[0], t[1]); };
+  q('1', [0, -10, 40], V5.x + 12, V5.y + 30);
+  q('2', [12, BOLT_Y, -31], V5.x + 72, V5.y + 58);
+  q('3', [0, BOLT_Y + 15, -160], V5.x + 72, V5.y + 96);
+  q('4', [14, BOLT_Y, -12], V5.x + 72, V5.y + 44);
+  txt(V5.x + 4, V5.y + 6, 'PATLATILMIŞ MONTAJ', { size: 3.4, weight: 700, anchor: 'start' });
+  txt(V5.x + 4, V5.y + 10, '1:2,4', { size: 2.5, fill: '#444', anchor: 'start' });
+}
+el('rect', { x: V5.x, y: V5.y, width: V5.w, height: V5.h, fill: 'none', stroke: '#111', 'stroke-width': 0.25 });
+
+// ---------- Detay: vida ve somun (1:1) ----------
+const V6 = panel({ x: 328, y: 128, w: 46, h: 102, center: [0, 0, 31], dir: [-1, 0, 0], up: [0, 0, 1], build: s => { lights(s); addPart(s, 'vida', [0, 0, 0], { color: 0xdfe2e6 }); } });
+{
+  const P = V6.P;
+  centerLine(P([0, 0, -4]), P([0, 0, 66]));
+  dim(P([0, -8, 58]), P([0, 8, 58]), 'h', P([0, 0, 68])[1], 'Ø16 × 3', { size: 2.8 });
+  dim(P([0, 8, 14]), P([0, 8, 62]), 'v', P([0, 17, 0])[0], '48', { size: 2.8 });
+  dim(P([0, -20.7, 0]), P([0, 20.7, 0]), 'h', P([0, 0, -6])[1], 'Ø42', { size: 2.8 });
+  dim(P([0, -20.7, 0]), P([0, -20.7, 14]), 'v', P([0, -23, 0])[0], '14', { size: 2.6 });
+}
+const V7 = panel({ x: 374, y: 128, w: 36, h: 52, center: [0, 0, 5], dir: [0, 0, -1], up: [0, 1, 0], build: s => { lights(s); addPart(s, 'somun', [0, 0, 0], { color: 0xdfe2e6 }); } });
+{
+  const P = V7.P;
+  dim(P([-13 / Math.tan(Math.PI / 3) * 0 - 7.5, 13, 10]), P([-7.5, -13, 10]), 'v', P([-17, 0, 0])[0], 'AA 26', { size: 2.5 });
+  dim(P([-15, -13, 10]), P([15, -13, 10]), 'h', P([0, -19, 0])[1], '30', { size: 2.5 });
+  txt(V7.x + V7.w / 2, V7.y + V7.h - 2, 'kalınlık 10', { size: 2.3, fill: '#444' });
+}
+const V8 = panel({ x: 374, y: 182, w: 36, h: 48, center: [0, 0, 3.5], dir: [1, 0.8, -0.9], scale: 0.9, up: [0, 0, 1], build: s => { lights(s); addPart(s, 'pabuc', [0, 0, 0], { color: 0xb5b5b5 }); } });
+{ const P = V8.P; txt(V8.x + V8.w / 2, V8.y + V8.h - 4, 'pabuç Ø30 × 7', { size: 2.3, fill: '#444' }); }
+el('rect', { x: 328, y: 118, width: 82, height: 112, fill: 'none', stroke: '#111', 'stroke-width': 0.25 });
+txt(332, 124, 'DETAY · PARÇA 2, 3, 4', { size: 3.4, weight: 700, anchor: 'start' });
+
+// ---------- Notlar ----------
+{
+  const x = 184, y = 214;
+  txt(x, y, 'NOTLAR', { size: 3.2, weight: 700, anchor: 'start' });
+  const N = [
+    'Ölçüler mm. Genel tol. ±0,3 (FDM).',
+    'Masaya delik açılmaz; vida elle',
+    'sıkılır. Masa kalınlığı 15–45 mm.',
+    'Diş: tek ağız, Ø16, adım 3, derinlik',
+    '1,2. Somun iç dişi +0,45 boşluklu.',
+    'Somun (2) çene yuvasına üstten',
+    'bastırılır, dönmez.',
+    'Pabuç (4) vida ucuna oturur,',
+    'masayı çizmez (TPU önerilir).',
+    'Parça 1 yan yatık, ağaç destekle;',
+    '2–4 düz, desteksiz basılır.',
+  ];
+  N.forEach((s, i) => txt(x, y + 5 + i * 3.6, s, { size: 2.35, anchor: 'start' }));
+}
+
+// ---------- Parça listesi ----------
+{
+  const x = 242, y = 232, w = 168;
+  const cols = [0, 10, 62, 76, 112, 146, 168];
+  const head = ['Poz', 'Parça', 'Adet', 'Malzeme', 'Baskı', 'Hacim'];
+  const rows = [
+    ['1', 'Gövde (kartal + kelepçe)', '1', 'PETG', '4 duvar, %25', '151 cm³'],
+    ['2', 'Somun Ø16×3, AA 26', '1', 'PETG', '%100', '3,9 cm³'],
+    ['3', 'Sıkma vidası Ø16×3 × 48', '1', 'PETG', '%100, topuz altta', '26 cm³'],
+    ['4', 'Pabuç Ø30 × 7', '1', 'TPU / PETG', '%100', '4,2 cm³'],
+  ];
+  const rh = 4.4;
+  el('rect', { x, y, width: w, height: rh * 5, fill: 'none', stroke: '#111', 'stroke-width': 0.35 });
+  el('rect', { x, y, width: w, height: rh, fill: '#ececea', stroke: 'none' });
+  for (let i = 1; i < 5; i++) line(x, y + rh * i, x + w, y + rh * i, i === 1 ? 0.3 : 0.15);
+  for (let j = 1; j < cols.length - 1; j++) line(x + cols[j], y, x + cols[j], y + rh * 5, 0.15);
+  [head, ...rows].forEach((r, i) => r.forEach((s, j) => txt(x + cols[j] + 1.5, y + rh * i + 3.1, s, { size: 2.45, anchor: 'start', weight: i ? 400 : 700 })));
+}
+
+// ---------- Antet ----------
+{
+  const x = 242, y = 256, w = 168, h = 31;
+  el('rect', { x, y, width: w, height: h, fill: 'none', stroke: '#111', 'stroke-width': 0.5 });
+  line(x, y + 13, x + w, y + 13, 0.3); line(x + 100, y, x + 100, y + h, 0.3);
+  line(x + 100, y + 22, x + w, y + 22, 0.2); line(x + 134, y + 13, x + 134, y + h, 0.2); line(x, y + 22, x + 100, y + 22, 0.2);
+  line(x + 34, y + 13, x + 34, y + h, 0.2); line(x + 67, y + 13, x + 67, y + h, 0.2);
+  txt(x + 3, y + 6.3, 'KARTAL ASKI', { size: 5.2, weight: 800, anchor: 'start' });
+  txt(x + 3, y + 10.8, 'masa kelepçeli kulaklık / çanta askısı · montaj ve ölçü resmi', { size: 2.5, anchor: 'start', fill: '#333' });
+  const cell = (cx, cy, k, v) => { txt(cx, cy, k, { size: 1.9, anchor: 'start', fill: '#666' }); txt(cx, cy + 4.2, v, { size: 2.9, anchor: 'start', weight: 600 }); };
+  cell(x + 2, y + 16, 'ÖLÇEK', '1:1 (A3)');
+  cell(x + 36, y + 16, 'BİRİM', 'mm');
+  cell(x + 69, y + 16, 'TARİH', '03.11.2026');
+  cell(x + 2, y + 25, 'ÇİZEN', 'Tasma QR Üretim');
+  cell(x + 36, y + 25, 'MALZEME', 'PETG / TPU');
+  cell(x + 69, y + 25, 'AĞIRLIK', '≈ 140 g');
+  cell(x + 102, y + 3, 'PAFTA NO', 'TQ-KA-001');
+  txt(x + 135, y + 3, 'REV', { size: 1.9, anchor: 'start', fill: '#666' }); txt(x + 135, y + 7.2, 'B', { size: 2.9, anchor: 'start', weight: 600 });
+  cell(x + 102, y + 16, 'İZDÜŞÜM', 'ISO-E');
+  // birinci açı sembolü
+  const sx = x + 150, sy = y + 17.5;
+  el('path', { d: `M${sx} ${sy - 2.2} L${sx + 7} ${sy - 3.5} L${sx + 7} ${sy + 3.5} L${sx} ${sy + 2.2} Z`, fill: 'none', stroke: '#111', 'stroke-width': 0.25 });
+  el('circle', { cx: sx - 6, cy: sy, r: 3.5, fill: 'none', stroke: '#111', 'stroke-width': 0.25 }); el('circle', { cx: sx - 6, cy: sy, r: 1.8, fill: 'none', stroke: '#111', 'stroke-width': 0.25 });
+  cell(x + 102, y + 25, 'PAFTA', '1 / 1');
+  cell(x + 136, y + 25, 'DOSYA', 'kartal_aski.py');
+}
+
+// çerçeve
+el('rect', { x: 20, y: 10, width: 390, height: 277, fill: 'none', stroke: '#111', 'stroke-width': 0.6 });
+window.__ready = true;
+</script>
+</body></html>
