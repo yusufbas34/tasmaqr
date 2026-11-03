@@ -6,7 +6,7 @@
 # Eksenler (mm): x = masa kenarı boyunca, y = masanın içine doğru (+), z = yukarı.
 # Masa üst yüzü z=0, masa ön kenarı y=0. Kelepçe ağzı z = 0 … -GAP.
 # Parçalar: 1 kelepçe + kuyruk (yan yatık basılır), 2 kartal (dik basılır, 2 pimle oturup yapıştırılır),
-#           3 somun, 4 sıkma vidası, 5 pabuç. Hazır donanım gerekmez.
+#           3 sıkma vidası (diş doğrudan çenede), 4 pabuç. Hazır donanım gerekmez.
 import os
 import numpy as np
 import trimesh
@@ -22,7 +22,7 @@ GAP = 50.0         # ağız: masa kalınlığı + pabuç
 JAW = 16.0         # alt çene kalınlığı
 BOLT = (0.0, 26.0) # vida ekseni (x, y)
 PITCH, SCREW_MAJ, DEPTH_T, SCREW_L = 3.0, 16.0, 1.2, 48.0   # basılı vida: Ø16, adım 3
-NUT_AF, NUT_H = 26.0, 10.0                                    # basılı somun
+TAP_CLEAR = 0.5                                               # çene iç dişi radyal boşluğu
 PINS = [(-9.0, 17.0), (9.0, 17.0)]   # kartalı kelepçeye oturtan pimler (x, y)
 PIN_D, PIN_L = 6.0, 5.0
 SPLIT_Y = -3.0     # kuyruk bu düzlemde ikiye ayrılır: önü kelepçede, arkası kartalda
@@ -244,30 +244,22 @@ def thread(r_maj, r_min, length, pitch=PITCH, taper=1.5, n_th=144, per_pitch=24)
 
 def clamp():
     m = mesh_from_sdf(part_clamp_sdf, (-HW - 1, -62, -GAP - JAW - 2), (HW + 1, DEPTH + 2, 36))
-    hole = trimesh.creation.cylinder(radius=SCREW_MAJ / 2 + 0.6, height=JAW * 3, sections=96)
-    hole.apply_translation([BOLT[0], BOLT[1], -GAP - JAW / 2])
-    pocket = hexagon(NUT_AF + 0.5, (NUT_H - 0.5) * 2)                 # somun yuvası çenenin üst yüzünde
-    pocket.apply_translation([BOLT[0], BOLT[1], -GAP])
-    return m.difference(hole, engine="manifold").difference(pocket, engine="manifold")
+    # iç diş doğrudan alt çeneye açılır (ayrı somun yok). Yan yatık basıldığı için boşluk biraz bol.
+    tap = thread(SCREW_MAJ / 2 + TAP_CLEAR, SCREW_MAJ / 2 - DEPTH_T + TAP_CLEAR, JAW + 6, taper=0.01)
+    tap.apply_translation([BOLT[0], BOLT[1], -GAP - JAW - 3])
+    m = m.difference(tap, engine="manifold")
+    r = SCREW_MAJ / 2 + 1.2
+    for z, up in ((-GAP - JAW, True), (-GAP, False)):                   # giriş pahları
+        ch = trimesh.creation.cone(radius=r, height=r, sections=96)
+        if not up:
+            ch.apply_transform(trimesh.transformations.rotation_matrix(np.pi, [1, 0, 0]))
+        ch.apply_translation([BOLT[0], BOLT[1], z - 1.2 if up else z + 1.2])
+        m = m.difference(ch, engine="manifold")
+    return m
 
 
 def eagle():
     return mesh_from_sdf(part_eagle_sdf, (-70, SPLIT_Y - 1, WALL - 1), (70, 45, 122))
-
-
-def nut():
-    # basılı somun: altıgen, iç diş vidadan 0,4 mm boşluklu
-    n = hexagon(NUT_AF, NUT_H)
-    n.apply_translation([0, 0, NUT_H / 2])
-    tap = thread(SCREW_MAJ / 2 + 0.45, SCREW_MAJ / 2 - DEPTH_T + 0.45, NUT_H + 4, taper=0.01)
-    tap.apply_translation([0, 0, -2])
-    for z in (0, NUT_H):                                               # giriş pahları
-        ch = trimesh.creation.cone(radius=SCREW_MAJ / 2 + 1.2, height=SCREW_MAJ / 2 + 1.2, sections=96)
-        if z:
-            ch.apply_transform(trimesh.transformations.rotation_matrix(np.pi, [1, 0, 0]))
-        ch.apply_translation([0, 0, z - 1.2 if not z else z + 1.2])
-        n = n.difference(ch, engine="manifold")
-    return n.difference(tap, engine="manifold")
 
 
 def screw():
@@ -310,10 +302,16 @@ if __name__ == "__main__":
     e_print = e.copy(); e_print.apply_translation([0, 0, -e.bounds[0][2]])
     parts = {"kartal-aski-1-kelepce": c, "kartal-aski-1-kelepce-baski-yonu": print_pose(c),
              "kartal-aski-2-kartal": e, "kartal-aski-2-kartal-baski-yonu": e_print,
-             "kartal-aski-3-somun": nut(), "kartal-aski-4-vida": screw(), "kartal-aski-5-pabuc": pad()}
+             "kartal-aski-3-vida": screw(), "kartal-aski-4-pabuc": pad()}
     for name, m in parts.items():
-        assert m.is_watertight, name
-        m.export(os.path.join(HERE, f"{name}.stl"))
+        # STL float32 yazar: önce yuvarla ve temizle ki dosyadan geri okununca da kapalı kalsın
+        m = trimesh.Trimesh(m.vertices.astype(np.float32).astype(np.float64), m.faces, process=True)
+        m.update_faces(m.nondegenerate_faces()); m.update_faces(m.unique_faces())
+        m.remove_unreferenced_vertices(); m.merge_vertices()
+        assert m.is_watertight and m.is_volume, name
+        path = os.path.join(HERE, f"{name}.stl")
+        m.export(path)
+        assert trimesh.load(path).is_volume, name + " (dosyadan)"
         b = m.bounds[1] - m.bounds[0]
         print(f"{name}: {b[0]:.1f}×{b[1]:.1f}×{b[2]:.1f} mm, {m.volume/1000:.1f} cm³, {len(m.faces)} üçgen")
     asm = trimesh.util.concatenate([c, e])

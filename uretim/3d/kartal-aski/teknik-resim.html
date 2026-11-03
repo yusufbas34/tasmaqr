@@ -40,12 +40,12 @@ async function load(n) {
   g.deleteAttribute('normal');
   const m = mergeVertices(g, 1e-3); m.computeVertexNormals(); return m;
 }
-const NAMES = ['kelepce', 'kartal', 'somun', 'vida', 'pabuc'];
+const NAMES = ['kelepce', 'kartal', 'vida', 'pabuc'];
 const GEO = Object.fromEntries(await Promise.all(NAMES.map(async n => [n, await load(n)])));
 
 const DESK = 25, BOLT_Y = 26, TAIL_Y = -61.6, TAIL_Z = 30.6, TOP = 115.7, WING = 63.4;
-const ASM = { kelepce: [0, 0, 0], kartal: [0, 0, 0], somun: [0, BOLT_Y, -59.5], vida: [0, BOLT_Y, -90.5], pabuc: [0, BOLT_Y, -DESK - 7] };
-const EXP = { kelepce: [0, 0, 0], kartal: [0, 0, 38], somun: [0, BOLT_Y, -36], vida: [0, BOLT_Y, -150], pabuc: [0, BOLT_Y, -16] };
+const ASM = { kelepce: [0, 0, 0], kartal: [0, 0, 0], vida: [0, BOLT_Y, -92], pabuc: [0, BOLT_Y, -DESK - 7] };
+const EXP = { kelepce: [0, 0, 0], kartal: [0, 0, 38], vida: [0, BOLT_Y, -150], pabuc: [0, BOLT_Y, -22] };
 const RCOL = { kelepce: 0x5e4630, kartal: 0x7a5b3e, somun: 0x2f3338, vida: 0x2f3338, pabuc: 0x1d1d1d };
 
 function outlineMat(t) {
@@ -95,7 +95,7 @@ function panel({ x, y, w, h, dir, up, center, scale = 1, build, persp = null, bg
     cam.up.set(...up); cam.lookAt(c);
   }
   cam.updateMatrixWorld(); cam.updateProjectionMatrix();
-  build(scene, scale);
+  build(scene, scale, r);
   r.render(scene, cam);
   const P = (p) => { const v = new THREE.Vector3(...p).project(cam); return [x + (v.x + 1) / 2 * w, y + (1 - v.y) / 2 * h]; };
   return { P, x, y, w, h };
@@ -186,9 +186,8 @@ const V6 = panel({ x: 242, y: 118, w: 84, h: 112, center: [0, 0, 4], scale: 0.3,
   const q = (n, p, bx, by) => { const t = P(p); balloon(bx, by, n, t[0], t[1]); };
   q('1', [0, -45, 14], V6.x + 10, V6.y + 62);
   q('2', [-40, 4, 108], V6.x + 10, V6.y + 22);
-  q('3', [12, BOLT_Y, -31], V6.x + 74, V6.y + 70);
-  q('4', [0, BOLT_Y + 15, -145], V6.x + 74, V6.y + 102);
-  q('5', [14, BOLT_Y, -12], V6.x + 74, V6.y + 58);
+  q('3', [0, BOLT_Y + 15, -145], V6.x + 74, V6.y + 102);
+  q('4', [14, BOLT_Y, -18], V6.x + 74, V6.y + 58);
   vtitle(V6.x + 4, V6.y + 6, 'PATLATILMIŞ MONTAJ', '1:3,3');
 }
 frame(V6.x, V6.y, V6.w, V6.h);
@@ -203,17 +202,24 @@ const V7 = panel({ x: 328, y: 128, w: 46, h: 102, center: [0, 0, 31], dir: [-1, 
   dim(P([0, -20.7, 0]), P([0, 20.7, 0]), 'h', P([0, 0, -6])[1], 'Ø42', { size: 2.6 });
   dim(P([0, -20.7, 0]), P([0, -20.7, 14]), 'v', P([0, -23, 0])[0], '14', { size: 2.4 });
 }
-const V8 = panel({ x: 374, y: 128, w: 36, h: 52, center: [0, 0, 5], dir: [0, 0, -1], up: [0, 1, 0], build: (s, sc) => { lights(s); addPart(s, 'somun', [0, 0, 0], { color: 0xdfe2e6, scale: sc }); } });
+const V8 = panel({ x: 374, y: 128, w: 36, h: 54, center: [0, 26, -58], dir: [-1, 0, 0], up: [0, 0, 1],
+  build: (s, sc, r) => {
+    lights(s); r.localClippingEnabled = true;
+    const plane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
+    s.add(new THREE.Mesh(GEO.kelepce, new THREE.MeshLambertMaterial({ color: 0xdfe2e6, side: THREE.DoubleSide, clippingPlanes: [plane] })));
+    s.add(new THREE.LineSegments(new THREE.EdgesGeometry(GEO.kelepce, 40), new THREE.LineBasicMaterial({ color: 0x111111, clippingPlanes: [plane] })));
+  } });
 {
   const P = V8.P;
-  dim(P([-7.5, 13, 10]), P([-7.5, -13, 10]), 'v', P([-17, 0, 0])[0], 'AA 26', { size: 2.4 });
-  dim(P([-15, -13, 10]), P([15, -13, 10]), 'h', P([0, -19, 0])[1], '30', { size: 2.4 });
-  txt(V8.x + V8.w / 2, V8.y + V8.h - 2, 'somun · kalınlık 10', { size: 2.2, fill: '#444' });
+  centerLine(P([0, 26, -72]), P([0, 26, -44]));
+  dim(P([0, 26 - 8.5, -50]), P([0, 26 + 8.5, -50]), 'h', P([0, 0, -40])[1], 'Ø17 iç', { size: 2.3 });
+  dim(P([0, 42, -50]), P([0, 42, -66]), 'v', P([0, 46, 0])[0], '16', { size: 2.3 });
+  txt(V8.x + V8.w / 2, V8.y + V8.h - 2, 'A-A: çene iç dişi', { size: 2.2, fill: '#444' });
 }
 const V9 = panel({ x: 374, y: 182, w: 36, h: 48, center: [0, 0, 3.5], dir: [1, 0.8, -0.9], scale: 0.9, up: [0, 0, 1], build: (s, sc) => { lights(s); addPart(s, 'pabuc', [0, 0, 0], { color: 0xb5b5b5, scale: sc }); } });
 txt(V9.x + V9.w / 2, V9.y + V9.h - 4, 'pabuç Ø30 × 7', { size: 2.2, fill: '#444' });
 frame(328, 118, 82, 112);
-vtitle(332, 124, 'DETAY · PARÇA 3, 4, 5', '1:1');
+vtitle(332, 124, 'DETAY · PARÇA 3, 4 · KESİT A-A', '1:1');
 
 // ---------- Notlar + montaj ----------
 {
@@ -223,20 +229,20 @@ vtitle(332, 124, 'DETAY · PARÇA 3, 4, 5', '1:1');
    'Masaya delik açılmaz; vida elle sıkılır.',
    'Masa kalınlığı 15–45 mm.',
    'Diş: tek ağız, Ø16, adım 3, derinlik 1,2.',
-   'Somun iç dişi +0,45 mm boşluklu.',
+   'İç diş doğrudan çenede, +0,5 mm boşluklu.',
    'Pimler Ø6 × 5, kartaldaki delik Ø6,5.',
    'Kuyruk kalınlığı 8,5; kelepçeyle tek parça.',
    'Kuyruk yükü: en çok 3 kg (hesap: kökte',
    '≈4 MPa). Basıldıktan sonra kademeli deneyin.',
-   'Pabuç (5) TPU önerilir, masayı çizmez.'].forEach((s, i) => txt(x, y + 4.6 + i * 3.4, s, { size: 2.25, anchor: 'start' }));
+   'Pabuç (4) TPU önerilir, masayı çizmez.'].forEach((s, i) => txt(x, y + 4.6 + i * 3.4, s, { size: 2.25, anchor: 'start' }));
   x = 128;
   txt(x, y, 'MONTAJ', { size: 3.0, weight: 700, anchor: 'start' });
   ['1. Kartalı (2) kelepçenin (1) pimlerine oturtun,',
    '    CA veya epoksi ile yapıştırın.',
-   '2. Somunu (3) çenedeki altıgen yuvaya bastırın.',
-   '3. Vidayı (4) alttan çeneye geçirip somuna çevirin.',
-   '4. Pabucu (5) vida ucuna oturtun.',
-   '5. Kelepçeyi masa kenarına geçirin, topuzu sıkın.',
+   '2. Vidayı (3) alttan çenedeki dişe çevirin.',
+   '    İlk takışta birkaç kez ileri geri çevirin.',
+   '3. Pabucu (4) vida ucuna oturtun.',
+   '4. Kelepçeyi masa kenarına geçirin, topuzu sıkın.',
    '    Kartal masaya bakar, kuyruk dışarı uzanır.'].forEach((s, i) => txt(x, y + 4.6 + i * 3.4, s, { size: 2.25, anchor: 'start' }));
 }
 
@@ -244,13 +250,12 @@ vtitle(332, 124, 'DETAY · PARÇA 3, 4, 5', '1:1');
 {
   const x = 242, y = 232, w = 168;
   const cols = [0, 9, 60, 71, 100, 146, 168];
-  const head = ['Poz', 'Parça', 'Adet', 'Malzeme', 'Baskı', 'Hacim'];
+  const head = ['Poz', 'Parça', 'Adet', 'Malzeme', 'Baskı', 'Ağırlık'];
   const rows = [
-    ['1', 'Kelepçe + kuyruk askı', '1', 'PETG', 'yan yatık, 5 duvar, %40', '89 cm³'],
-    ['2', 'Kartal, açık kanat, taş kaide', '1', 'PETG / PLA', 'dik, ağaç destek, %15', '56 cm³'],
-    ['3', 'Somun Ø16×3, AA 26', '1', 'PETG', 'düz, %100', '3,9 cm³'],
-    ['4', 'Sıkma vidası Ø16×3 × 48', '1', 'PETG', 'topuz altta, %100', '26 cm³'],
-    ['5', 'Pabuç Ø30 × 7', '1', 'TPU / PETG', 'düz, %100', '4,2 cm³'],
+    ['1', 'Kelepçe + kuyruk askı, iç dişli', '1', 'PETG', 'yan yatık, 5 duvar, %40', '≈ 90 g'],
+    ['2', 'Kartal, açık kanat, taş kaide', '1', 'PETG / PLA', 'dik, ağaç destek, %15', '≈ 38 g'],
+    ['3', 'Sıkma vidası Ø16×3 × 48', '1', 'PETG', 'topuz altta, %100', '≈ 33 g'],
+    ['4', 'Pabuç Ø30 × 7', '1', 'TPU / PETG', 'düz, %100', '≈ 5 g'],
   ];
   const rh = 4.2, n = rows.length + 1;
   el('rect', { x, y, width: w, height: rh * n, fill: 'none', stroke: '#111', 'stroke-width': 0.35 });
@@ -275,9 +280,9 @@ vtitle(332, 124, 'DETAY · PARÇA 3, 4, 5', '1:1');
   cell(x + 69, y + 13.5, 'TARİH', '03.11.2026');
   cell(x + 2, y + 22, 'ÇİZEN', 'Tasma QR Üretim');
   cell(x + 36, y + 22, 'MALZEME', 'PETG / TPU');
-  cell(x + 69, y + 22, 'AĞIRLIK', '≈ 140 g');
+  cell(x + 69, y + 22, 'AĞIRLIK', '≈ 166 g');
   cell(x + 102, y + 3, 'PAFTA NO', 'TQ-KA-001');
-  txt(x + 135, y + 3, 'REV', { size: 1.8, anchor: 'start', fill: '#666' }); txt(x + 135, y + 6.9, 'C', { size: 2.7, anchor: 'start', weight: 600 });
+  txt(x + 135, y + 3, 'REV', { size: 1.8, anchor: 'start', fill: '#666' }); txt(x + 135, y + 6.9, 'D', { size: 2.7, anchor: 'start', weight: 600 });
   cell(x + 102, y + 13.5, 'İZDÜŞÜM', 'ISO-E');
   const sx = x + 152, sy = y + 15.3;
   el('path', { d: `M${sx} ${sy - 2} L${sx + 6.5} ${sy - 3.2} L${sx + 6.5} ${sy + 3.2} L${sx} ${sy + 2} Z`, fill: 'none', stroke: '#111', 'stroke-width': 0.25 });
