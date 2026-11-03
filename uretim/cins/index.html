@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Cinslere göre rozetler · Tasma QR</title>
+<!-- 10 kedi + 10 köpek cinsi, her cinsin tüy rengine göre 2 rozet (40 rozet), A4 sayfa başına 20. Üst yayda cinsin adı.
+     ?kodlar=K1,K2,… verilirse rozetler bu stok kodlarıyla (sırayla) basılır; yoksa ÖRNEK. PDF: node uretim/cins/uret.js -->
+<link rel="stylesheet" href="../../shared/fonts.css">
+<link rel="stylesheet" href="../../shared/tag.css">
+<script src="../../shared/vendor/qrcode.js"></script>
+<script src="../../shared/tag.js"></script>
+<style>
+@page{size:A4;margin:0}
+*{box-sizing:border-box}
+body{margin:0;background:#888;font-family:"Barlow",sans-serif;color:#2a1a10}
+.page{width:210mm;height:297mm;margin:10mm auto;background:#f6f1ea;position:relative;overflow:hidden;padding:8mm 10mm 0}
+@media print{body{background:none}.page{margin:0;break-after:page}}
+.head{display:flex;align-items:center;justify-content:space-between;border-bottom:.6mm solid #b8501a;padding-bottom:2.2mm}
+.head h1{font:700 8.4mm/1 "Barlow Condensed",sans-serif;margin:0;letter-spacing:.02em}
+.head h1 span{color:#b8501a}
+.head p{margin:.8mm 0 0;font-size:3.1mm;color:#6a5d54}
+.head .logo{display:flex;align-items:center;gap:2mm;font:700 5.6mm "Barlow Condensed",sans-serif}
+.head .logo img{width:10mm;height:10mm;border-radius:22%}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:2.4mm;margin-top:3mm}
+.card{background:#fff;border-radius:3mm;padding:1.8mm 3mm 1.4mm;border:.25mm solid #e2d8cd}
+.card h2{margin:0;font:700 5mm/1.05 "Barlow Condensed",sans-serif;display:flex;justify-content:space-between;align-items:baseline}
+.card h2 small{font:600 2.8mm "Barlow",sans-serif;color:#6a5d54}
+.pair{display:flex;justify-content:space-around;margin-top:.8mm}
+.one{display:flex;flex-direction:column;align-items:center}
+.one .badgebox{filter:drop-shadow(0 .6mm .8mm rgba(0,0,0,.22))}
+.sw{display:flex;align-items:center;gap:1.2mm;margin-top:.6mm;font-size:2.9mm;font-weight:600}
+.sw i{width:3mm;height:3mm;border-radius:50%;border:.2mm solid rgba(0,0,0,.25);display:inline-block}
+.sw code{font-family:inherit;color:#6a5d54;font-weight:500}
+.foot{position:absolute;left:10mm;right:10mm;bottom:5mm;display:flex;justify-content:space-between;font-size:3.2mm;color:#6a5d54}
+.foot b{color:#b8501a}
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script>
+const SITE = "https://tasma.bulqr.com.tr/?r=cins";
+// [cins, açıklama, [[renk adı, hex], [renk adı, hex]]]
+const CATS = [
+  ["Tekir", "Türkiye'nin en yaygını", [["Kahve tekir", "#886548"], ["Gri tekir", "#7D7468"]]],
+  ["Sarman", "Turuncu tekir", [["Sarman", "#D9822B"], ["Krem", "#E8C08A"]]],
+  ["British Shorthair", "Sakin ve yumuşak tüylü", [["Mavi gri", "#8295A8"], ["Lila", "#B5A8B0"]]],
+  ["Scottish Fold", "Katlanmış kulaklar", [["Gümüş", "#A5A9AD"], ["Krem", "#D8C3A5"]]],
+  ["Van Kedisi", "Yerli, suyu sever", [["Kar beyazı", "#F5F1E8"], ["Mavi göz", "#5B8FC9"]]],
+  ["Ankara Kedisi", "Yerli, ipek tüylü", [["Beyaz", "#F7F4EF"], ["Duman", "#9DA3A8"]]],
+  ["Maine Coon", "İri ve kabarık", [["Kahve", "#795B45"], ["Kızıl", "#A0522D"]]],
+  ["İran Kedisi", "Uzun tüylü, basık yüz", [["Krem", "#EADBC8"], ["Gri", "#9A9A9E"]]],
+  ["Siyam", "Mavi gözlü, renkli uçlar", [["Krem", "#EFE3CF"], ["Koyu kahve", "#4A3426"]]],
+  ["Bengal", "Leopar desenli", [["Altın", "#C8913F"], ["Kar", "#E9E1D3"]]],
+];
+const DOGS = [
+  ["Golden Retriever", "Ailenin dostu", [["Altın", "#D4A55A"], ["Krem", "#EBD3A6"]]],
+  ["Labrador Retriever", "Enerjik ve sadık", [["Siyah", "#292229"], ["Sarı", "#E3C48A"]]],
+  ["Toy Poodle", "Kıvırcık ve zeki", [["Kayısı", "#D99A68"], ["Siyah", "#2B2B2B"]]],
+  ["Maltese", "Küçük, bembeyaz", [["Beyaz", "#F5F1EB"], ["Fildişi", "#EDE3D1"]]],
+  ["Pomeranian", "Pamuk gibi kabarık", [["Turuncu", "#C98243"], ["Krem", "#E6C9A0"]]],
+  ["Siberian Husky", "Buz mavisi gözler", [["Gri", "#8E959C"], ["Buz mavisi", "#7EB6D9"]]],
+  ["French Bulldog", "Yarasa kulaklı", [["Açık kahve", "#C9A27A"], ["Mavi", "#6E7B8B"]]],
+  ["Alman Çoban", "Zeki ve koruyucu", [["Kahve", "#8B5A2B"], ["Siyah", "#2A2420"]]],
+  ["Kangal", "Yerli, güçlü bekçi", [["Bej", "#D2B48C"], ["Siyah maske", "#2E2A27"]]],
+  ["Jack Russell", "Küçük ve hareketli", [["Beyaz", "#F4F1EC"], ["Ten", "#B9783F"]]],
+];
+const codes = (new URLSearchParams(location.search).get("kodlar") || "").split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
+let ci = 0;
+const lum = hex => { const n = parseInt(hex.slice(1), 16); return (.299 * (n >> 16) + .587 * (n >> 8 & 255) + .114 * (n & 255)) / 255; };
+// Her renk için etiket tasarımı: halka tüy renginde, yazı açık zeminde koyu, koyu zeminde beyaz
+function breedBadge(kind, breed, hex) {
+  const light = lum(hex) > .62, key = "cins" + (++ci);
+  DESIGNS[key] = {name: breed, ring: hex, ink: light ? "#2a1a10" : "#fff", accent: light ? "#6e2c0c" : "#fff",
+    icon: kind === "kedi" ? "cat" : "dog", side: "paw", top: breed, ...(lum(hex) > .88 ? {line: "#b9ae9f"} : {})};
+  const code = codes[ci - 1] || "ÖRNEK";
+  return badgeAt(code, key, "y30", {top: breed, body: hex, link: codes[ci - 1] ? tagLink(code) : SITE});
+}
+const page = (kind, title, list, no) => `<div class="page">
+  <div class="head"><div><h1>${title} <span>göre rozetler</span></h1><p>Her cinse, tüy rengine uyan iki renk. Üstte cinsin adı, altta “OKUT • SAHİBİMİ ARA”.</p></div>
+    <div class="logo"><img src="../../shared/logo.svg" alt="">Tasma QR</div></div>
+  <div class="grid">${list.map(([breed, note, cols]) => `<div class="card"><h2>${esc(breed)}<small>${esc(note)}</small></h2>
+    <div class="pair">${cols.map(([cn, hex]) => `<div class="one">${breedBadge(kind, breed, hex)}<div class="sw"><i style="background:${hex}"></i>${esc(cn)} <code>${hex}</code></div></div>`).join("")}</div></div>`).join("")}</div>
+  <div class="foot"><span>Ø30 mm · 3D baskı PETG gövde + su geçirmez lamine QR sticker · gerçek boyut</span><span><b>tasma.bulqr.com.tr</b> · Hazır rozet 250 TL · ${no}/2</span></div>
+</div>`;
+document.getElementById("out").outerHTML = page("kedi", "Kedi cinslerine", CATS, 1) + page("kopek", "Köpek cinslerine", DOGS, 2);
+</script>
+</body>
+</html>
