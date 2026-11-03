@@ -1,11 +1,12 @@
-# Kartal askı: masaya delik açmadan, alttan cıvatayla sıkılan kelepçe (C-işkence).
-# Kartal masanın ön kenarına konmuş; bacakları kelepçenin ön yüzünden iner, pençeleri öne
-# uzanıp yukarı kıvrılarak kulaklık / çanta askısı olur.
+# Kartal askı: masaya delik açmadan, alttan elle sıkılan kelepçe (C-işkence).
+# Kartal kanatları açık, yüzü masaya dönük, taş kaidesiyle kelepçenin üstüne oturur.
+# Kuyruğu masa kenarından dışarı doğru uzanır, ucu kalkık: kulaklık / çanta askısı olur.
 # Çalıştırma: pip install trimesh fast_simplification scikit-image manifold3d numpy && python3 kartal_aski.py
 #
 # Eksenler (mm): x = masa kenarı boyunca, y = masanın içine doğru (+), z = yukarı.
 # Masa üst yüzü z=0, masa ön kenarı y=0. Kelepçe ağzı z = 0 … -GAP.
-# Hazır donanım gerekmez: vida, somun ve pabuç da basılır.
+# Parçalar: 1 kelepçe + kuyruk (yan yatık basılır), 2 kartal (dik basılır, 2 pimle oturup yapıştırılır),
+#           3 somun, 4 sıkma vidası, 5 pabuç. Hazır donanım gerekmez.
 import os
 import numpy as np
 import trimesh
@@ -17,11 +18,14 @@ RES = 0.45
 HW = 22.0          # kelepçe yarım genişliği (x)
 WALL = 9.0         # üst plaka ve ön kol kalınlığı
 DEPTH = 50.0       # üst plakanın masa üstündeki derinliği
-GAP = 50.0         # ağız: masa kalınlığı + baskı pabucu (18–42 mm masa)
+GAP = 50.0         # ağız: masa kalınlığı + pabuç
 JAW = 16.0         # alt çene kalınlığı
-BOLT = (0.0, 26.0) # cıvata ekseni (x, y)
+BOLT = (0.0, 26.0) # vida ekseni (x, y)
 PITCH, SCREW_MAJ, DEPTH_T, SCREW_L = 3.0, 16.0, 1.2, 48.0   # basılı vida: Ø16, adım 3
 NUT_AF, NUT_H = 26.0, 10.0                                    # basılı somun
+PINS = [(-9.0, 17.0), (9.0, 17.0)]   # kartalı kelepçeye oturtan pimler (x, y)
+PIN_D, PIN_L = 6.0, 5.0
+SPLIT_Y = -3.0     # kuyruk bu düzlemde ikiye ayrılır: önü kelepçede, arkası kartalda
 
 
 def smin(a, b, k):
@@ -64,45 +68,122 @@ def clamp_sdf(p):
     return np.minimum(np.minimum(top, arm), jaw)
 
 
-def eagle_sdf(p):
+def rot_ellipsoid(p, c, r, ang):
+    """x-z düzleminde ang (rad) kadar döndürülmüş elipsoid; r[0] uzun eksen."""
+    d = p - np.array(c)
+    ca, sa = np.cos(ang), np.sin(ang)
+    q = np.stack([d[..., 0] * ca + d[..., 2] * sa, d[..., 1], -d[..., 0] * sa + d[..., 2] * ca], axis=-1)
+    return ellipsoid(q, (0, 0, 0), r)
+
+
+def seg2(py, pz, a, b):
+    ab = np.array(b) - np.array(a)
+    t = np.clip(((py - a[0]) * ab[0] + (pz - a[1]) * ab[1]) / (ab @ ab), 0, 1)
+    return np.hypot(py - a[0] - t * ab[0], pz - a[1] - t * ab[1]), t
+
+
+_TP = [(6, 19), (-3, 14), (-12, 12), (-28, 12), (-42, 13.5), (-52, 17.5), (-57, 26)]
+_TW = [16, 20, 27, 36, 44, 46, 44]          # kuyruk genişliği (x), uca doğru yelpaze gibi açılır
+
+
+def _chaikin(pts, ws, n=3):
+    P, W = np.array(pts, float), np.array(ws, float)
+    for _ in range(n):
+        q = [P[0]]; w = [W[0]]
+        for i in range(len(P) - 1):
+            q += [0.75 * P[i] + 0.25 * P[i + 1], 0.25 * P[i] + 0.75 * P[i + 1]]
+            w += [0.75 * W[i] + 0.25 * W[i + 1], 0.25 * W[i] + 0.75 * W[i + 1]]
+        q.append(P[-1]); w.append(W[-1])
+        P, W = np.array(q), np.array(w)
+    return [tuple(p) for p in P], list(W)
+
+
+TAIL, TAIL_W = _chaikin(_TP, _TW)     # köşeleri yuvarlatılmış kuyruk yolu (y, z)
+
+
+def tail_sdf(p, t_th=8.5):
     x, y, z = p[..., 0], p[..., 1], p[..., 2]
-    # gövde + göğüs, kenara konmuş, öne bakıyor (-y)
-    d = ellipsoid(p, (0, -1, 38), (17, 15, 28))
-    d = smin(d, ellipsoid(p, (0, -8, 44), (14, 10, 19)), 6)
-    # kanatlar: yanlara katlanmış, tüy sıraları kabartmalı
-    for s in (-1, 1):
-        w = ellipsoid(p, (s * 13.5, 4, 37), (6.5, 15, 27))
-        w = np.minimum(w, cone(p, (s * 12, 12, 20), (s * 8, 30, 11), 5.5, 2.0))
-        w = w + 0.45 * np.sin(0.85 * z + 0.55 * y) * (y > -6)
-        d = smin(d, w, 3)
-    # kuyruk: plakanın üstüne yatık
-    d = smin(d, ellipsoid(p, (0, 30, 11), (10, 15, 3.2)), 4)
-    # kafa, kaş çıkıntıları, kanca gaga
-    d = smin(d, ellipsoid(p, (0, -5, 72), (12, 13, 12)), 8)
-    for s in (-1, 1):
-        d = smin(d, ellipsoid(p, (s * 6, -13, 77), (5, 4.5, 2.4)), 2)
-    d = smin(d, chain(p, [(0, -13, 72), (0, -23, 71), (0, -28.5, 65.5), (0, -27, 61)], [5.5, 3.8, 2.0, 0.9]), 2.5)
-    for s in (-1, 1):                                                  # gözler (çukur)
-        d = np.maximum(d, -ellipsoid(p, (s * 8.2, -13.5, 74.5), (2.2, 2.2, 2.2)))
-    # bacaklar: tüylü üst bacak + kelepçenin önünden inen incik
-    for s in (-1, 1):
-        fx = s * 9.5
-        d = smin(d, ellipsoid(p, (fx, -10, 14), (7, 8, 10)), 4)
-        d = smin(d, cone(p, (fx, -13, 8), (fx, -14.5, -40), 5.2, 4.6), 3)
-        # pençe: 3 parmak öne uzanıp yukarı kıvrılıyor = askı kancası
-        for dx in (-3.6, 0.0, 3.6):
-            toe = chain(p, [(fx + dx * 0.3, -14.5, -42), (fx + dx, -30, -47), (fx + dx * 1.1, -43, -45),
-                            (fx + dx * 1.15, -48, -36), (fx + dx * 1.15, -47, -30)],
-                        [4.6, 4.3, 4.0, 3.2, 1.6])
-            d = smin(d, toe, 1.5)
+    best = np.full(x.shape, 1e9); w = np.zeros(x.shape)
+    for i in range(len(TAIL) - 1):
+        d, t = seg2(y, z, TAIL[i], TAIL[i + 1])
+        m = d < best
+        best = np.where(m, d, best)
+        w = np.where(m, TAIL_W[i] + (TAIL_W[i + 1] - TAIL_W[i]) * t, w)
+    r = 2.2
+    q0 = best - t_th / 2 + r
+    q1 = np.abs(x) - w / 2 + r
+    d = np.hypot(np.maximum(q0, 0), np.maximum(q1, 0)) + np.minimum(np.maximum(q0, q1), 0) - r
+    return d + 0.35 * np.sin(x * 1.15)                         # tüy oluklari
+
+
+def wing_sdf(p, s):
+    q = p.copy(); q[..., 0] = s * p[..., 0]                   # sağ kanat formülü, aynalanır
+    S, W = np.array([10.0, 5.5, 50.0]), np.array([48.0, 2.5, 80.0])
+    a = np.arctan2(W[2] - S[2], W[0] - S[0])
+    L = np.linalg.norm(W - S)
+    d = rot_ellipsoid(q, (S + W) / 2, (L / 2 + 5, 3.4, 10.5), a)        # örtü tüyleri
+    n = 10
+    for i in range(n):
+        t = i / (n - 1)
+        base = S + (W - S) * t
+        ang = np.radians(-38 + 108 * t)
+        Lf = 20 + 18 * t
+        c = base + np.array([np.cos(ang), 0, np.sin(ang)]) * Lf / 2
+        c[1] -= 0.4 * i * 0.3
+        d = smin(d, rot_ellipsoid(q, c, (Lf / 2, 2.2, 4.6 - 1.2 * t), ang), 1.2)
     return d
 
 
-def full_sdf(p):
-    d = smin(clamp_sdf(p), eagle_sdf(p), 3)
-    # masa ve kelepçe ağzı boş kalsın
+def eagle_sdf(p):
+    x, y, z = p[..., 0], p[..., 1], p[..., 2]
+    # taş kaide (kelepçe plakasına oturur)
+    rock = rbox(p, (-20, SPLIT_Y, 8), (20, 37, 17.5), 4.5)
+    rock = rock + 0.7 * np.sin(0.45 * x + 1.3) * np.sin(0.5 * y) + 0.4 * np.sin(0.9 * x + 0.7 * y)
+    d = rock
+    # gövde, göğüs (masaya, +y yönüne bakıyor)
+    body = ellipsoid(p, (0, 8, 38), (15, 13, 22))
+    body = smin(body, ellipsoid(p, (0, 14, 42), (12, 9, 16)), 6)
+    for s in (-1, 1):                                          # bacaklar ve pençeler kaideyi kavrar
+        fx = s * 8
+        body = smin(body, ellipsoid(p, (fx, 13, 24), (7, 8, 9)), 4)
+        body = smin(body, cone(p, (fx, 15, 20), (fx, 18, 18), 4.2, 3.6), 2)
+        for dx in (-3.2, 0, 3.2):
+            body = smin(body, chain(p, [(fx + dx * 0.3, 18, 18), (fx + dx, 27, 18.2), (fx + dx * 1.1, 31, 16.5)], [3.0, 2.4, 1.3]), 1)
+    d = smin(d, body, 3)
+    # kafa, kaşlar, kanca gaga, gözler
+    d = smin(d, ellipsoid(p, (0, 16, 66), (11, 12, 11)), 8)
+    for s in (-1, 1):
+        d = smin(d, ellipsoid(p, (s * 6, 24, 71), (5, 4.5, 2.4)), 2)
+    d = smin(d, chain(p, [(0, 25, 66), (0, 33, 64.5), (0, 37.5, 59.5), (0, 36, 55.5)], [5.5, 3.8, 2.0, 0.9]), 2.5)
+    for s in (-1, 1):
+        d = np.maximum(d, -ellipsoid(p, (s * 8.2, 24.5, 68.5), (2.2, 2.2, 2.2)))
+    # açık kanatlar
+    for s in (-1, 1):
+        d = smin(d, wing_sdf(p, s), 4)
+    # kuyruğun kartal tarafı
+    d = smin(d, np.maximum(tail_sdf(p), SPLIT_Y - y), 4)
+    return d
+
+
+def part_clamp_sdf(p):
+    y = p[..., 1]
+    d = smin(clamp_sdf(p), np.maximum(tail_sdf(p), y - (SPLIT_Y - 0.15)), 6)     # geniş köşe dolgusu: kuyruk kökü sağlam
     mouth = rbox(p, (-HW - 5, 0, -GAP), (HW + 5, 200, 0), 0.01)
     d = np.maximum(d, -mouth)
+    d = np.maximum(d, np.abs(p[..., 0]) - HW)                  # yanlar düz: yan yatırıp basmak için
+    for px, py in PINS:                                        # pimler
+        d = np.minimum(d, np.maximum(cone(p, (px, py, WALL - 1), (px, py, WALL + PIN_L - 0.6), PIN_D / 2, PIN_D / 2 - 0.4), -p[..., 2] + WALL - 1))
+    return d
+
+
+def part_eagle_sdf(p):
+    y, z = p[..., 1], p[..., 2]
+    d = eagle_sdf(p)
+    d = np.maximum(d, SPLIT_Y + 0.15 - y)     # kuyruğun önü kelepçede
+    d = np.maximum(d, -(clamp_sdf(p) - 0.2))                   # kelepçeye oturduğu yer düz
+    d = np.maximum(d, WALL - z)
+    for px, py in PINS:
+        d = np.maximum(d, -cone(p, (px, py, WALL - 1), (px, py, WALL + PIN_L + 0.6), PIN_D / 2 + 0.25, PIN_D / 2 + 0.25))
     return d
 
 
@@ -161,13 +242,17 @@ def thread(r_maj, r_min, length, pitch=PITCH, taper=1.5, n_th=144, per_pitch=24)
     return m
 
 
-def body():
-    m = mesh_from_sdf(full_sdf, (-HW - 1, -55, -GAP - JAW - 2), (HW + 1, DEPTH + 2, 88))
+def clamp():
+    m = mesh_from_sdf(part_clamp_sdf, (-HW - 1, -62, -GAP - JAW - 2), (HW + 1, DEPTH + 2, 36))
     hole = trimesh.creation.cylinder(radius=SCREW_MAJ / 2 + 0.6, height=JAW * 3, sections=96)
     hole.apply_translation([BOLT[0], BOLT[1], -GAP - JAW / 2])
     pocket = hexagon(NUT_AF + 0.5, (NUT_H - 0.5) * 2)                 # somun yuvası çenenin üst yüzünde
     pocket.apply_translation([BOLT[0], BOLT[1], -GAP])
     return m.difference(hole, engine="manifold").difference(pocket, engine="manifold")
+
+
+def eagle():
+    return mesh_from_sdf(part_eagle_sdf, (-70, SPLIT_Y - 1, WALL - 1), (70, 45, 122))
 
 
 def nut():
@@ -221,11 +306,15 @@ def print_pose(m):
 
 
 if __name__ == "__main__":
-    b = body()
-    parts = {"kartal-aski-govde": b, "kartal-aski-govde-baski-yonu": print_pose(b),
-             "kartal-aski-vida": screw(), "kartal-aski-somun": nut(), "kartal-aski-pabuc": pad()}
+    c, e = clamp(), eagle()
+    e_print = e.copy(); e_print.apply_translation([0, 0, -e.bounds[0][2]])
+    parts = {"kartal-aski-1-kelepce": c, "kartal-aski-1-kelepce-baski-yonu": print_pose(c),
+             "kartal-aski-2-kartal": e, "kartal-aski-2-kartal-baski-yonu": e_print,
+             "kartal-aski-3-somun": nut(), "kartal-aski-4-vida": screw(), "kartal-aski-5-pabuc": pad()}
     for name, m in parts.items():
         assert m.is_watertight, name
         m.export(os.path.join(HERE, f"{name}.stl"))
-        e = m.bounds[1] - m.bounds[0]
-        print(f"{name}: {e[0]:.1f}×{e[1]:.1f}×{e[2]:.1f} mm, {m.volume/1000:.1f} cm³, {len(m.faces)} üçgen")
+        b = m.bounds[1] - m.bounds[0]
+        print(f"{name}: {b[0]:.1f}×{b[1]:.1f}×{b[2]:.1f} mm, {m.volume/1000:.1f} cm³, {len(m.faces)} üçgen")
+    asm = trimesh.util.concatenate([c, e])
+    print("montaj sınırları", asm.bounds.round(1).tolist())
