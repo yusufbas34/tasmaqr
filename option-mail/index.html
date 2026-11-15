@@ -115,8 +115,8 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
       <div style="display:flex;flex-direction:column;gap:10px">
         <div class="small muted" style="font-weight:700">Şartlar</div>
         <div class="row">
-          <span class="chip">MAG a göre DH &gt; <input id="cDH" type="number" step="1" value="0">%</span>
-          <span class="chip">MAG a göre GMROI &gt; <input id="cGM" type="number" step="1" value="0">%</span>
+          <span class="chip">MAG a göre DH <select id="cDHop" style="padding:2px 4px"><option value="lt" selected>&lt;</option><option value="gt">&gt;</option></select> <input id="cDH" type="number" step="1" value="0">%</span>
+          <span class="chip">MAG a göre GMROI <select id="cGMop" style="padding:2px 4px"><option value="lt" selected>&lt;</option><option value="gt">&gt;</option></select> <input id="cGM" type="number" step="1" value="0">%</span>
           <span class="chip">STR &lt; <input id="cSTR" type="number" step="1" value="50">%</span>
           <span class="chip">Raf Ömrü = RafOk</span>
           <span class="chip">Ortama sipariş kontrol = OrtÜst</span>
@@ -237,7 +237,7 @@ const nf2 = new Intl.NumberFormat('tr-TR',{minimumFractionDigits:2,maximumFracti
 const nf1 = new Intl.NumberFormat('tr-TR',{minimumFractionDigits:1,maximumFractionDigits:1});
 const fmt = (v,t)=>{ if(v==null||isNaN(v)) return '-';
   if(t==='int') return nfInt.format(v); if(t==='dec') return nf2.format(v); if(t==='dec1') return nf1.format(v);
-  if(t==='pct') return '%'+nf1.format(v*100); return String(v); };
+  if(t==='pct') return (v<0?'-%':'%')+nf1.format(Math.abs(v*100)); return String(v); };
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = s => String(s??'').normalize('NFC').trim();
 const $ = id => document.getElementById(id);
@@ -317,7 +317,8 @@ function parseWorkbook(wb){
 
 function eligible(o){
   const dh=+$('cDH').value/100, gm=+$('cGM').value/100, str=+$('cSTR').value/100;
-  return o.magDh!=null && o.magDh>dh && o.magGm!=null && o.magGm>gm && o.str!=null && o.str<str
+  const cmp=(v,op,t)=>v!=null && (op==='lt'? v<t : v>t);
+  return cmp(o.magDh,$('cDHop').value,dh) && cmp(o.magGm,$('cGMop').value,gm) && o.str!=null && o.str<str
     && o.rafFlag==='RafOk' && o.ortKontrol==='OrtÜst';
 }
 
@@ -431,10 +432,17 @@ function pickImage(html,o){
 }
 async function resolveImage(o,url){
   url=url||o.link||lcwLink(o);
-  if(isImgUrl(url)){ await setImage(o.key,url,true); return true; }
+  if(isImgUrl(url)) return storeFound(o,url);
   const html=await fetchText(url); if(!html) return false;
   const img=pickImage(html,o); if(!img) return false;
-  await setImage(o.key,new URL(img,url).href,true); return true;
+  return storeFound(o,new URL(img,url).href);
+}
+const imgLoads = u => new Promise(res=>{ const i=new Image(); const t=setTimeout(()=>res(false),15000); i.onload=()=>{clearTimeout(t);res(i.naturalWidth>20);}; i.onerror=()=>{clearTimeout(t);res(false);}; i.src=u; });
+async function storeFound(o,url){
+  const d=await toEmbedded(url);            // resmi indirip sayfaya göm (mailde kesin görünsün)
+  if(d){ await setImage(o.key,d,true); return true; }
+  if(await imgLoads(url)){ await setImage(o.key,url,true); return true; }
+  return false;
 }
 async function findAll(){
   const list=[]; for(const g of state.groups) for(const o of selectedIn(g)) if(!images[o.key]) list.push(o);
@@ -470,7 +478,7 @@ document.addEventListener('paste',e=>{ if(!activeSlot || !document.body.contains
   e.preventDefault(); handleTransfer(e.clipboardData, activeSlot.dataset.key); });
 
 // ---------- Mail HTML (inline stil, Outlook uyumlu tablolar) ----------
-const B='border:1px solid #9e9e9e;'; const TD='font-family:Calibri,Arial,sans-serif;font-size:12px;';
+const B='border:1px solid #9e9e9e;'; const TD='font-family:Calibri,Arial,sans-serif;font-size:11px;line-height:13px;mso-line-height-rule:exactly;';
 function sumTable(scope,forMail){
   const sc=SCOPES.find(s=>s[0]===scope); const rows=[];
   for(const g of state.groups.filter(g=>g.scope===scope)) for(const o of selectedIn(g)) rows.push(o);
@@ -482,7 +490,7 @@ function sumTable(scope,forMail){
       </tbody></table></div>`;
   }
   const th=(t,c)=>`<th style="${B}${TD}background:#f2f2f2;font-weight:bold;text-align:center;padding:3px 5px;${c?'color:'+c+';':''}">${t}</th>`;
-  const td=(t,r)=>`<td style="${B}${TD}padding:2px 5px;white-space:nowrap;${r?'text-align:right;':''}">${t}</td>`;
+  const td=(t,r)=>`<td style="${B}${TD}padding:1px 5px;white-space:nowrap;${r?'text-align:right;':''}">${t}</td>`;
   return `<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
     <tr><td colspan="7" style="${B}${TD}background:#3d2cff;color:#ffffff;font-weight:bold;text-align:center;padding:3px;">${sc[1]}</td></tr>
     <tr>${th('BuyerGrupTanim')}${th('UrunAd')}${th('RenkKod')}${th('RenkTanim')}${th('Ortalma Reyon<br>Devir Hızı','#c00000')}${th('GMROI<br>(Son 7 Gün)','#0070c0')}${th('Geçilen<br>Sipariş Adet')}</tr>
@@ -497,20 +505,20 @@ function summaryHTML(forMail){
 function mailHTML(imgSrc){
   const intro=esc($('mIntro').value);
   let h=`<div style="${TD}font-size:14px;margin-bottom:10px;">${intro}</div>`;
-  h+=`<div style="${TD}font-size:12px;color:#555;margin-bottom:8px;">Hafta: ${esc(state.week)} · Şartlar: MAG a göre DH &gt; %${esc($('cDH').value)}, MAG a göre GMROI &gt; %${esc($('cGM').value)}, STR &lt; %${esc($('cSTR').value)}, Raf Ömrü RafOk, Ortalama sipariş OrtÜst</div>`;
+  h+=`<div style="${TD}font-size:12px;color:#555;margin-bottom:8px;">Hafta: ${esc(state.week)} · Şartlar: MAG a göre DH ${$('cDHop').value==='lt'?'&lt;':'&gt;'} %${esc($('cDH').value)}, MAG a göre GMROI ${$('cGMop').value==='lt'?'&lt;':'&gt;'} %${esc($('cGM').value)}, STR &lt; %${esc($('cSTR').value)}, Raf Ömrü RafOk, Ortalama sipariş OrtÜst</div>`;
   h+=summaryHTML(true)+'<br><br>';
   for(const g of state.groups){ const sel=selectedIn(g); if(!sel.length) continue;
     const sc=SCOPES.find(s=>s[0]===g.scope); const n=sel.length;
     h+=`<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:18px;">`;
-    h+=`<tr><td colspan="${n*2}" style="${B}${TD}font-size:14px;text-align:center;font-weight:bold;background:#3d2cff;color:#ffffff;padding:6px;">${esc(sc[2])} / ${esc(g.buyer)}</td></tr>`;
-    h+=`<tr>${sel.map(o=>`<td colspan="2" style="${B}${TD}text-align:center;padding:4px;width:300px;background:#eeecff;color:#3d2cff;font-weight:bold;">${esc(o.ozel)}-${esc(o.urunAd)} - ${esc(o.renkTanim)} -${esc(o.renkKod)}</td>`).join('')}</tr>`;
+    h+=`<tr><td colspan="${n*2}" style="${B}${TD}font-size:13px;line-height:16px;text-align:center;font-weight:bold;background:#3d2cff;color:#ffffff;padding:4px;">${esc(sc[2])} / ${esc(g.buyer)}</td></tr>`;
+    h+=`<tr>${sel.map(o=>`<td colspan="2" style="${B}${TD}text-align:center;padding:2px 4px;width:260px;background:#eeecff;color:#3d2cff;font-weight:bold;">${esc(o.ozel)}-${esc(o.urunAd)} - ${esc(o.renkTanim)} -${esc(o.renkKod)}</td>`).join('')}</tr>`;
     h+=`<tr>${sel.map(o=>{ const s=images[o.key]; const src=s?imgSrc(o.key,s):'';
-      return `<td colspan="2" style="${B}${TD}text-align:center;height:260px;padding:4px;">${src?`<img src="${esc(src)}" height="250" style="height:250px;width:auto;" alt="${esc(o.urunAd)}">`:'RESİM'}</td>`; }).join('')}</tr>`;
+      return `<td colspan="2" height="190" style="${B}${TD}text-align:center;height:190px;padding:3px;">${src?`<img src="${esc(src)}" height="180" style="height:180px;width:auto;display:inline-block;" alt="${esc(o.urunAd)}">`:'RESİM'}</td>`; }).join('')}</tr>`;
     for(const [l,k,t] of METRICS){
-      h+=`<tr>${sel.map(o=>`<td style="${B}${TD}font-weight:bold;padding:2px 5px;white-space:nowrap;">${esc(l)}</td><td style="${B}${TD}padding:2px 6px;text-align:right;white-space:nowrap;width:70px;">${fmt(o[k],t)}</td>`).join('')}</tr>`;
+      h+=`<tr>${sel.map(o=>`<td height="15" style="${B}${TD}font-weight:bold;padding:1px 5px;white-space:nowrap;">${esc(l)}</td><td style="${B}${TD}padding:1px 6px;text-align:right;white-space:nowrap;width:60px;">${fmt(o[k],t)}</td>`).join('')}</tr>`;
     }
     h+='</table>';
-    h+='<table cellspacing="0" cellpadding="0" width="100%"><tr><td height="36" style="height:36px;font-size:1px;line-height:1px;">&nbsp;</td></tr></table>';
+    h+='<table cellspacing="0" cellpadding="0" width="100%"><tr><td height="24" style="height:24px;font-size:1px;line-height:1px;">&nbsp;</td></tr></table>';
   }
   return `<div style="${TD}">${h}</div>`;
 }
@@ -520,13 +528,29 @@ function subject(){ return ($('mSubj').value||'Option Önerileri').replace('{haf
 function b64utf8(str){ const bytes=new TextEncoder().encode(str); let bin=''; for(let i=0;i<bytes.length;i+=0x8000) bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000)); return btoa(bin); }
 const wrap76 = s=>s.replace(/.{1,76}/g,'$&\r\n');
 function hdrEnc(s){ return /^[\x20-\x7e]*$/.test(s)?s:'=?UTF-8?B?'+b64utf8(s)+'?='; }
-function buildEml(){
+async function toEmbedded(src){
+  if(!src || src.startsWith('data:')) return src||null;
+  const tries=[src]; const px=$('proxy').value.trim();
+  if(px) tries.push(px.includes('{url}')?px.replace('{url}',encodeURIComponent(src)):px+encodeURIComponent(src));
+  for(const u of tries){ try{ const c=new AbortController(); const t=setTimeout(()=>c.abort(),15000);
+    const r=await fetch(u,{signal:c.signal}); clearTimeout(t); if(!r.ok) continue;
+    const b=await r.blob(); if(!/^image\//.test(b.type) && b.size<2000) continue;
+    return await blobToDataURL(b.type.startsWith('image/')?b:new Blob([b],{type:'image/jpeg'})); }catch(e){} }
+  return null;
+}
+async function buildEml(){
+  // Linkli resimler maile gömülür (Outlook dış resimleri engelleyebiliyor)
+  const emb={};
+  for(const g of state.groups) for(const o of selectedIn(g)){ const s=images[o.key]; if(s && !s.startsWith('data:')){
+    const d=await toEmbedded(s); if(d){ emb[o.key]=d; images[o.key]=d; DB.put('images',o.key,d); }
+    else if(!(await imgLoads(s))) emb[o.key]='';  // açılmayan link: mailde boş kutu yerine "RESİM" yazar
+  } }
   const parts=[]; const cidMap={}; let i=0;
-  const html=mailHTML((key,src)=>{ const m=src.match(/^data:(image\/[a-z+]+);base64,(.*)$/i);
+  const html=mailHTML((key,src0)=>{ const src=(key in emb)?emb[key]:src0; if(!src) return ''; const m=src.match(/^data:(image\/[a-z+]+);base64,(.*)$/i);
     if(!m) return src; if(!cidMap[key]){ i++; cidMap[key]={cid:'img'+i+'@option', type:m[1], data:m[2], ext:m[1].split('/')[1]}; parts.push(cidMap[key]); }
     return 'cid:'+cidMap[key].cid; });
   const bnd='----=_opt_'+Date.now().toString(36);
-  const full=`<!doctype html><html><head><meta charset="utf-8"></head><body>${html}</body></html>`;
+  const full=`<!doctype html><html><head><meta charset="utf-8"><style>p{margin:0}td{mso-line-height-rule:exactly}</style></head><body>${html}</body></html>`;
   let eml='';
   eml+='X-Unsent: 1\r\n';
   if($('mTo').value.trim()) eml+='To: '+$('mTo').value.trim().replace(/;\s*/g,', ')+'\r\n';
@@ -546,7 +570,7 @@ async function saveWeek(silent){
   if(!state.week){ toast('Önce hafta gir'); return; }
   const sel=[]; for(const g of state.groups) for(const o of selectedIn(g)) sel.push(o);
   await DB.put('weeks',state.week,{ week:state.week, savedAt:new Date().toISOString(), fileName:state.fileName, sortBy:$('sortBy').value,
-    criteria:{proxy:$('proxy').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value}, eligibleCount:state.groups.reduce((a,g)=>a+g.list.length,0), rows:sel });
+    criteria:{dhOp:$('cDHop').value,gmOp:$('cGMop').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value}, eligibleCount:state.groups.reduce((a,g)=>a+g.list.length,0), rows:sel });
   if(!silent) toast(state.week+' haftası kaydedildi');
   await renderHistory();
 }
@@ -605,14 +629,16 @@ $('file').onchange=e=>{ const f=e.target.files[0]; if(f) loadFile(f); e.target.v
 ['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('over');}));
 ['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev,()=>$('drop').classList.remove('over')));
 $('drop').addEventListener('drop',e=>{ e.preventDefault(); const f=e.dataTransfer.files[0]; if(f) loadFile(f); });
-for(const id of ['cDH','cGM','cSTR','sortBy','perGroup']) $(id).addEventListener('change',()=>{ if(state.rows.length && !state.readOnly){ buildGroups(); render(); } saveSettings(); });
+for(const id of ['cDH','cGM','cDHop','cGMop','cSTR','sortBy','perGroup']) $(id).addEventListener('change',()=>{ if(state.rows.length && !state.readOnly){ buildGroups(); render(); } saveSettings(); });
 $('week').addEventListener('change',async()=>{ state.week=$('week').value.trim(); await loadPrevKeys(); render(); });
 for(const id of ['mTo','mCc','mSubj','mIntro']) $(id).addEventListener('change',saveSettings);
 
 $('btnPreview').onclick=()=>{ const w=$('mailPreviewWrap'); w.hidden=!w.hidden; if(!w.hidden) $('mailPreview').innerHTML=mailHTML((k,s)=>s); };
 $('btnEml').onclick=async()=>{
   const missing=[]; for(const g of state.groups) for(const o of selectedIn(g)) if(!images[o.key]) missing.push(o.ozel);
-  download(`Option_Onerileri_${state.week||'hafta'}.eml`, buildEml(), 'message/rfc822');
+  $('btnEml').disabled=true; toast('Mail hazırlanıyor, resimler gömülüyor…');
+  const eml=await buildEml(); $('btnEml').disabled=false;
+  download(`Option_Onerileri_${state.week||'hafta'}.eml`, eml, 'message/rfc822');
   await saveWeek(true);
   toast(missing.length?`Mail taslağı indirildi (${missing.length} option görselsiz). Dosyayı aç → Gönder.`:'Mail taslağı indirildi. Dosyayı aç → Gönder.');
 };
@@ -645,11 +671,11 @@ $('importFile').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; tr
   await renderHistory(); toast('Yedek yüklendi'); }catch(err){ toast('Yedek dosyası okunamadı'); } e.target.value=''; };
 
 async function saveSettings(){ await DB.put('settings','s',{to:$('mTo').value,cc:$('mCc').value,subj:$('mSubj').value,intro:$('mIntro').value,
-  proxy:$('proxy').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value,sortBy:$('sortBy').value,per:$('perGroup').value}); }
+  proxy:$('proxy').value,dhOp:$('cDHop').value,gmOp:$('cGMop').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value,sortBy:$('sortBy').value,per:$('perGroup').value}); }
 (async function init(){
   const s=await DB.get('settings','s');
   if(s){ $('mTo').value=s.to||''; $('mCc').value=s.cc||''; if(s.subj) $('mSubj').value=s.subj; if(s.intro) $('mIntro').value=s.intro;
-    if(s.proxy!=null) $('proxy').value=s.proxy; if(s.dh!=null) $('cDH').value=s.dh; if(s.gm!=null) $('cGM').value=s.gm; if(s.str!=null) $('cSTR').value=s.str; if(s.sortBy) $('sortBy').value=s.sortBy; if(s.per) $('perGroup').value=s.per; }
+    if(s.proxy!=null) $('proxy').value=s.proxy; if(s.dhOp) $('cDHop').value=s.dhOp; if(s.gmOp) $('cGMop').value=s.gmOp; if(s.dh!=null) $('cDH').value=s.dh; if(s.gm!=null) $('cGM').value=s.gm; if(s.str!=null) $('cSTR').value=s.str; if(s.sortBy) $('sortBy').value=s.sortBy; if(s.per) $('perGroup').value=s.per; }
   images=Object.fromEntries(await DB.all('images'));
   $('week').value=isoWeekId(); state.week=$('week').value;
   await renderHistory(); render();
