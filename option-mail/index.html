@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Haftalık Option Seçici</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: üstte kontrol şeridi, altında YD | TR özet tabloları, sonra buyer grup kartları (3 option yan yana) */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --fg:#1b2230; --muted:#5d6779; --line:#d9dde5;
+  --accent:#1f4fd1; --accent-soft:#e6edfc; --red:#c62828; --blue:#1565c0; --ok:#1e7d4f; --warn:#a15c00;
+  --head:#eef1f6;
+  --f-display:"Space Grotesk",system-ui,sans-serif; --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12151b; --surface:#1b2029; --fg:#e7eaf0; --muted:#9aa3b3; --line:#2f3644;
+  --accent:#7ea2ff; --accent-soft:#232d45; --red:#ff7b7b; --blue:#78b4ff; --ok:#5fd39a; --warn:#f0b35a; --head:#232935; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151b; --surface:#1b2029; --fg:#e7eaf0; --muted:#9aa3b3; --line:#2f3644;
+  --accent:#7ea2ff; --accent-soft:#232d45; --red:#ff7b7b; --blue:#78b4ff; --ok:#5fd39a; --warn:#f0b35a; --head:#232935; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 60px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+h1{font-size:24px} h2{font-size:18px} h3{font-size:15px}
+.wrap{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+button,.btn{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);
+  padding:8px 14px;border-radius:7px;cursor:pointer;text-decoration:none;display:inline-flex;gap:6px;align-items:center}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,.imgslot:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input,select{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+input[type=number]{width:70px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;cursor:pointer}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.chip{display:inline-flex;gap:6px;align-items:center;background:var(--head);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600}
+.tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.tag.ok{color:var(--ok)} .tag.warn{color:var(--warn)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;font-variant-numeric:tabular-nums}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:1000px){.sum{grid-template-columns:1fr}}
+.sum > div{min-width:0}
+.st{width:100%;font-size:12px}
+.st caption{font-weight:700;background:var(--head);border:1px solid var(--line);border-bottom:0;padding:4px}
+.st th,.st td{border:1px solid var(--line);padding:3px 6px;text-align:left;white-space:nowrap}
+.st th{background:var(--head);text-align:center}
+.st td.n{text-align:right}
+.st th.r{color:var(--red)} .st th.b{color:var(--blue)}
+.groups{display:flex;flex-direction:column;gap:16px}
+.ghead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+@media (max-width:900px){.cards{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.card .t{background:var(--head);padding:6px 8px;font-weight:600;font-size:12px;text-align:center;border-bottom:1px solid var(--line)}
+.imgslot{height:260px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;border-bottom:1px solid var(--line);
+  background:var(--bg);position:relative;cursor:pointer;padding:8px;text-align:center}
+.imgslot img{max-height:100%;max-width:100%;object-fit:contain}
+.imgslot.active{outline:2px solid var(--accent);outline-offset:-2px}
+.imgslot .acts{position:absolute;right:6px;top:6px;display:flex;gap:4px}
+.imgslot .acts button{padding:2px 7px;font-size:11px}
+.mt{width:100%;font-size:12px}
+.mt td{border-top:1px solid var(--line);padding:3px 8px}
+.mt td:first-child{font-weight:600}
+.mt td:last-child{text-align:right;white-space:nowrap}
+.cand{margin-top:10px}
+.cand summary{cursor:pointer;font-weight:600;font-size:13px}
+.cand table{font-size:12px;margin-top:8px}
+.cand th,.cand td{border:1px solid var(--line);padding:3px 6px;white-space:nowrap}
+.cand th{background:var(--head)}
+.cand td.n{text-align:right}
+.hist{display:flex;flex-direction:column;gap:6px}
+.hist .item{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);
+  padding:10px 16px;border-radius:8px;font-weight:600;z-index:20;max-width:90vw}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:800px){.grid2{grid-template-columns:1fr}}
+.grid2 > *{min-width:0}
+#mailPreview{background:#fff;color:#000;border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.drop{transition:background .15s,border-color .15s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="row" style="justify-content:space-between">
+    <div>
+      <h1>Haftalık Option Seçici</h1>
+      <div class="muted small">Excel'i yükle → şartlara uyan optionlar her buyer grup için YD ve TR'de 3'er tane seçilir → görselleri ekle → mail oluştur.</div>
+    </div>
+    <div class="row">
+      <span class="chip">Hafta <input id="week" type="text" style="width:80px;padding:2px 6px" placeholder="202645"></span>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="grid2">
+      <div>
+        <div id="drop" class="drop" tabindex="0" role="button" aria-label="Excel dosyası seç">
+          <strong>Excel dosyasını buraya bırak ya da tıkla</strong><br>
+          <span class="muted small">.xlsb / .xlsx — "Çalışma" sayfası okunur</span>
+          <div id="fileInfo" class="small" style="margin-top:6px"></div>
+        </div>
+        <input id="file" type="file" accept=".xlsb,.xlsx,.xlsm,.xls" hidden>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="small muted" style="font-weight:700">Şartlar</div>
+        <div class="row">
+          <span class="chip">MAG a göre DH &gt; <input id="cDH" type="number" step="1" value="0">%</span>
+          <span class="chip">MAG a göre GMROI &gt; <input id="cGM" type="number" step="1" value="0">%</span>
+          <span class="chip">STR &lt; <input id="cSTR" type="number" step="1" value="50">%</span>
+          <span class="chip">Raf Ömrü = RafOk</span>
+          <span class="chip">Ortama sipariş kontrol = OrtÜst</span>
+        </div>
+        <div class="row">
+          <label class="f">Sıralama (ilk 3 seçilir)
+            <select id="sortBy">
+              <option value="gmroi">GMROI (Son 7 Gün) ↓</option>
+              <option value="magGm">MAG a göre GMROI ↓</option>
+              <option value="magDh">MAG a göre DH ↓</option>
+              <option value="dh">Ortalma Reyon Devir Hızı ↓</option>
+              <option value="sip">Geçilen Sipariş Adet ↓</option>
+              <option value="satis7">Son 7 Gün Satış Adet ↓</option>
+            </select>
+          </label>
+          <label class="f">Grup başına
+            <input id="perGroup" type="number" min="1" max="10" value="3">
+          </label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="row" style="justify-content:space-between">
+      <h2>Mail</h2>
+      <div class="row">
+        <button id="btnEml" class="primary" disabled>Mail At (.eml taslak)</button>
+        <button id="btnCopy" disabled>Kopyala + Outlook'u Aç</button>
+        <button id="btnSave" disabled>Haftayı Kaydet</button>
+        <button id="btnPreview" disabled>Mail önizleme</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <label class="f" style="flex:1 1 220px">Kime <input id="mTo" type="text" placeholder="ornek@firma.com; ..."></label>
+      <label class="f" style="flex:1 1 220px">Bilgi (CC) <input id="mCc" type="text" placeholder=""></label>
+      <label class="f" style="flex:2 1 300px">Konu <input id="mSubj" type="text" value="Haftalık Option Önerileri - {hafta}"></label>
+    </div>
+    <label class="f" style="margin-top:10px">Mail giriş metni
+      <input id="mIntro" type="text" value="Merhaba, bu haftanın şartlara uyan option önerileri aşağıdadır.">
+    </label>
+    <div class="small muted" style="margin-top:8px">
+      <b>Mail At</b>: Outlook'ta açılan hazır bir taslak (.eml) indirir; görseller maile gömülüdür, açıp Gönder'e basman yeterli.
+      <b>Kopyala</b>: maili panoya kopyalar ve yeni mail penceresini açar; gövdeye Ctrl+V yapıştır.
+    </div>
+    <div id="mailPreviewWrap" hidden style="margin-top:12px"><div id="mailPreview"></div></div>
+  </section>
+
+  <section class="panel" id="summaryPanel">
+    <h2>Özet</h2>
+    <div id="summary" style="margin-top:10px"><div class="empty">Dosya yüklendiğinde YD ve TR özet tabloları burada görünecek.</div></div>
+  </section>
+
+  <section id="groups" class="groups"></section>
+
+  <section class="panel">
+    <div class="row" style="justify-content:space-between">
+      <h2>Haftalık kayıtlar</h2>
+      <div class="row">
+        <button id="btnExport">Yedek indir (.json)</button>
+        <button id="btnImport">Yedek yükle</button>
+        <input id="importFile" type="file" accept=".json" hidden>
+      </div>
+    </div>
+    <div class="small muted" style="margin:6px 0 10px">Kayıtlar bu tarayıcıda saklanır. Mail oluşturduğunda hafta otomatik kaydedilir. Önceki haftalarda seçilen optionlar kartlarda "Geçen hafta da vardı" etiketiyle işaretlenir.</div>
+    <div id="history" class="hist"></div>
+  </section>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+"use strict";
+// ---------- Ayarlar ----------
+const COLS = {
+  key:0, // ilk sütun (OzelKod1+RenkKod)
+  scope:'YurtIci_YurtDisi', ozel:'OzelKod1', renkKod:'RenkKod', urunAd:'UrunAd', renkTanim:'RenkTanim',
+  gmroi:'GMROI', magazaStok:'Mağaza Stok Adet', merkezStok:'Merkez Sevke Hazır Depolar Stok Adet',
+  sip:'Net Gelen Sipariş Adet', satis7:'Son 7 Gün Satış Adet', kumSatis:'Kümülatif Satış Adet',
+  dh:'Ortalma Reyon Devir Hızı', indirim:'Son 7 Gün Gerçekleşen Ortalama İndirim Oranı',
+  marj:'Son 7 Gün Brüt Kar Marjı (USD)', magDhRaw:'MAG DH', magDh:'MAG a göre DH', magGmRaw:'MAG GMROI',
+  magGm:'MAG a göre GMROI', str:'STR', ortKontrol:'Ortama sipariş kontrol', buyer:'Buyer Grup'
+};
+// Kart metrikleri (sıra mail görseliyle aynı)
+const METRICS = [
+  ['Mağaza Stok Adet','magazaStok','int'],
+  ['Merkez Sevke Hazır Depolar Stok Adet','merkezStok','int'],
+  ['Son 7 Gün Satış Adet','satis7','int'],
+  ['Kümülatif Satış Adet','kumSatis','int'],
+  ['Ortalma Reyon Devir Hızı','dh','dec'],
+  ['Son 7 Gün Gerçekleşen Ortalama İndirim Oranı','indirim','pct'],
+  ['Son 7 Gün Brüt Kar Marjı (USD)','marj','pct'],
+  ['Raf Ömrü','raf','dec1'],
+  ['MAG a göre DH','magDh','pct'],
+  ['MAG DH','magDhRaw','dec'],
+  ['MAG GMROI','magGmRaw','dec'],
+  ['MAG a göre GMROI','magGm','pct'],
+  ['STR','str','pct'],
+];
+const SCOPES = [['YurtDisi','YD','Yurtdışı'],['YurtIci','TR','Yurtiçi']];
+const nfInt = new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0});
+const nf2 = new Intl.NumberFormat('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const nf1 = new Intl.NumberFormat('tr-TR',{minimumFractionDigits:1,maximumFractionDigits:1});
+const fmt = (v,t)=>{ if(v==null||isNaN(v)) return '-';
+  if(t==='int') return nfInt.format(v); if(t==='dec') return nf2.format(v); if(t==='dec1') return nf1.format(v);
+  if(t==='pct') return '%'+nf1.format(v*100); return String(v); };
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s??'').normalize('NFC').trim();
+const $ = id => document.getElementById(id);
+
+// ---------- Durum ----------
+let state = { week:'', fileName:'', rows:[], groups:[], selected:new Set(), readOnly:false };
+let images = {};          // key -> src (dataURL veya https URL)
+let prevKeys = new Map(); // key -> en son hangi haftada seçildi
+let activeSlot = null;
+
+// ---------- IndexedDB ----------
+const DB = (()=>{ let p;
+  function open(){ if(p) return p; p = new Promise((res,rej)=>{ try{
+      const r = indexedDB.open('optionSecici',1);
+      r.onupgradeneeded = ()=>{ const db=r.result; db.createObjectStore('weeks'); db.createObjectStore('images'); db.createObjectStore('settings'); };
+      r.onsuccess = ()=>res(r.result); r.onerror = ()=>rej(r.error);
+    }catch(e){rej(e)} }); return p; }
+  async function tx(store,mode,fn){ const db=await open(); return new Promise((res,rej)=>{ const t=db.transaction(store,mode); const s=t.objectStore(store);
+    const out=fn(s); t.oncomplete=()=>res(out&&out.result!==undefined?out.result:out); t.onerror=()=>rej(t.error); }); }
+  return {
+    get:(st,k)=>tx(st,'readonly',s=>s.get(k)).catch(()=>undefined),
+    put:(st,k,v)=>tx(st,'readwrite',s=>s.put(v,k)).catch(()=>undefined),
+    del:(st,k)=>tx(st,'readwrite',s=>s.delete(k)).catch(()=>undefined),
+    all:async st=>{ try{ const db=await open(); return await new Promise((res,rej)=>{ const out=[]; const t=db.transaction(st,'readonly');
+        const c=t.objectStore(st).openCursor(); c.onsuccess=()=>{const cur=c.result; if(cur){out.push([cur.key,cur.value]);cur.continue();} else res(out);}; c.onerror=()=>rej(c.error); }); }catch(e){ return []; } }
+  };
+})();
+
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>t.hidden=true,3200); }
+
+// ---------- Excel okuma ----------
+function num(v){ if(v==null||v==='') return null; if(typeof v==='number') return v; const n=parseFloat(String(v).replace(',','.')); return isNaN(n)?null:n; }
+
+function findWeek(wb){
+  for(const name of wb.SheetNames){
+    const a = XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:true,blankrows:false});
+    for(let r=0;r<Math.min(a.length,40);r++){ const row=a[r]||[];
+      for(let c=0;c<row.length;c++){ if(norm(row[c])==='Geçen Hafta'){
+        for(let k=c+1;k<row.length;k++){ const n=num(row[k]); if(n && n>200000 && n<300000) return String(Math.round(n)); } } } }
+  }
+  return '';
+}
+function isoWeekId(d=new Date()){ const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); const day=t.getUTCDay()||7;
+  t.setUTCDate(t.getUTCDate()+4-day); const y=t.getUTCFullYear(); const w=Math.ceil(((t-Date.UTC(y,0,1))/86400000+1)/7); return y+String(w).padStart(2,'0'); }
+
+function parseWorkbook(wb){
+  let sheetName = wb.SheetNames.find(n=>norm(n)==='Çalışma');
+  let arr, hdrIdx=-1;
+  const trySheet = n => { const a=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null});
+    for(let r=0;r<Math.min(a.length,15);r++){ const row=(a[r]||[]).map(norm); if(row.includes('OzelKod1')&&row.includes('Ortama sipariş kontrol')) return [a,r]; } return null; };
+  let res = sheetName && trySheet(sheetName);
+  if(!res){ for(const n of wb.SheetNames){ res=trySheet(n); if(res){sheetName=n;break;} } }
+  if(!res) throw new Error('"OzelKod1" ve "Ortama sipariş kontrol" başlıklarını içeren sayfa bulunamadı.');
+  [arr,hdrIdx]=res;
+  const hdr = arr[hdrIdx].map(norm);
+  const idx = {}; for(const [k,name] of Object.entries(COLS)){ if(typeof name==='number'){idx[k]=name;continue;}
+    const i=hdr.indexOf(norm(name)); if(i<0 && !['magDhRaw','magGmRaw','merkezStok'].includes(k)) throw new Error('Sütun bulunamadı: '+name); idx[k]=i; }
+  const rafIdx = hdr.reduce((a,h,i)=>h==='Raf Ömrü'?a.concat(i):a,[]);
+  idx.raf = rafIdx[0]; idx.rafFlag = rafIdx[rafIdx.length-1];
+  const rows=[];
+  for(let r=hdrIdx+1;r<arr.length;r++){ const a=arr[r]; if(!a) continue;
+    const scope=norm(a[idx.scope]); if(scope!=='YurtIci'&&scope!=='YurtDisi') continue;
+    const o={ scope, key:norm(a[idx.key])||(norm(a[idx.ozel])+norm(a[idx.renkKod])), ozel:norm(a[idx.ozel]), renkKod:norm(a[idx.renkKod]),
+      urunAd:norm(a[idx.urunAd]), renkTanim:norm(a[idx.renkTanim]), buyer:norm(a[idx.buyer]),
+      rafFlag:norm(a[idx.rafFlag]), ortKontrol:norm(a[idx.ortKontrol]) };
+    for(const k of ['gmroi','magazaStok','merkezStok','sip','satis7','kumSatis','dh','indirim','marj','magDhRaw','magDh','magGmRaw','magGm','str','raf'])
+      o[k] = idx[k]>=0 ? num(a[idx[k]]) : null;
+    if(!o.buyer || o.buyer==='0') continue;
+    rows.push(o);
+  }
+  return {sheetName, rows};
+}
+
+function eligible(o){
+  const dh=+$('cDH').value/100, gm=+$('cGM').value/100, str=+$('cSTR').value/100;
+  return o.magDh!=null && o.magDh>dh && o.magGm!=null && o.magGm>gm && o.str!=null && o.str<str
+    && o.rafFlag==='RafOk' && o.ortKontrol==='OrtÜst';
+}
+
+function buildGroups(){
+  const sortKey=$('sortBy').value; const per=Math.max(1,+$('perGroup').value||3);
+  const by=new Map();
+  for(const o of state.rows){ if(!state.readOnly && !eligible(o)) continue;
+    const k=o.scope+'|'+o.buyer; if(!by.has(k)) by.set(k,[]); by.get(k).push(o); }
+  const order=[]; for(const o of state.rows){ if(!order.includes(o.buyer)) order.push(o.buyer); }
+  const groups=[];
+  for(const [scope] of SCOPES){ for(const b of order){ const list=by.get(scope+'|'+b); if(!list) continue;
+    list.sort((x,y)=>(y[sortKey]??-Infinity)-(x[sortKey]??-Infinity));
+    groups.push({scope,buyer:b,list}); } }
+  state.groups=groups;
+  if(!state.readOnly){ state.selected=new Set(); for(const g of groups) g.list.slice(0,per).forEach(o=>state.selected.add(o.scope+'|'+o.key)); }
+}
+const selKey = o=>o.scope+'|'+o.key;
+const selectedIn = g=>g.list.filter(o=>state.selected.has(selKey(o)));
+
+// ---------- Ekran ----------
+function render(){
+  const has = state.groups.length>0;
+  for(const id of ['btnEml','btnCopy','btnSave','btnPreview']) $(id).disabled=!has;
+  $('summary').innerHTML = has ? summaryHTML(false) : '<div class="empty">Şartlara uyan option bulunamadı ya da dosya yüklenmedi.</div>';
+  const host=$('groups'); host.innerHTML='';
+  for(const g of state.groups){
+    const sc=SCOPES.find(s=>s[0]===g.scope); const sel=selectedIn(g);
+    const sec=document.createElement('section'); sec.className='panel';
+    sec.innerHTML = `<div class="ghead"><h3>${esc(sc[2])} / ${esc(g.buyer)}</h3>
+      <div class="row"><span class="tag">${sc[1]}</span><span class="tag ${sel.length<3?'warn':'ok'}">${sel.length} seçili · ${g.list.length} uygun</span></div></div>
+      <div class="cards"></div>`;
+    const cards=sec.querySelector('.cards');
+    for(const o of sel) cards.appendChild(cardEl(o));
+    if(!state.readOnly){
+      const d=document.createElement('details'); d.className='cand';
+      d.innerHTML=`<summary>Uygun optionlar (${g.list.length}) — seçimi değiştir</summary><div class="scroll"><table><thead><tr>
+        <th></th><th>OzelKod1</th><th>UrunAd</th><th>RenkKod</th><th>RenkTanim</th><th>GMROI</th><th>Devir Hızı</th><th>MAG a göre DH</th><th>MAG a göre GMROI</th><th>STR</th><th>Sipariş</th></tr></thead><tbody>
+        ${g.list.map(o=>`<tr><td><input type="checkbox" id="c_${esc(selKey(o))}" data-k="${esc(selKey(o))}" ${state.selected.has(selKey(o))?'checked':''}></td>
+        <td>${esc(o.ozel)}</td><td>${esc(o.urunAd)}</td><td>${esc(o.renkKod)}</td><td>${esc(o.renkTanim)}</td>
+        <td class="n">${fmt(o.gmroi,'dec')}</td><td class="n">${fmt(o.dh,'dec')}</td><td class="n">${fmt(o.magDh,'pct')}</td><td class="n">${fmt(o.magGm,'pct')}</td><td class="n">${fmt(o.str,'pct')}</td><td class="n">${fmt(o.sip,'int')}</td></tr>`).join('')}
+        </tbody></table></div>`;
+      d.addEventListener('change',e=>{ const k=e.target.dataset.k; if(!k) return; e.target.checked?state.selected.add(k):state.selected.delete(k); render(); reopen(g); });
+      d.dataset.g=g.scope+'|'+g.buyer;
+      sec.appendChild(d);
+    }
+    host.appendChild(sec);
+  }
+}
+function reopen(g){ const d=document.querySelector(`details[data-g="${CSS.escape(g.scope+'|'+g.buyer)}"]`); if(d) d.open=true; }
+
+function lcwLink(o){ return 'https://www.lcw.com/arama?q='+encodeURIComponent(o.ozel); }
+function googleLink(o){ return 'https://www.google.com/search?tbm=isch&q='+encodeURIComponent('site:lcw.com '+o.ozel+' '+o.renkTanim); }
+
+function cardEl(o){
+  const el=document.createElement('div'); el.className='card';
+  const prev=prevKeys.get(selKey(o));
+  el.innerHTML=`<div class="t">${esc(o.ozel)}-${esc(o.urunAd)} - ${esc(o.renkTanim)} -${esc(o.renkKod)}
+     ${prev?`<div><span class="tag">Geçen hafta da vardı (${esc(prev)})</span></div>`:''}</div>
+    <div class="imgslot" tabindex="0" data-key="${esc(o.key)}" aria-label="Ürün görseli: yapıştır veya sürükle"></div>
+    <table class="mt"><tbody>${METRICS.map(([l,k,t])=>`<tr><td>${esc(l)}</td><td>${fmt(o[k],t)}</td></tr>`).join('')}</tbody></table>`;
+  const slot=el.querySelector('.imgslot'); fillSlot(slot,o);
+  slot.addEventListener('click',e=>{ if(e.target.closest('a,button')) return; setActive(slot); });
+  slot.addEventListener('focus',()=>setActive(slot));
+  slot.addEventListener('dragover',e=>{e.preventDefault(); slot.classList.add('active');});
+  slot.addEventListener('drop',e=>{ e.preventDefault(); handleTransfer(e.dataTransfer,o.key); });
+  return el;
+}
+function fillSlot(slot,o){
+  const src=images[o.key];
+  if(src){ slot.innerHTML=`<img alt="${esc(o.urunAd)}" src="${esc(src)}"><div class="acts"><button data-a="del" title="Görseli kaldır">Kaldır</button></div>`;
+    slot.querySelector('[data-a=del]').onclick=async()=>{ delete images[o.key]; await DB.del('images',o.key); fillSlot(slot,o); }; }
+  else slot.innerHTML=`<strong class="small">RESİM</strong>
+     <div class="row" style="justify-content:center"><a class="btn small" href="${lcwLink(o)}" target="_blank" rel="noopener">LCW'de ara</a>
+     <a class="btn small" href="${googleLink(o)}" target="_blank" rel="noopener">Google görsel</a></div>
+     <span class="small muted">Görseli kopyala → buraya tıkla → Ctrl+V<br>ya da görseli buraya sürükle</span>
+     <button class="small" data-a="url">URL gir</button>
+     <input type="text" class="small" placeholder="https://img-lcwaikiki..." hidden style="width:90%">`;
+  const ub=slot.querySelector('[data-a=url]'); if(ub){ const inp=slot.querySelector('input');
+    ub.onclick=()=>{ ub.hidden=true; inp.hidden=false; inp.focus(); };
+    inp.onkeydown=e=>{ if(e.key==='Enter' && /^https?:\/\//.test(inp.value.trim())) setImage(o.key,inp.value.trim()); }; }
+}
+function setActive(slot){ document.querySelectorAll('.imgslot.active').forEach(s=>s.classList.remove('active')); slot.classList.add('active'); activeSlot=slot; }
+
+async function setImage(key,src){ images[key]=src; await DB.put('images',key,src);
+  document.querySelectorAll(`.imgslot[data-key="${CSS.escape(key)}"]`).forEach(s=>{ const o=state.rows.find(r=>r.key===key); if(o) fillSlot(s,o); });
+  toast('Görsel eklendi'); }
+
+async function blobToDataURL(blob){ // küçült: max 360x480, jpeg
+  const url=URL.createObjectURL(blob); try{
+    const img=await new Promise((res,rej)=>{const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url;});
+    const s=Math.min(1,360/img.width,480/img.height); const c=document.createElement('canvas');
+    c.width=Math.round(img.width*s); c.height=Math.round(img.height*s); const g=c.getContext('2d');
+    g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(img,0,0,c.width,c.height);
+    return c.toDataURL('image/jpeg',0.85);
+  } finally { URL.revokeObjectURL(url); } }
+
+async function handleTransfer(dt,key){
+  if(!dt||!key) return;
+  for(const it of dt.items||[]){ if(it.kind==='file' && it.type.startsWith('image/')){ return setImage(key, await blobToDataURL(it.getAsFile())); } }
+  for(const f of dt.files||[]){ if(f.type.startsWith('image/')) return setImage(key, await blobToDataURL(f)); }
+  const html=dt.getData('text/html'); const m=html&&html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  if(m && /^(https?:|data:image)/.test(m[1])) return setImage(key,m[1]);
+  const t=(dt.getData('text/uri-list')||dt.getData('text/plain')||'').trim().split(/\s+/)[0];
+  if(/^https?:\/\//.test(t)) return setImage(key,t);
+  toast('Görsel okunamadı. Görsele sağ tık → "Resmi kopyala" deyip tekrar dene.');
+}
+document.addEventListener('paste',e=>{ if(!activeSlot || !document.body.contains(activeSlot)) return;
+  if(e.target.tagName==='INPUT' && e.target.closest('.imgslot')===null) return;
+  e.preventDefault(); handleTransfer(e.clipboardData, activeSlot.dataset.key); });
+
+// ---------- Mail HTML (inline stil, Outlook uyumlu tablolar) ----------
+const B='border:1px solid #9e9e9e;'; const TD='font-family:Calibri,Arial,sans-serif;font-size:12px;';
+function sumTable(scope,forMail){
+  const sc=SCOPES.find(s=>s[0]===scope); const rows=[];
+  for(const g of state.groups.filter(g=>g.scope===scope)) for(const o of selectedIn(g)) rows.push(o);
+  if(!forMail){
+    return `<div class="scroll"><table class="st"><caption>${sc[1]}</caption><thead><tr><th>BuyerGrupTanim</th><th>UrunAd</th><th>RenkKod</th><th>RenkTanim</th>
+      <th class="r">Ortalma Reyon Devir Hızı</th><th class="b">GMROI (Son 7 Gün)</th><th>Geçilen Sipariş Adet</th></tr></thead><tbody>
+      ${rows.map(o=>`<tr><td>${esc(o.buyer)}</td><td>${esc(o.urunAd)}</td><td>${esc(o.renkKod)}</td><td>${esc(o.renkTanim)}</td>
+      <td class="n">${fmt(o.dh,'dec')}</td><td class="n">${fmt(o.gmroi,'dec')}</td><td class="n">${fmt(o.sip,'int')}</td></tr>`).join('')||'<tr><td colspan="7">Uygun option yok</td></tr>'}
+      </tbody></table></div>`;
+  }
+  const th=(t,c)=>`<th style="${B}${TD}background:#f2f2f2;font-weight:bold;text-align:center;padding:3px 5px;${c?'color:'+c+';':''}">${t}</th>`;
+  const td=(t,r)=>`<td style="${B}${TD}padding:2px 5px;white-space:nowrap;${r?'text-align:right;':''}">${t}</td>`;
+  return `<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+    <tr><td colspan="7" style="${B}${TD}background:#d9d9d9;font-weight:bold;text-align:center;padding:3px;">${sc[1]}</td></tr>
+    <tr>${th('BuyerGrupTanim')}${th('UrunAd')}${th('RenkKod')}${th('RenkTanim')}${th('Ortalma Reyon<br>Devir Hızı','#c00000')}${th('GMROI<br>(Son 7 Gün)','#0070c0')}${th('Geçilen<br>Sipariş Adet')}</tr>
+    ${rows.map(o=>`<tr>${td(esc(o.buyer))}${td(esc(o.urunAd))}${td(esc(o.renkKod))}${td(esc(o.renkTanim))}${td(fmt(o.dh,'dec'),1)}${td(fmt(o.gmroi,'dec'),1)}${td(fmt(o.sip,'int'),1)}</tr>`).join('')}
+  </table>`;
+}
+function summaryHTML(forMail){
+  if(!forMail) return `<div class="sum"><div>${sumTable('YurtDisi')}</div><div>${sumTable('YurtIci')}</div></div>`;
+  return `<table cellspacing="0" cellpadding="0"><tr><td valign="top" style="padding-right:16px;">${sumTable('YurtDisi',true)}</td><td valign="top">${sumTable('YurtIci',true)}</td></tr></table>`;
+}
+// imgSrc: (key, src) => mail için src
+function mailHTML(imgSrc){
+  const intro=esc($('mIntro').value);
+  let h=`<div style="${TD}font-size:14px;margin-bottom:10px;">${intro}</div>`;
+  h+=`<div style="${TD}font-size:12px;color:#555;margin-bottom:8px;">Hafta: ${esc(state.week)} · Şartlar: MAG a göre DH &gt; %${esc($('cDH').value)}, MAG a göre GMROI &gt; %${esc($('cGM').value)}, STR &lt; %${esc($('cSTR').value)}, Raf Ömrü RafOk, Ortalama sipariş OrtÜst</div>`;
+  h+=summaryHTML(true)+'<br><br>';
+  for(const g of state.groups){ const sel=selectedIn(g); if(!sel.length) continue;
+    const sc=SCOPES.find(s=>s[0]===g.scope); const n=sel.length;
+    h+=`<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:18px;">`;
+    h+=`<tr><td colspan="${n*2}" style="${B}${TD}font-size:13px;text-align:center;font-weight:bold;background:#d9d9d9;padding:4px;">${esc(sc[2])} / ${esc(g.buyer)}</td></tr>`;
+    h+=`<tr>${sel.map(o=>`<td colspan="2" style="${B}${TD}text-align:center;padding:4px;width:300px;">${esc(o.ozel)}-${esc(o.urunAd)} - ${esc(o.renkTanim)} -${esc(o.renkKod)}</td>`).join('')}</tr>`;
+    h+=`<tr>${sel.map(o=>{ const s=images[o.key]; const src=s?imgSrc(o.key,s):'';
+      return `<td colspan="2" style="${B}${TD}text-align:center;height:260px;padding:4px;">${src?`<img src="${esc(src)}" height="250" style="height:250px;width:auto;" alt="${esc(o.urunAd)}">`:'RESİM'}</td>`; }).join('')}</tr>`;
+    for(const [l,k,t] of METRICS){
+      h+=`<tr>${sel.map(o=>`<td style="${B}${TD}font-weight:bold;padding:2px 5px;white-space:nowrap;">${esc(l)}</td><td style="${B}${TD}padding:2px 6px;text-align:right;white-space:nowrap;width:70px;">${fmt(o[k],t)}</td>`).join('')}</tr>`;
+    }
+    h+='</table>';
+  }
+  return `<div style="${TD}">${h}</div>`;
+}
+function subject(){ return ($('mSubj').value||'Option Önerileri').replace('{hafta}',state.week); }
+
+// ---------- .eml ----------
+function b64utf8(str){ const bytes=new TextEncoder().encode(str); let bin=''; for(let i=0;i<bytes.length;i+=0x8000) bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000)); return btoa(bin); }
+const wrap76 = s=>s.replace(/.{1,76}/g,'$&\r\n');
+function hdrEnc(s){ return /^[\x20-\x7e]*$/.test(s)?s:'=?UTF-8?B?'+b64utf8(s)+'?='; }
+function buildEml(){
+  const parts=[]; const cidMap={}; let i=0;
+  const html=mailHTML((key,src)=>{ const m=src.match(/^data:(image\/[a-z+]+);base64,(.*)$/i);
+    if(!m) return src; if(!cidMap[key]){ i++; cidMap[key]={cid:'img'+i+'@option', type:m[1], data:m[2], ext:m[1].split('/')[1]}; parts.push(cidMap[key]); }
+    return 'cid:'+cidMap[key].cid; });
+  const bnd='----=_opt_'+Date.now().toString(36);
+  const full=`<!doctype html><html><head><meta charset="utf-8"></head><body>${html}</body></html>`;
+  let eml='';
+  eml+='X-Unsent: 1\r\n';
+  if($('mTo').value.trim()) eml+='To: '+$('mTo').value.trim().replace(/;\s*/g,', ')+'\r\n';
+  if($('mCc').value.trim()) eml+='Cc: '+$('mCc').value.trim().replace(/;\s*/g,', ')+'\r\n';
+  eml+='Subject: '+hdrEnc(subject())+'\r\nMIME-Version: 1.0\r\n';
+  eml+=`Content-Type: multipart/related; boundary="${bnd}"; type="text/html"\r\n\r\n`;
+  eml+=`--${bnd}\r\nContent-Type: text/html; charset="utf-8"\r\nContent-Transfer-Encoding: base64\r\n\r\n${wrap76(b64utf8(full))}\r\n`;
+  for(const p of parts){ eml+=`--${bnd}\r\nContent-Type: ${p.type}; name="${p.cid.split('@')[0]}.${p.ext}"\r\nContent-Transfer-Encoding: base64\r\nContent-ID: <${p.cid}>\r\nContent-Disposition: inline; filename="${p.cid.split('@')[0]}.${p.ext}"\r\n\r\n${wrap76(p.data)}\r\n`; }
+  eml+=`--${bnd}--\r\n`;
+  return eml;
+}
+function download(name,content,type){ const blob=new Blob([content],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1000); }
+
+// ---------- Haftalık kayıt ----------
+async function saveWeek(silent){
+  if(!state.week){ toast('Önce hafta gir'); return; }
+  const sel=[]; for(const g of state.groups) for(const o of selectedIn(g)) sel.push(o);
+  await DB.put('weeks',state.week,{ week:state.week, savedAt:new Date().toISOString(), fileName:state.fileName, sortBy:$('sortBy').value,
+    criteria:{dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value}, eligibleCount:state.groups.reduce((a,g)=>a+g.list.length,0), rows:sel });
+  if(!silent) toast(state.week+' haftası kaydedildi');
+  await renderHistory();
+}
+async function loadPrevKeys(){
+  prevKeys=new Map(); const all=(await DB.all('weeks')).map(x=>x[1]).sort((a,b)=>a.week.localeCompare(b.week));
+  for(const w of all){ if(w.week===state.week) continue; for(const o of w.rows) prevKeys.set(o.scope+'|'+o.key,w.week); }
+}
+async function renderHistory(){
+  const all=(await DB.all('weeks')).map(x=>x[1]).sort((a,b)=>b.week.localeCompare(a.week));
+  const h=$('history');
+  if(!all.length){ h.innerHTML='<div class="muted small">Henüz kayıtlı hafta yok.</div>'; return; }
+  h.innerHTML=all.map(w=>`<div class="item"><div><b>${esc(w.week)}</b> <span class="muted small">· ${w.rows.length} option seçildi · ${w.eligibleCount??'-'} uygun · ${esc(w.fileName||'')} · ${new Date(w.savedAt).toLocaleString('tr-TR')}</span></div>
+     <div class="row"><button data-open="${esc(w.week)}">Aç</button><button data-del="${esc(w.week)}">Sil</button></div></div>`).join('');
+  h.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openWeek(b.dataset.open));
+  h.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.armed){ DB.del('weeks',b.dataset.del).then(renderHistory); }
+    else { b.dataset.armed=1; b.textContent='Silmek için tekrar tıkla'; setTimeout(()=>{ if(b.isConnected){delete b.dataset.armed;b.textContent='Sil';} },3000); } });
+}
+async function openWeek(week){
+  const w=await DB.get('weeks',week); if(!w) return;
+  state={ week:w.week, fileName:w.fileName, rows:w.rows, groups:[], selected:new Set(w.rows.map(selKey)), readOnly:true };
+  $('week').value=w.week; $('fileInfo').innerHTML=`<span class="tag">Kayıttan açıldı: ${esc(w.week)}</span>`;
+  await loadPrevKeys(); buildGroups(); render(); window.scrollTo({top:0,behavior:'smooth'}); toast(w.week+' haftası açıldı');
+}
+
+// Bazı .xlsb dosyalarındaki "metadata.bin" (dinamik dizi bilgisi) okuyucuyu bozuyor; içeriğini boş bir kayıtla değiştirip tekrar dene.
+function readWorkbook(data){
+  try{ return XLSX.read(data,{type:'array'}); }
+  catch(e){
+    const z=XLSX.CFB.read(data,{type:'array'}); let fixed=false;
+    z.FullPaths.forEach((p,i)=>{ if(/metadata\.bin$/i.test(p)){ z.FileIndex[i].content=new Uint8Array([0x23,0,0x24,0]); z.FileIndex[i].size=4; fixed=true; } });
+    if(!fixed) throw e;
+    return XLSX.read(XLSX.CFB.write(z,{type:'array',fileType:'zip'}),{type:'array'});
+  }
+}
+
+// ---------- Olaylar ----------
+async function loadFile(f){
+  if(typeof XLSX==='undefined'){ toast('Excel okuyucu yüklenemedi; internet bağlantısını kontrol et.'); return; }
+  $('fileInfo').textContent='Okunuyor…';
+  try{
+    const wb=readWorkbook(new Uint8Array(await f.arrayBuffer()));
+    const {sheetName,rows}=parseWorkbook(wb);
+    const wk=findWeek(wb)||isoWeekId();
+    state={ week:wk, fileName:f.name, rows, groups:[], selected:new Set(), readOnly:false };
+    $('week').value=wk;
+    await loadPrevKeys(); buildGroups(); render();
+    const n=state.groups.reduce((a,g)=>a+g.list.length,0);
+    $('fileInfo').innerHTML=`<span class="tag ok">${esc(f.name)}</span> <span class="muted">“${esc(sheetName)}” · ${rows.length} satır · ${n} uygun option · ${state.selected.size} seçildi</span>`;
+  }catch(e){ console.error(e); $('fileInfo').innerHTML=`<span class="tag warn">Hata</span> ${esc(e.message)}`; }
+}
+$('drop').onclick=()=>$('file').click();
+$('drop').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();$('file').click();} };
+$('file').onchange=e=>{ const f=e.target.files[0]; if(f) loadFile(f); e.target.value=''; };
+['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('over');}));
+['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev,()=>$('drop').classList.remove('over')));
+$('drop').addEventListener('drop',e=>{ e.preventDefault(); const f=e.dataTransfer.files[0]; if(f) loadFile(f); });
+for(const id of ['cDH','cGM','cSTR','sortBy','perGroup']) $(id).addEventListener('change',()=>{ if(state.rows.length && !state.readOnly){ buildGroups(); render(); } saveSettings(); });
+$('week').addEventListener('change',async()=>{ state.week=$('week').value.trim(); await loadPrevKeys(); render(); });
+for(const id of ['mTo','mCc','mSubj','mIntro']) $(id).addEventListener('change',saveSettings);
+
+$('btnPreview').onclick=()=>{ const w=$('mailPreviewWrap'); w.hidden=!w.hidden; if(!w.hidden) $('mailPreview').innerHTML=mailHTML((k,s)=>s); };
+$('btnEml').onclick=async()=>{
+  const missing=[]; for(const g of state.groups) for(const o of selectedIn(g)) if(!images[o.key]) missing.push(o.ozel);
+  download(`Option_Onerileri_${state.week||'hafta'}.eml`, buildEml(), 'message/rfc822');
+  await saveWeek(true);
+  toast(missing.length?`Mail taslağı indirildi (${missing.length} option görselsiz). Dosyayı aç → Gönder.`:'Mail taslağı indirildi. Dosyayı aç → Gönder.');
+};
+$('btnCopy').onclick=async()=>{
+  const html=mailHTML((k,s)=>s);
+  let ok=false;
+  try{ if(window.ClipboardItem){ await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([document.createRange().createContextualFragment(html).textContent],{type:'text/plain'})})]); ok=true; } }catch(e){}
+  if(!ok){ const d=document.createElement('div'); d.contentEditable='true'; d.innerHTML=html; d.style.position='fixed'; d.style.left='-9999px'; document.body.appendChild(d);
+    const r=document.createRange(); r.selectNodeContents(d); const s=getSelection(); s.removeAllRanges(); s.addRange(r); try{ ok=document.execCommand('copy'); }catch(e){} s.removeAllRanges(); d.remove(); }
+  await saveWeek(true);
+  const to=$('mTo').value.trim().replace(/\s*;\s*/g,';'); const cc=$('mCc').value.trim().replace(/\s*;\s*/g,';');
+  location.href='mailto:'+encodeURIComponent(to).replace(/%3B/g,';').replace(/%40/g,'@')+'?subject='+encodeURIComponent(subject())+(cc?'&cc='+encodeURIComponent(cc):'');
+  toast(ok?'Mail panoya kopyalandı. Açılan mailin gövdesine Ctrl+V yapıştır.':'Kopyalanamadı; "Mail önizleme"yi açıp elle kopyala.');
+};
+$('btnSave').onclick=()=>saveWeek(false);
+$('btnExport').onclick=async()=>{ const weeks=(await DB.all('weeks')).map(x=>x[1]); const imgs=Object.fromEntries(await DB.all('images'));
+  download('option_secici_yedek_'+new Date().toISOString().slice(0,10)+'.json', JSON.stringify({weeks,images:imgs}), 'application/json'); };
+$('btnImport').onclick=()=>$('importFile').click();
+$('importFile').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ const j=JSON.parse(await f.text());
+  for(const w of j.weeks||[]) await DB.put('weeks',w.week,w); for(const [k,v] of Object.entries(j.images||{})){ await DB.put('images',k,v); images[k]=v; }
+  await renderHistory(); toast('Yedek yüklendi'); }catch(err){ toast('Yedek dosyası okunamadı'); } e.target.value=''; };
+
+async function saveSettings(){ await DB.put('settings','s',{to:$('mTo').value,cc:$('mCc').value,subj:$('mSubj').value,intro:$('mIntro').value,
+  dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value,sortBy:$('sortBy').value,per:$('perGroup').value}); }
+(async function init(){
+  const s=await DB.get('settings','s');
+  if(s){ $('mTo').value=s.to||''; $('mCc').value=s.cc||''; if(s.subj) $('mSubj').value=s.subj; if(s.intro) $('mIntro').value=s.intro;
+    if(s.dh!=null) $('cDH').value=s.dh; if(s.gm!=null) $('cGM').value=s.gm; if(s.str!=null) $('cSTR').value=s.str; if(s.sortBy) $('sortBy').value=s.sortBy; if(s.per) $('perGroup').value=s.per; }
+  images=Object.fromEntries(await DB.all('images'));
+  $('week').value=isoWeekId(); state.week=$('week').value;
+  await renderHistory(); render();
+})();
+</script>
+</body>
+</html>
