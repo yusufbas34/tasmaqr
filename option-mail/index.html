@@ -9,24 +9,24 @@
 <style>
 /* Layout: üstte kontrol şeridi, altında YD | TR özet tabloları, sonra buyer grup kartları (3 option yan yana) */
 :root{
-  --bg:#f5f6f8; --surface:#ffffff; --fg:#1b2230; --muted:#5d6779; --line:#d9dde5;
-  --accent:#1f4fd1; --accent-soft:#e6edfc; --red:#c62828; --blue:#1565c0; --ok:#1e7d4f; --warn:#a15c00;
-  --head:#eef1f6;
+  --bg:#ffffff; --surface:#ffffff; --fg:#14172b; --muted:#5b6080; --line:#e1e4f0;
+  --accent:#3d2cff; --accent2:#ff4f7b; --accent-soft:#eeecff; --red:#e0234e; --blue:#1a6dff; --ok:#0f9d63; --warn:#d97706;
+  --head:#f4f5fb; --band:linear-gradient(90deg,#3d2cff,#8a2cff 55%,#ff4f7b);
   --f-display:"Space Grotesk",system-ui,sans-serif; --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#12151b; --surface:#1b2029; --fg:#e7eaf0; --muted:#9aa3b3; --line:#2f3644;
-  --accent:#7ea2ff; --accent-soft:#232d45; --red:#ff7b7b; --blue:#78b4ff; --ok:#5fd39a; --warn:#f0b35a; --head:#232935; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#12151b; --surface:#1b2029; --fg:#e7eaf0; --muted:#9aa3b3; --line:#2f3644;
-  --accent:#7ea2ff; --accent-soft:#232d45; --red:#ff7b7b; --blue:#78b4ff; --ok:#5fd39a; --warn:#f0b35a; --head:#232935; color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--f-body);
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 60px}
 h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 h1{font-size:24px} h2{font-size:18px} h3{font-size:15px}
 .wrap{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(61,44,255,.06)}
+.hero{background:var(--band);color:#fff;border-radius:14px;padding:20px 22px}
+.hero .muted{color:rgba(255,255,255,.85)}
+.hero .chip{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.35);color:#fff}
+.gband{background:var(--band);color:#fff;border-radius:9px;padding:9px 12px}
+.gband .tag,.gband .tag.ok,.gband .tag.warn{background:rgba(255,255,255,.22);color:#fff}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .muted{color:var(--muted)}
 .small{font-size:12px}
@@ -49,7 +49,7 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
 @media (max-width:1000px){.sum{grid-template-columns:1fr}}
 .sum > div{min-width:0}
 .st{width:100%;font-size:12px}
-.st caption{font-weight:700;background:var(--head);border:1px solid var(--line);border-bottom:0;padding:4px}
+.st caption{font-weight:700;background:var(--accent);color:#fff;border:1px solid var(--line);border-bottom:0;padding:4px}
 .st th,.st td{border:1px solid var(--line);padding:3px 6px;text-align:left;white-space:nowrap}
 .st th{background:var(--head);text-align:center}
 .st td.n{text-align:right}
@@ -59,7 +59,7 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
 @media (max-width:900px){.cards{grid-template-columns:1fr}}
 .card{border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
-.card .t{background:var(--head);padding:6px 8px;font-weight:600;font-size:12px;text-align:center;border-bottom:1px solid var(--line)}
+.card .t{background:var(--accent-soft);color:var(--accent);padding:6px 8px;font-weight:600;font-size:12px;text-align:center;border-bottom:1px solid var(--line)}
 .imgslot{height:260px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;border-bottom:1px solid var(--line);
   background:var(--bg);position:relative;cursor:pointer;padding:8px;text-align:center}
 .imgslot img{max-height:100%;max-width:100%;object-fit:contain}
@@ -84,6 +84,7 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
 @media (max-width:800px){.grid2{grid-template-columns:1fr}}
 .grid2 > *{min-width:0}
 #mailPreview{background:#fff;color:#000;border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto}
+.notice{margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--accent-soft);border:1px solid var(--accent);line-height:1.8}
 .empty{padding:30px;text-align:center;color:var(--muted)}
 @media (prefers-reduced-motion:no-preference){.drop{transition:background .15s,border-color .15s}}
 </style>
@@ -91,7 +92,7 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
 <body>
 <div class="wrap">
 
-  <header class="row" style="justify-content:space-between">
+  <header class="row hero" style="justify-content:space-between">
     <div>
       <h1>Haftalık Option Seçici</h1>
       <div class="muted small">Excel'i yükle → şartlara uyan optionlar her buyer grup için YD ve TR'de 3'er tane seçilir → görselleri ekle → mail oluştur.</div>
@@ -161,12 +162,26 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
       <b>Mail At</b>: Outlook'ta açılan hazır bir taslak (.eml) indirir; görseller maile gömülüdür, açıp Gönder'e basman yeterli.
       <b>Kopyala</b>: maili panoya kopyalar ve yeni mail penceresini açar; gövdeye Ctrl+V yapıştır.
     </div>
+    <div id="copyBox" class="notice" hidden></div>
     <div id="mailPreviewWrap" hidden style="margin-top:12px"><div id="mailPreview"></div></div>
   </section>
 
   <section class="panel" id="summaryPanel">
     <h2>Özet</h2>
     <div id="summary" style="margin-top:10px"><div class="empty">Dosya yüklendiğinde YD ve TR özet tabloları burada görünecek.</div></div>
+  </section>
+
+  <section class="panel">
+    <div class="row" style="justify-content:space-between">
+      <h2>Resimler</h2>
+      <button id="btnFind" class="primary" disabled>Resimleri linkten bul</button>
+    </div>
+    <div class="small muted" style="margin:6px 0 10px">Excel'de resim/link sütunu varsa (başlığında "Resim", "Görsel", "Link" ya da "URL" geçen) o link kullanılır; yoksa ürün kodu lcw.com'da aranır. Kartta "URL gir" alanına ürün sayfası linkini ya da resim linkini de yapıştırabilirsin.</div>
+    <div class="row">
+      <label class="f" style="flex:1 1 360px">Ara sunucu (lcw.com tarayıcıdan doğrudan okunamazsa kullanılır, boş bırakılabilir)
+        <input id="proxy" type="text" value="https://api.allorigins.win/raw?url="></label>
+      <div id="imgStatus" class="small" style="flex:2 1 300px;font-weight:600"></div>
+    </div>
   </section>
 
   <section id="groups" class="groups"></section>
@@ -282,12 +297,16 @@ function parseWorkbook(wb){
     const i=hdr.indexOf(norm(name)); if(i<0 && !['magDhRaw','magGmRaw','merkezStok'].includes(k)) throw new Error('Sütun bulunamadı: '+name); idx[k]=i; }
   const rafIdx = hdr.reduce((a,h,i)=>h==='Raf Ömrü'?a.concat(i):a,[]);
   idx.raf = rafIdx[0]; idx.rafFlag = rafIdx[rafIdx.length-1];
+  idx.link = hdr.findIndex(h=>/resim|görsel|gorsel|link|url|image|foto/i.test(h));
+  const ws = wb.Sheets[sheetName]; const r0 = XLSX.utils.decode_range(ws['!ref']||'A1').s;
   const rows=[];
   for(let r=hdrIdx+1;r<arr.length;r++){ const a=arr[r]; if(!a) continue;
     const scope=norm(a[idx.scope]); if(scope!=='YurtIci'&&scope!=='YurtDisi') continue;
     const o={ scope, key:norm(a[idx.key])||(norm(a[idx.ozel])+norm(a[idx.renkKod])), ozel:norm(a[idx.ozel]), renkKod:norm(a[idx.renkKod]),
       urunAd:norm(a[idx.urunAd]), renkTanim:norm(a[idx.renkTanim]), buyer:norm(a[idx.buyer]),
-      rafFlag:norm(a[idx.rafFlag]), ortKontrol:norm(a[idx.ortKontrol]) };
+      rafFlag:norm(a[idx.rafFlag]), ortKontrol:norm(a[idx.ortKontrol]), link:'' };
+    if(idx.link>=0){ const cell=ws[XLSX.utils.encode_cell({r:r+r0.r,c:idx.link+r0.c})];
+      const t=(cell&&cell.l&&cell.l.Target)||norm(a[idx.link]); if(/^https?:\/\//i.test(t)) o.link=t; }
     for(const k of ['gmroi','magazaStok','merkezStok','sip','satis7','kumSatis','dh','indirim','marj','magDhRaw','magDh','magGmRaw','magGm','str','raf'])
       o[k] = idx[k]>=0 ? num(a[idx[k]]) : null;
     if(!o.buyer || o.buyer==='0') continue;
@@ -321,13 +340,13 @@ const selectedIn = g=>g.list.filter(o=>state.selected.has(selKey(o)));
 // ---------- Ekran ----------
 function render(){
   const has = state.groups.length>0;
-  for(const id of ['btnEml','btnCopy','btnSave','btnPreview']) $(id).disabled=!has;
+  for(const id of ['btnEml','btnCopy','btnSave','btnPreview','btnFind']) $(id).disabled=!has;
   $('summary').innerHTML = has ? summaryHTML(false) : '<div class="empty">Şartlara uyan option bulunamadı ya da dosya yüklenmedi.</div>';
   const host=$('groups'); host.innerHTML='';
   for(const g of state.groups){
     const sc=SCOPES.find(s=>s[0]===g.scope); const sel=selectedIn(g);
     const sec=document.createElement('section'); sec.className='panel';
-    sec.innerHTML = `<div class="ghead"><h3>${esc(sc[2])} / ${esc(g.buyer)}</h3>
+    sec.innerHTML = `<div class="ghead gband"><h3>${esc(sc[2])} / ${esc(g.buyer)}</h3>
       <div class="row"><span class="tag">${sc[1]}</span><span class="tag ${sel.length<3?'warn':'ok'}">${sel.length} seçili · ${g.list.length} uygun</span></div></div>
       <div class="cards"></div>`;
     const cards=sec.querySelector('.cards');
@@ -372,19 +391,60 @@ function fillSlot(slot,o){
     slot.querySelector('[data-a=del]').onclick=async()=>{ delete images[o.key]; await DB.del('images',o.key); fillSlot(slot,o); }; }
   else slot.innerHTML=`<strong class="small">RESİM</strong>
      <div class="row" style="justify-content:center"><a class="btn small" href="${lcwLink(o)}" target="_blank" rel="noopener">LCW'de ara</a>
-     <a class="btn small" href="${googleLink(o)}" target="_blank" rel="noopener">Google görsel</a></div>
+     ${o.link?`<a class="btn small" href="${esc(o.link)}" target="_blank" rel="noopener">Link</a>`:`<a class="btn small" href="${googleLink(o)}" target="_blank" rel="noopener">Google görsel</a>`}</div>
      <span class="small muted">Görseli kopyala → buraya tıkla → Ctrl+V<br>ya da görseli buraya sürükle</span>
      <button class="small" data-a="url">URL gir</button>
      <input type="text" class="small" placeholder="https://img-lcwaikiki..." hidden style="width:90%">`;
   const ub=slot.querySelector('[data-a=url]'); if(ub){ const inp=slot.querySelector('input');
     ub.onclick=()=>{ ub.hidden=true; inp.hidden=false; inp.focus(); };
-    inp.onkeydown=e=>{ if(e.key==='Enter' && /^https?:\/\//.test(inp.value.trim())) setImage(o.key,inp.value.trim()); }; }
+    inp.onkeydown=async e=>{ if(e.key!=='Enter') return; const u=inp.value.trim(); if(!/^https?:\/\//.test(u)) return;
+      inp.disabled=true; const ok=await resolveImage(o,u); inp.disabled=false; toast(ok?'Görsel eklendi':'Bu linkten resim okunamadı. Resmin kendisine sağ tık → "Resim adresini kopyala" ile dene.'); }; }
 }
 function setActive(slot){ document.querySelectorAll('.imgslot.active').forEach(s=>s.classList.remove('active')); slot.classList.add('active'); activeSlot=slot; }
 
-async function setImage(key,src){ images[key]=src; await DB.put('images',key,src);
+async function setImage(key,src,silent){ images[key]=src; await DB.put('images',key,src);
   document.querySelectorAll(`.imgslot[data-key="${CSS.escape(key)}"]`).forEach(s=>{ const o=state.rows.find(r=>r.key===key); if(o) fillSlot(s,o); });
-  toast('Görsel eklendi'); }
+  if(!silent) toast('Görsel eklendi'); }
+
+// ---------- Linkten resim bulma ----------
+const isImgUrl = u => /\.(jpe?g|png|webp|gif)(\?.*)?$/i.test(u) || /mncdn\.com\/|\/productimages\//i.test(u);
+async function fetchText(url){
+  const tries=[url]; const px=$('proxy').value.trim();
+  if(px) tries.push(px.includes('{url}')?px.replace('{url}',encodeURIComponent(url)):px+encodeURIComponent(url));
+  for(const u of tries){ try{ const c=new AbortController(); const t=setTimeout(()=>c.abort(),15000);
+    const r=await fetch(u,{signal:c.signal}); clearTimeout(t); if(r.ok){ const txt=await r.text(); if(txt && txt.length>200) return txt; } }catch(e){} }
+  return null;
+}
+function pickImage(html,o){
+  const h=html.replace(/\\u002F/gi,'/').replace(/\\\//g,'/').replace(/&amp;/g,'&');
+  const oz=o.ozel.toLowerCase(), rk=o.renkKod.toLowerCase();
+  const found=new Set(h.match(/https?:\/\/[^"'\s<>()\\]+?\.(?:jpe?g|png|webp)/gi)||[]);
+  (h.match(/(?<![a-z:])\/\/img-lcwaikiki[^"'\s<>()\\]+?\.(?:jpe?g|png|webp)/gi)||[]).forEach(u=>found.add('https:'+u));
+  let best=null,bs=0;
+  for(const u of found){ const l=u.toLowerCase(); let sc=0;
+    if(l.includes(oz)) sc+=3; if(l.includes(oz+'-'+rk)||l.includes('-'+rk+'_')||l.includes('-'+rk+'.')) sc+=2;
+    if(/lcw|mncdn/.test(l)) sc+=1; if(/logo|icon|sprite|banner|placeholder/.test(l)) sc-=5;
+    if(sc>bs){bs=sc;best=u;} }
+  if(best && bs>=3) return best;
+  const og=h.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)/i)||h.match(/content=["']([^"']+)["'][^>]+property=["']og:image/i);
+  return og?og[1]:null;
+}
+async function resolveImage(o,url){
+  url=url||o.link||lcwLink(o);
+  if(isImgUrl(url)){ await setImage(o.key,url,true); return true; }
+  const html=await fetchText(url); if(!html) return false;
+  const img=pickImage(html,o); if(!img) return false;
+  await setImage(o.key,new URL(img,url).href,true); return true;
+}
+async function findAll(){
+  const list=[]; for(const g of state.groups) for(const o of selectedIn(g)) if(!images[o.key]) list.push(o);
+  const st=$('imgStatus');
+  if(!list.length){ st.textContent='Seçili tüm optionların resmi var.'; return; }
+  $('btnFind').disabled=true; let ok=0;
+  for(let i=0;i<list.length;i++){ st.textContent=`Aranıyor ${i+1}/${list.length}: ${list[i].ozel} ${list[i].renkKod}`; if(await resolveImage(list[i])) ok++; }
+  $('btnFind').disabled=false;
+  st.textContent=`${ok}/${list.length} resim bulundu.`+(ok<list.length?' Bulunamayanlar için kartta "LCW\'de ara" ile sayfayı aç, resmi karta sürükle ya da linkini "URL gir" alanına yapıştır.':'');
+}
 
 async function blobToDataURL(blob){ // küçült: max 360x480, jpeg
   const url=URL.createObjectURL(blob); try{
@@ -402,7 +462,7 @@ async function handleTransfer(dt,key){
   const html=dt.getData('text/html'); const m=html&&html.match(/<img[^>]+src=["']([^"']+)["']/i);
   if(m && /^(https?:|data:image)/.test(m[1])) return setImage(key,m[1]);
   const t=(dt.getData('text/uri-list')||dt.getData('text/plain')||'').trim().split(/\s+/)[0];
-  if(/^https?:\/\//.test(t)) return setImage(key,t);
+  if(/^https?:\/\//.test(t)){ const o=state.rows.find(r=>r.key===key); if(o && !isImgUrl(t)){ return toast(await resolveImage(o,t)?'Görsel eklendi':'Bu linkten resim okunamadı.'); } return setImage(key,t); }
   toast('Görsel okunamadı. Görsele sağ tık → "Resmi kopyala" deyip tekrar dene.');
 }
 document.addEventListener('paste',e=>{ if(!activeSlot || !document.body.contains(activeSlot)) return;
@@ -424,7 +484,7 @@ function sumTable(scope,forMail){
   const th=(t,c)=>`<th style="${B}${TD}background:#f2f2f2;font-weight:bold;text-align:center;padding:3px 5px;${c?'color:'+c+';':''}">${t}</th>`;
   const td=(t,r)=>`<td style="${B}${TD}padding:2px 5px;white-space:nowrap;${r?'text-align:right;':''}">${t}</td>`;
   return `<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
-    <tr><td colspan="7" style="${B}${TD}background:#d9d9d9;font-weight:bold;text-align:center;padding:3px;">${sc[1]}</td></tr>
+    <tr><td colspan="7" style="${B}${TD}background:#3d2cff;color:#ffffff;font-weight:bold;text-align:center;padding:3px;">${sc[1]}</td></tr>
     <tr>${th('BuyerGrupTanim')}${th('UrunAd')}${th('RenkKod')}${th('RenkTanim')}${th('Ortalma Reyon<br>Devir Hızı','#c00000')}${th('GMROI<br>(Son 7 Gün)','#0070c0')}${th('Geçilen<br>Sipariş Adet')}</tr>
     ${rows.map(o=>`<tr>${td(esc(o.buyer))}${td(esc(o.urunAd))}${td(esc(o.renkKod))}${td(esc(o.renkTanim))}${td(fmt(o.dh,'dec'),1)}${td(fmt(o.gmroi,'dec'),1)}${td(fmt(o.sip,'int'),1)}</tr>`).join('')}
   </table>`;
@@ -442,14 +502,15 @@ function mailHTML(imgSrc){
   for(const g of state.groups){ const sel=selectedIn(g); if(!sel.length) continue;
     const sc=SCOPES.find(s=>s[0]===g.scope); const n=sel.length;
     h+=`<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:18px;">`;
-    h+=`<tr><td colspan="${n*2}" style="${B}${TD}font-size:13px;text-align:center;font-weight:bold;background:#d9d9d9;padding:4px;">${esc(sc[2])} / ${esc(g.buyer)}</td></tr>`;
-    h+=`<tr>${sel.map(o=>`<td colspan="2" style="${B}${TD}text-align:center;padding:4px;width:300px;">${esc(o.ozel)}-${esc(o.urunAd)} - ${esc(o.renkTanim)} -${esc(o.renkKod)}</td>`).join('')}</tr>`;
+    h+=`<tr><td colspan="${n*2}" style="${B}${TD}font-size:14px;text-align:center;font-weight:bold;background:#3d2cff;color:#ffffff;padding:6px;">${esc(sc[2])} / ${esc(g.buyer)}</td></tr>`;
+    h+=`<tr>${sel.map(o=>`<td colspan="2" style="${B}${TD}text-align:center;padding:4px;width:300px;background:#eeecff;color:#3d2cff;font-weight:bold;">${esc(o.ozel)}-${esc(o.urunAd)} - ${esc(o.renkTanim)} -${esc(o.renkKod)}</td>`).join('')}</tr>`;
     h+=`<tr>${sel.map(o=>{ const s=images[o.key]; const src=s?imgSrc(o.key,s):'';
       return `<td colspan="2" style="${B}${TD}text-align:center;height:260px;padding:4px;">${src?`<img src="${esc(src)}" height="250" style="height:250px;width:auto;" alt="${esc(o.urunAd)}">`:'RESİM'}</td>`; }).join('')}</tr>`;
     for(const [l,k,t] of METRICS){
       h+=`<tr>${sel.map(o=>`<td style="${B}${TD}font-weight:bold;padding:2px 5px;white-space:nowrap;">${esc(l)}</td><td style="${B}${TD}padding:2px 6px;text-align:right;white-space:nowrap;width:70px;">${fmt(o[k],t)}</td>`).join('')}</tr>`;
     }
     h+='</table>';
+    h+='<table cellspacing="0" cellpadding="0" width="100%"><tr><td height="36" style="height:36px;font-size:1px;line-height:1px;">&nbsp;</td></tr></table>';
   }
   return `<div style="${TD}">${h}</div>`;
 }
@@ -485,7 +546,7 @@ async function saveWeek(silent){
   if(!state.week){ toast('Önce hafta gir'); return; }
   const sel=[]; for(const g of state.groups) for(const o of selectedIn(g)) sel.push(o);
   await DB.put('weeks',state.week,{ week:state.week, savedAt:new Date().toISOString(), fileName:state.fileName, sortBy:$('sortBy').value,
-    criteria:{dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value}, eligibleCount:state.groups.reduce((a,g)=>a+g.list.length,0), rows:sel });
+    criteria:{proxy:$('proxy').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value}, eligibleCount:state.groups.reduce((a,g)=>a+g.list.length,0), rows:sel });
   if(!silent) toast(state.week+' haftası kaydedildi');
   await renderHistory();
 }
@@ -534,6 +595,7 @@ async function loadFile(f){
     $('week').value=wk;
     await loadPrevKeys(); buildGroups(); render();
     const n=state.groups.reduce((a,g)=>a+g.list.length,0);
+    findAll();
     $('fileInfo').innerHTML=`<span class="tag ok">${esc(f.name)}</span> <span class="muted">“${esc(sheetName)}” · ${rows.length} satır · ${n} uygun option · ${state.selected.size} seçildi</span>`;
   }catch(e){ console.error(e); $('fileInfo').innerHTML=`<span class="tag warn">Hata</span> ${esc(e.message)}`; }
 }
@@ -555,17 +617,26 @@ $('btnEml').onclick=async()=>{
   toast(missing.length?`Mail taslağı indirildi (${missing.length} option görselsiz). Dosyayı aç → Gönder.`:'Mail taslağı indirildi. Dosyayı aç → Gönder.');
 };
 $('btnCopy').onclick=async()=>{
+  // Outlook yapıştırmada gömülü (data:) resimleri atabildiği için, linkli resimler doğrudan URL ile gider
   const html=mailHTML((k,s)=>s);
   let ok=false;
-  try{ if(window.ClipboardItem){ await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([document.createRange().createContextualFragment(html).textContent],{type:'text/plain'})})]); ok=true; } }catch(e){}
+  try{ if(window.ClipboardItem && navigator.clipboard){ await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([document.createRange().createContextualFragment(html).textContent],{type:'text/plain'})})]); ok=true; } }catch(e){}
   if(!ok){ const d=document.createElement('div'); d.contentEditable='true'; d.innerHTML=html; d.style.position='fixed'; d.style.left='-9999px'; document.body.appendChild(d);
-    const r=document.createRange(); r.selectNodeContents(d); const s=getSelection(); s.removeAllRanges(); s.addRange(r); try{ ok=document.execCommand('copy'); }catch(e){} s.removeAllRanges(); d.remove(); }
+    const r=document.createRange(); r.selectNodeContents(d); const sl=getSelection(); sl.removeAllRanges(); sl.addRange(r); try{ ok=document.execCommand('copy'); }catch(e){} sl.removeAllRanges(); d.remove(); }
   await saveWeek(true);
   const to=$('mTo').value.trim().replace(/\s*;\s*/g,';'); const cc=$('mCc').value.trim().replace(/\s*;\s*/g,';');
-  location.href='mailto:'+encodeURIComponent(to).replace(/%3B/g,';').replace(/%40/g,'@')+'?subject='+encodeURIComponent(subject())+(cc?'&cc='+encodeURIComponent(cc):'');
-  toast(ok?'Mail panoya kopyalandı. Açılan mailin gövdesine Ctrl+V yapıştır.':'Kopyalanamadı; "Mail önizleme"yi açıp elle kopyala.');
+  const href='mailto:'+encodeURIComponent(to).replace(/%3B/g,';').replace(/%40/g,'@')+'?subject='+encodeURIComponent(subject())+(cc?'&cc='+encodeURIComponent(cc):'')
+    +'&body='+encodeURIComponent('[Buraya tıklayıp Ctrl+V ile tabloyu yapıştırın]');
+  const box=$('copyBox');
+  box.innerHTML = ok
+    ? `<b>Mail panoya kopyalandı.</b> Açılan Outlook mailinde gövdedeki yazıyı seçip <b>Ctrl+V</b> yap; tablolar ve resimler gelir. Outlook açılmadıysa: <a class="btn small" href="${esc(href)}">Outlook'u aç</a>`
+    : `<b>Panoya kopyalanamadı.</b> "Mail önizleme"yi aç, içine tıklayıp Ctrl+A, Ctrl+C yap, sonra Outlook'ta yapıştır. Ya da <b>Mail At (.eml)</b> kullan.`;
+  box.hidden=false;
+  if(ok) location.href=href;
 };
 $('btnSave').onclick=()=>saveWeek(false);
+$('btnFind').onclick=findAll;
+$('proxy').addEventListener('change',saveSettings);
 $('btnExport').onclick=async()=>{ const weeks=(await DB.all('weeks')).map(x=>x[1]); const imgs=Object.fromEntries(await DB.all('images'));
   download('option_secici_yedek_'+new Date().toISOString().slice(0,10)+'.json', JSON.stringify({weeks,images:imgs}), 'application/json'); };
 $('btnImport').onclick=()=>$('importFile').click();
@@ -574,11 +645,11 @@ $('importFile').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; tr
   await renderHistory(); toast('Yedek yüklendi'); }catch(err){ toast('Yedek dosyası okunamadı'); } e.target.value=''; };
 
 async function saveSettings(){ await DB.put('settings','s',{to:$('mTo').value,cc:$('mCc').value,subj:$('mSubj').value,intro:$('mIntro').value,
-  dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value,sortBy:$('sortBy').value,per:$('perGroup').value}); }
+  proxy:$('proxy').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value,sortBy:$('sortBy').value,per:$('perGroup').value}); }
 (async function init(){
   const s=await DB.get('settings','s');
   if(s){ $('mTo').value=s.to||''; $('mCc').value=s.cc||''; if(s.subj) $('mSubj').value=s.subj; if(s.intro) $('mIntro').value=s.intro;
-    if(s.dh!=null) $('cDH').value=s.dh; if(s.gm!=null) $('cGM').value=s.gm; if(s.str!=null) $('cSTR').value=s.str; if(s.sortBy) $('sortBy').value=s.sortBy; if(s.per) $('perGroup').value=s.per; }
+    if(s.proxy!=null) $('proxy').value=s.proxy; if(s.dh!=null) $('cDH').value=s.dh; if(s.gm!=null) $('cGM').value=s.gm; if(s.str!=null) $('cSTR').value=s.str; if(s.sortBy) $('sortBy').value=s.sortBy; if(s.per) $('perGroup').value=s.per; }
   images=Object.fromEntries(await DB.all('images'));
   $('week').value=isoWeekId(); state.week=$('week').value;
   await renderHistory(); render();
