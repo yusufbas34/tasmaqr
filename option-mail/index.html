@@ -213,7 +213,7 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
         <input id="importFile" type="file" accept=".json" hidden>
       </div>
     </div>
-    <div class="small muted" style="margin:6px 0 10px">Kayıtlar bu tarayıcıda saklanır. Mail oluşturduğunda hafta otomatik kaydedilir. Önceki haftalarda seçilen optionlar kartlarda "Geçen hafta da vardı" etiketiyle işaretlenir.</div>
+    <div class="small muted" style="margin:6px 0 10px">Kayıtlar bu tarayıcıda saklanır. Mail oluşturduğunda hafta otomatik kaydedilir. </div>
     <div id="history" class="hist"></div>
   </section>
 </div>
@@ -428,9 +428,8 @@ function googleLink(o){ return 'https://www.google.com/search?tbm=isch&q='+encod
 
 function cardEl(o){
   const el=document.createElement('div'); el.className='card';
-  const prev=prevKeys.get(selKey(o));
   el.innerHTML=`<div class="t">${esc(o.ozel)}-${esc(o.urunAd)} - ${esc(o.renkTanim)} -${esc(o.renkKod)}
-     ${prev?`<div><span class="tag">Geçen hafta da vardı (${esc(prev)})</span></div>`:''}</div>
+</div>
     <div class="imgslot" tabindex="0" data-key="${esc(o.key)}" aria-label="Ürün görseli: yapıştır veya sürükle"></div>
     <table class="mt"><tbody>${METRICS.map(([l,k,t])=>`<tr><td>${esc(l)}</td><td>${fmt(o[k],t)}</td></tr>`).join('')}</tbody></table>`;
   const slot=el.querySelector('.imgslot'); fillSlot(slot,o);
