@@ -695,7 +695,10 @@ $('file').onchange=e=>{ const f=e.target.files[0]; if(f) loadFile(f); e.target.v
 ['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('over');}));
 ['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev,()=>$('drop').classList.remove('over')));
 $('drop').addEventListener('drop',e=>{ e.preventDefault(); const f=e.dataTransfer.files[0]; if(f) loadFile(f); });
-for(const id of ['cDH','cGM','cDHop','cGMop','cSTR',...SL_IDS,'sortBy','perGroup']) $(id).addEventListener('change',()=>{ if(state.rows.length && !state.readOnly){ buildGroups(); render(); } saveSettings(); });
+// Şart değişince liste hemen yenilenir (yazarken kısa bir beklemeyle), yeni seçilenlerin resmi de aranır
+let critTimer;
+function onCriteria(){ clearTimeout(critTimer); critTimer=setTimeout(()=>{ if(state.rows.length && !state.readOnly){ buildGroups(); render(); findAll(); } saveSettings(); },350); }
+for(const id of ['cDH','cGM','cDHop','cGMop','cSTR',...SL_IDS,'sortBy','perGroup']){ $(id).addEventListener('change',onCriteria); $(id).addEventListener('input',onCriteria); }
 $('week').addEventListener('change',async()=>{ state.week=$('week').value.trim(); await loadPrevKeys(); render(); });
 for(const id of ['mTo','mCc','mSubj','mIntro']) $(id).addEventListener('change',saveSettings);
 
