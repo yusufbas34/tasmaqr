@@ -37,7 +37,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,.imgslot:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 input,select{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
 input[type=number]{width:70px}
-label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
+.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
 .drop{border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;cursor:pointer}
 .drop.over{border-color:var(--accent);background:var(--accent-soft)}
 .chip{display:inline-flex;gap:6px;align-items:center;background:var(--head);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600}
@@ -121,6 +121,8 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
           <span class="chip">MAG a göre DH <select id="cDHop" style="padding:2px 4px"><option value="lt" selected>&lt;</option><option value="gt">&gt;</option></select> <input id="cDH" type="number" step="1" value="0">%</span>
           <span class="chip">MAG a göre GMROI <select id="cGMop" style="padding:2px 4px"><option value="lt" selected>&lt;</option><option value="gt">&gt;</option></select> <input id="cGM" type="number" step="1" value="0">%</span>
           <span class="chip">STR &lt; <input id="cSTR" type="number" step="1" value="50">%</span>
+          <span class="chip">Mağaza Stok Adet <select id="cMSop" style="padding:2px 4px"><option value="ge" selected>&ge;</option><option value="le">&le;</option></select> <input id="cMS" type="number" step="1" min="0" placeholder="yok" title="Boş bırakılırsa kısıt uygulanmaz"></span>
+          <span class="chip">Kaç Mağazada <select id="cKMop" style="padding:2px 4px"><option value="ge" selected>&ge;</option><option value="le">&le;</option></select> <input id="cKM" type="number" step="1" min="0" placeholder="yok" title="Boş bırakılırsa kısıt uygulanmaz"></span>
           <span class="chip">Raf Ömrü = RafOk</span>
           <span class="chip">Ortama sipariş kontrol = OrtÜst <button type="button" id="btnLimits" style="padding:1px 8px;font-size:11px">Limitleri düzenle</button></span>
         </div>
@@ -224,7 +226,7 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
 const COLS = {
   key:0, // ilk sütun (OzelKod1+RenkKod)
   scope:'YurtIci_YurtDisi', ozel:'OzelKod1', renkKod:'RenkKod', urunAd:'UrunAd', renkTanim:'RenkTanim',
-  gmroi:'GMROI', magazaStok:'Mağaza Stok Adet', merkezStok:'Merkez Sevke Hazır Depolar Stok Adet',
+  gmroi:'GMROI', kacMagaza:'Kaç Mağazada', magazaStok:'Mağaza Stok Adet', merkezStok:'Merkez Sevke Hazır Depolar Stok Adet',
   sip:'Net Gelen Sipariş Adet', satis7:'Son 7 Gün Satış Adet', kumSatis:'Kümülatif Satış Adet',
   dh:'Ortalma Reyon Devir Hızı', indirim:'Son 7 Gün Gerçekleşen Ortalama İndirim Oranı',
   marj:'Son 7 Gün Brüt Kar Marjı (USD)', magDhRaw:'MAG DH', magDh:'MAG a göre DH', magGmRaw:'MAG GMROI',
@@ -309,7 +311,7 @@ function parseWorkbook(wb){
   [arr,hdrIdx]=res;
   const hdr = arr[hdrIdx].map(norm);
   const idx = {}; for(const [k,name] of Object.entries(COLS)){ if(typeof name==='number'){idx[k]=name;continue;}
-    const i=hdr.indexOf(norm(name)); if(i<0 && !['magDhRaw','magGmRaw','merkezStok','direktor','kontrol'].includes(k)) throw new Error('Sütun bulunamadı: '+name); idx[k]=i; }
+    const i=hdr.indexOf(norm(name)); if(i<0 && !['magDhRaw','magGmRaw','merkezStok','direktor','kontrol','kacMagaza'].includes(k)) throw new Error('Sütun bulunamadı: '+name); idx[k]=i; }
   const rafIdx = hdr.reduce((a,h,i)=>h==='Raf Ömrü'?a.concat(i):a,[]);
   idx.raf = rafIdx[0]; idx.rafFlag = rafIdx[rafIdx.length-1];
   idx.link = hdr.findIndex(h=>/resim|görsel|gorsel|link|url|image|foto/i.test(h));
@@ -322,7 +324,7 @@ function parseWorkbook(wb){
       rafFlag:norm(a[idx.rafFlag]), ortKontrol:norm(a[idx.ortKontrol]), link:'' };
     if(idx.link>=0){ const cell=ws[XLSX.utils.encode_cell({r:r+r0.r,c:idx.link+r0.c})];
       const t=(cell&&cell.l&&cell.l.Target)||norm(a[idx.link]); if(/^https?:\/\//i.test(t)) o.link=t; }
-    for(const k of ['kontrol','gmroi','magazaStok','merkezStok','sip','satis7','kumSatis','dh','indirim','marj','magDhRaw','magDh','magGmRaw','magGm','str','raf'])
+    for(const k of ['kontrol','kacMagaza','gmroi','magazaStok','merkezStok','sip','satis7','kumSatis','dh','indirim','marj','magDhRaw','magDh','magGmRaw','magGm','str','raf'])
       o[k] = idx[k]>=0 ? num(a[idx[k]]) : null;
     if(!o.buyer || o.buyer==='0') continue;
     rows.push(o);
@@ -352,6 +354,10 @@ function renderLimits(){
 function eligible(o){
   const dh=+$('cDH').value/100, gm=+$('cGM').value/100, str=+$('cSTR').value/100;
   const cmp=(v,op,t)=>v!=null && (op==='lt'? v<t : v>t);
+  // Mağaza stok / kaç mağazada: kutu boşsa kısıt yok
+  const lim=(v,op,t)=>{ if(t==='') return true; return v!=null && (op==='ge'? v>=+t : v<=+t); };
+  if(!lim(o.magazaStok,$('cMSop').value,$('cMS').value.trim())) return false;
+  if(!lim(o.kacMagaza,$('cKMop').value,$('cKM').value.trim())) return false;
   return cmp(o.magDh,$('cDHop').value,dh) && cmp(o.magGm,$('cGMop').value,gm) && o.str!=null && o.str<str
     && o.rafFlag==='RafOk' && ortUst(o);
 }
@@ -554,7 +560,7 @@ function summaryHTML(forMail){
 function mailHTML(imgSrc){
   const intro=esc($('mIntro').value);
   let h=P(intro,'font-size:14px;line-height:18px;')+P('&nbsp;');
-  h+=`<p class="MsoNormal" style="margin:0 0 8px 0;${TD}color:#555;">Hafta: ${esc(state.week)} · Şartlar: MAG a göre DH ${$('cDHop').value==='lt'?'&lt;':'&gt;'} %${esc($('cDH').value)}, MAG a göre GMROI ${$('cGMop').value==='lt'?'&lt;':'&gt;'} %${esc($('cGM').value)}, STR &lt; %${esc($('cSTR').value)}, Raf Ömrü RafOk, Ortalama sipariş OrtÜst${Object.keys(limits).length?' (revize limitlerle)':''}</p>`;
+  h+=`<p class="MsoNormal" style="margin:0 0 8px 0;${TD}color:#555;">Hafta: ${esc(state.week)} · Şartlar: MAG a göre DH ${$('cDHop').value==='lt'?'&lt;':'&gt;'} %${esc($('cDH').value)}, MAG a göre GMROI ${$('cGMop').value==='lt'?'&lt;':'&gt;'} %${esc($('cGM').value)}, STR &lt; %${esc($('cSTR').value)}${$('cMS').value.trim()!==''?`, Mağaza Stok ${$('cMSop').value==='ge'?'&ge;':'&le;'} ${esc($('cMS').value)}`:''}${$('cKM').value.trim()!==''?`, Kaç Mağazada ${$('cKMop').value==='ge'?'&ge;':'&le;'} ${esc($('cKM').value)}`:''}, Raf Ömrü RafOk, Ortalama sipariş OrtÜst${Object.keys(limits).length?' (revize limitlerle)':''}</p>`;
   h+=summaryHTML(true)+P('&nbsp;')+P('&nbsp;');
   for(const g of state.groups){ const sel=selectedIn(g); if(!sel.length) continue;
     const sc=SCOPES.find(s=>s[0]===g.scope); const n=sel.length;
@@ -620,7 +626,7 @@ async function saveWeek(silent){
   if(!state.week){ toast('Önce hafta gir'); return; }
   const sel=[]; for(const g of state.groups) for(const o of selectedIn(g)) sel.push(o);
   await DB.put('weeks',state.week,{ week:state.week, savedAt:new Date().toISOString(), fileName:state.fileName, sortBy:$('sortBy').value, mode:groupMode, limits:{...limits},
-    criteria:{dhOp:$('cDHop').value,gmOp:$('cGMop').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value}, eligibleCount:state.groups.reduce((a,g)=>a+g.list.length,0), rows:sel });
+    criteria:{dhOp:$('cDHop').value,gmOp:$('cGMop').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value,ms:$('cMS').value,msOp:$('cMSop').value,km:$('cKM').value,kmOp:$('cKMop').value}, eligibleCount:state.groups.reduce((a,g)=>a+g.list.length,0), rows:sel });
   if(!silent) toast(state.week+' haftası kaydedildi');
   await renderHistory();
 }
@@ -680,7 +686,7 @@ $('file').onchange=e=>{ const f=e.target.files[0]; if(f) loadFile(f); e.target.v
 ['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('over');}));
 ['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev,()=>$('drop').classList.remove('over')));
 $('drop').addEventListener('drop',e=>{ e.preventDefault(); const f=e.dataTransfer.files[0]; if(f) loadFile(f); });
-for(const id of ['cDH','cGM','cDHop','cGMop','cSTR','sortBy','perGroup']) $(id).addEventListener('change',()=>{ if(state.rows.length && !state.readOnly){ buildGroups(); render(); } saveSettings(); });
+for(const id of ['cDH','cGM','cDHop','cGMop','cSTR','cMS','cMSop','cKM','cKMop','sortBy','perGroup']) $(id).addEventListener('change',()=>{ if(state.rows.length && !state.readOnly){ buildGroups(); render(); } saveSettings(); });
 $('week').addEventListener('change',async()=>{ state.week=$('week').value.trim(); await loadPrevKeys(); render(); });
 for(const id of ['mTo','mCc','mSubj','mIntro']) $(id).addEventListener('change',saveSettings);
 
@@ -727,11 +733,11 @@ $('importFile').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; tr
   await renderHistory(); toast('Yedek yüklendi'); }catch(err){ toast('Yedek dosyası okunamadı'); } e.target.value=''; };
 
 async function saveSettings(){ await DB.put('settings','s',{to:$('mTo').value,cc:$('mCc').value,subj:$('mSubj').value,intro:$('mIntro').value,
-  proxy:$('proxy').value,dhOp:$('cDHop').value,gmOp:$('cGMop').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value,sortBy:$('sortBy').value,per:$('perGroup').value,mode:groupMode}); }
+  proxy:$('proxy').value,dhOp:$('cDHop').value,gmOp:$('cGMop').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value,ms:$('cMS').value,msOp:$('cMSop').value,km:$('cKM').value,kmOp:$('cKMop').value,sortBy:$('sortBy').value,per:$('perGroup').value,mode:groupMode}); }
 (async function init(){
   const s=await DB.get('settings','s');
   if(s){ $('mTo').value=s.to||''; $('mCc').value=s.cc||''; if(s.subj) $('mSubj').value=s.subj; if(s.intro) $('mIntro').value=s.intro;
-    if(s.proxy!=null) $('proxy').value=s.proxy; if(s.dhOp) $('cDHop').value=s.dhOp; if(s.gmOp) $('cGMop').value=s.gmOp; if(s.dh!=null) $('cDH').value=s.dh; if(s.gm!=null) $('cGM').value=s.gm; if(s.str!=null) $('cSTR').value=s.str; if(s.sortBy) $('sortBy').value=s.sortBy; if(s.per) $('perGroup').value=s.per; if(s.mode) setMode(s.mode); }
+    if(s.proxy!=null) $('proxy').value=s.proxy; if(s.dhOp) $('cDHop').value=s.dhOp; if(s.gmOp) $('cGMop').value=s.gmOp; if(s.dh!=null) $('cDH').value=s.dh; if(s.gm!=null) $('cGM').value=s.gm; if(s.str!=null) $('cSTR').value=s.str; if(s.ms!=null) $('cMS').value=s.ms; if(s.msOp) $('cMSop').value=s.msOp; if(s.km!=null) $('cKM').value=s.km; if(s.kmOp) $('cKMop').value=s.kmOp; if(s.sortBy) $('sortBy').value=s.sortBy; if(s.per) $('perGroup').value=s.per; if(s.mode) setMode(s.mode); }
   origins=(await DB.get('settings','origins'))||{};
   limits=(await DB.get('settings','limits'))||{};
   images=Object.fromEntries(await DB.all('images')); for(const [k,v] of Object.entries(images)) measure(k,v);
