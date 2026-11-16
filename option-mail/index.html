@@ -122,7 +122,7 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
           <span class="chip">MAG a göre GMROI <select id="cGMop" style="padding:2px 4px"><option value="lt" selected>&lt;</option><option value="gt">&gt;</option></select> <input id="cGM" type="number" step="1" value="0">%</span>
           <span class="chip">STR &lt; <input id="cSTR" type="number" step="1" value="50">%</span>
           <span class="chip">Raf Ömrü = RafOk</span>
-          <span class="chip">Ortama sipariş kontrol = OrtÜst</span>
+          <span class="chip">Ortama sipariş kontrol = OrtÜst <button type="button" id="btnLimits" style="padding:1px 8px;font-size:11px">Limitleri düzenle</button></span>
         </div>
         <div class="row">
           <label class="f">Sıralama (ilk 3 seçilir)
@@ -190,6 +190,15 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
     </div>
   </section>
 
+  <section class="panel" id="limitsPanel" hidden>
+    <div class="row" style="justify-content:space-between">
+      <h2>Ortalama sipariş limitleri</h2>
+      <div class="row"><button id="btnLimReset">Excel değerlerine dön</button><button id="btnLimClose">Kapat</button></div>
+    </div>
+    <div class="small muted" style="margin:6px 0 10px">Geçilen sipariş adedi bu limitin üstündeyse option "OrtÜst" sayılır. Boş bırakılan kutuda Excel'deki "Sipariş Adet Kontrol" değeri kullanılır. Değiştirdiğin limitler kayıtlı kalır.</div>
+    <div id="limitsBody"></div>
+  </section>
+
   <section id="groups" class="groups"></section>
 
   <section class="panel">
@@ -219,7 +228,7 @@ const COLS = {
   sip:'Net Gelen Sipariş Adet', satis7:'Son 7 Gün Satış Adet', kumSatis:'Kümülatif Satış Adet',
   dh:'Ortalma Reyon Devir Hızı', indirim:'Son 7 Gün Gerçekleşen Ortalama İndirim Oranı',
   marj:'Son 7 Gün Brüt Kar Marjı (USD)', magDhRaw:'MAG DH', magDh:'MAG a göre DH', magGmRaw:'MAG GMROI',
-  magGm:'MAG a göre GMROI', str:'STR', ortKontrol:'Ortama sipariş kontrol', buyer:'Buyer Grup', direktor:'Direktör'
+  magGm:'MAG a göre GMROI', str:'STR', ortKontrol:'Ortama sipariş kontrol', kontrol:'Sipariş Adet Kontrol', buyer:'Buyer Grup', direktor:'Direktör'
 };
 // Kart metrikleri (sıra mail görseliyle aynı)
 const METRICS = [
@@ -262,7 +271,7 @@ const DB = (()=>{ let p;
       r.onsuccess = ()=>res(r.result); r.onerror = ()=>rej(r.error);
     }catch(e){rej(e)} }); return p; }
   async function tx(store,mode,fn){ const db=await open(); return new Promise((res,rej)=>{ const t=db.transaction(store,mode); const s=t.objectStore(store);
-    const out=fn(s); t.oncomplete=()=>res(out&&out.result!==undefined?out.result:out); t.onerror=()=>rej(t.error); }); }
+    const out=fn(s); t.oncomplete=()=>res(out instanceof IDBRequest?out.result:out); t.onerror=()=>rej(t.error); }); }
   return {
     get:(st,k)=>tx(st,'readonly',s=>s.get(k)).catch(()=>undefined),
     put:(st,k,v)=>tx(st,'readwrite',s=>s.put(v,k)).catch(()=>undefined),
@@ -300,7 +309,7 @@ function parseWorkbook(wb){
   [arr,hdrIdx]=res;
   const hdr = arr[hdrIdx].map(norm);
   const idx = {}; for(const [k,name] of Object.entries(COLS)){ if(typeof name==='number'){idx[k]=name;continue;}
-    const i=hdr.indexOf(norm(name)); if(i<0 && !['magDhRaw','magGmRaw','merkezStok','direktor'].includes(k)) throw new Error('Sütun bulunamadı: '+name); idx[k]=i; }
+    const i=hdr.indexOf(norm(name)); if(i<0 && !['magDhRaw','magGmRaw','merkezStok','direktor','kontrol'].includes(k)) throw new Error('Sütun bulunamadı: '+name); idx[k]=i; }
   const rafIdx = hdr.reduce((a,h,i)=>h==='Raf Ömrü'?a.concat(i):a,[]);
   idx.raf = rafIdx[0]; idx.rafFlag = rafIdx[rafIdx.length-1];
   idx.link = hdr.findIndex(h=>/resim|görsel|gorsel|link|url|image|foto/i.test(h));
@@ -313,7 +322,7 @@ function parseWorkbook(wb){
       rafFlag:norm(a[idx.rafFlag]), ortKontrol:norm(a[idx.ortKontrol]), link:'' };
     if(idx.link>=0){ const cell=ws[XLSX.utils.encode_cell({r:r+r0.r,c:idx.link+r0.c})];
       const t=(cell&&cell.l&&cell.l.Target)||norm(a[idx.link]); if(/^https?:\/\//i.test(t)) o.link=t; }
-    for(const k of ['gmroi','magazaStok','merkezStok','sip','satis7','kumSatis','dh','indirim','marj','magDhRaw','magDh','magGmRaw','magGm','str','raf'])
+    for(const k of ['kontrol','gmroi','magazaStok','merkezStok','sip','satis7','kumSatis','dh','indirim','marj','magDhRaw','magDh','magGmRaw','magGm','str','raf'])
       o[k] = idx[k]>=0 ? num(a[idx[k]]) : null;
     if(!o.buyer || o.buyer==='0') continue;
     rows.push(o);
@@ -321,11 +330,30 @@ function parseWorkbook(wb){
   return {sheetName, rows};
 }
 
+// OrtÜst = Geçilen (Net Gelen) Sipariş Adet > limit. Limit Excel'deki "Sipariş Adet Kontrol" değeri;
+// HTML'de buyer grup + YD/TR bazında değiştirilebilir (limits).
+let limits={};
+const limKey=(scope,buyer)=>scope+'|'+buyer;
+function excelLimit(scope,buyer){ const o=state.rows.find(r=>r.scope===scope && r.buyer===buyer && r.kontrol!=null); return o?o.kontrol:null; }
+function limitFor(o){ const v=limits[limKey(o.scope,o.buyer)]; return (v!=null && v!=='' && !isNaN(v)) ? +v : o.kontrol; }
+function ortUst(o){ const L=limitFor(o); if(L==null) return o.ortKontrol==='OrtÜst'; return (o.sip||0) > L; }
+function renderLimits(){
+  const host=$('limitsBody'); const buyers=[]; for(const o of state.rows) if(!buyers.includes(o.buyer)) buyers.push(o.buyer);
+  if(!buyers.length){ host.innerHTML='<div class="muted small">Önce Excel dosyasını yükle.</div>'; return; }
+  const cell=(sc,b)=>{ const ex=excelLimit(sc,b); const k=limKey(sc,b); const v=limits[k];
+    return `<td><input type="number" step="1" min="0" id="lim_${esc(k)}" data-k="${esc(k)}" value="${v!=null&&v!==''?esc(v):''}" placeholder="${ex!=null?Math.round(ex):''}" style="width:100px">
+      <div class="small muted">Excel: ${ex!=null?nfInt.format(ex):'-'}${v!=null&&v!==''?' · <b style="color:var(--accent2)">değişti</b>':''}</div></td>`; };
+  host.innerHTML=`<div class="scroll"><table class="st" style="width:auto"><thead><tr><th>Buyer Grup</th><th>YD limit</th><th>TR limit</th></tr></thead><tbody>
+    ${buyers.map(b=>`<tr><td style="font-weight:600">${esc(b)}</td>${cell('YurtDisi',b)}${cell('YurtIci',b)}</tr>`).join('')}</tbody></table></div>`;
+  host.querySelectorAll('input').forEach(inp=>inp.addEventListener('change',()=>{
+    const k=inp.dataset.k; if(inp.value==='') delete limits[k]; else limits[k]=+inp.value;
+    DB.put('settings','limits',limits); if(!state.readOnly){ buildGroups(); render(); } setTimeout(renderLimits,0); }));
+}
 function eligible(o){
   const dh=+$('cDH').value/100, gm=+$('cGM').value/100, str=+$('cSTR').value/100;
   const cmp=(v,op,t)=>v!=null && (op==='lt'? v<t : v>t);
   return cmp(o.magDh,$('cDHop').value,dh) && cmp(o.magGm,$('cGMop').value,gm) && o.str!=null && o.str<str
-    && o.rafFlag==='RafOk' && o.ortKontrol==='OrtÜst';
+    && o.rafFlag==='RafOk' && ortUst(o);
 }
 
 let groupMode='buyer';
@@ -526,7 +554,7 @@ function summaryHTML(forMail){
 function mailHTML(imgSrc){
   const intro=esc($('mIntro').value);
   let h=P(intro,'font-size:14px;line-height:18px;')+P('&nbsp;');
-  h+=`<p class="MsoNormal" style="margin:0 0 8px 0;${TD}color:#555;">Hafta: ${esc(state.week)} · Şartlar: MAG a göre DH ${$('cDHop').value==='lt'?'&lt;':'&gt;'} %${esc($('cDH').value)}, MAG a göre GMROI ${$('cGMop').value==='lt'?'&lt;':'&gt;'} %${esc($('cGM').value)}, STR &lt; %${esc($('cSTR').value)}, Raf Ömrü RafOk, Ortalama sipariş OrtÜst</p>`;
+  h+=`<p class="MsoNormal" style="margin:0 0 8px 0;${TD}color:#555;">Hafta: ${esc(state.week)} · Şartlar: MAG a göre DH ${$('cDHop').value==='lt'?'&lt;':'&gt;'} %${esc($('cDH').value)}, MAG a göre GMROI ${$('cGMop').value==='lt'?'&lt;':'&gt;'} %${esc($('cGM').value)}, STR &lt; %${esc($('cSTR').value)}, Raf Ömrü RafOk, Ortalama sipariş OrtÜst${Object.keys(limits).length?' (revize limitlerle)':''}</p>`;
   h+=summaryHTML(true)+P('&nbsp;')+P('&nbsp;');
   for(const g of state.groups){ const sel=selectedIn(g); if(!sel.length) continue;
     const sc=SCOPES.find(s=>s[0]===g.scope); const n=sel.length;
@@ -591,7 +619,7 @@ function download(name,content,type){ const blob=new Blob([content],{type}); con
 async function saveWeek(silent){
   if(!state.week){ toast('Önce hafta gir'); return; }
   const sel=[]; for(const g of state.groups) for(const o of selectedIn(g)) sel.push(o);
-  await DB.put('weeks',state.week,{ week:state.week, savedAt:new Date().toISOString(), fileName:state.fileName, sortBy:$('sortBy').value, mode:groupMode,
+  await DB.put('weeks',state.week,{ week:state.week, savedAt:new Date().toISOString(), fileName:state.fileName, sortBy:$('sortBy').value, mode:groupMode, limits:{...limits},
     criteria:{dhOp:$('cDHop').value,gmOp:$('cGMop').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value}, eligibleCount:state.groups.reduce((a,g)=>a+g.list.length,0), rows:sel });
   if(!silent) toast(state.week+' haftası kaydedildi');
   await renderHistory();
@@ -640,7 +668,7 @@ async function loadFile(f){
     const wk=findWeek(wb)||isoWeekId();
     state={ week:wk, fileName:f.name, rows, groups:[], selected:new Set(), readOnly:false };
     $('week').value=wk;
-    await loadPrevKeys(); buildGroups(); render();
+    await loadPrevKeys(); buildGroups(); render(); if(!$("limitsPanel").hidden) renderLimits();
     const n=state.groups.reduce((a,g)=>a+g.list.length,0);
     findAll();
     $('fileInfo').innerHTML=`<span class="tag ok">${esc(f.name)}</span> <span class="muted">“${esc(sheetName)}” · ${rows.length} satır · ${n} uygun option · ${state.selected.size} seçildi</span>`;
@@ -685,6 +713,9 @@ $('btnCopy').onclick=async()=>{
 };
 $('btnSave').onclick=()=>saveWeek(false);
 $('btnFind').onclick=findAll;
+$('btnLimits').onclick=()=>{ const p=$('limitsPanel'); p.hidden=!p.hidden; if(!p.hidden){ renderLimits(); p.scrollIntoView({behavior:'smooth',block:'start'}); } };
+$('btnLimClose').onclick=()=>{ $('limitsPanel').hidden=true; };
+$('btnLimReset').onclick=()=>{ limits={}; DB.put('settings','limits',limits); if(state.rows.length && !state.readOnly){ buildGroups(); render(); } renderLimits(); toast('Limitler Excel değerlerine döndü'); };
 $('modeBuyer').onclick=()=>{ setMode('buyer'); saveSettings(); };
 $('modeDir').onclick=()=>{ setMode('direktor'); saveSettings(); };
 $('proxy').addEventListener('change',saveSettings);
@@ -702,6 +733,7 @@ async function saveSettings(){ await DB.put('settings','s',{to:$('mTo').value,cc
   if(s){ $('mTo').value=s.to||''; $('mCc').value=s.cc||''; if(s.subj) $('mSubj').value=s.subj; if(s.intro) $('mIntro').value=s.intro;
     if(s.proxy!=null) $('proxy').value=s.proxy; if(s.dhOp) $('cDHop').value=s.dhOp; if(s.gmOp) $('cGMop').value=s.gmOp; if(s.dh!=null) $('cDH').value=s.dh; if(s.gm!=null) $('cGM').value=s.gm; if(s.str!=null) $('cSTR').value=s.str; if(s.sortBy) $('sortBy').value=s.sortBy; if(s.per) $('perGroup').value=s.per; if(s.mode) setMode(s.mode); }
   origins=(await DB.get('settings','origins'))||{};
+  limits=(await DB.get('settings','limits'))||{};
   images=Object.fromEntries(await DB.all('images')); for(const [k,v] of Object.entries(images)) measure(k,v);
   $('week').value=isoWeekId(); state.week=$('week').value;
   await renderHistory(); render();
