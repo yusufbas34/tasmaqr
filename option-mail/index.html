@@ -25,6 +25,7 @@ h1{font-size:24px} h2{font-size:18px} h3{font-size:15px}
 .hero{background:var(--band);color:#fff;border-radius:14px;padding:20px 22px}
 .hero .muted{color:rgba(255,255,255,.85)}
 .hero .chip{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.35);color:#fff}
+.hsave{background:#fff;color:var(--accent);border-color:#fff}
 .gband{background:var(--band);color:#fff;border-radius:9px;padding:9px 12px}
 .gband .tag,.gband .tag.ok,.gband .tag.warn{background:rgba(255,255,255,.22);color:#fff}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -84,6 +85,9 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
 @media (max-width:800px){.grid2{grid-template-columns:1fr}}
 .grid2 > *{min-width:0}
 #mailPreview{background:#fff;color:#000;border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto}
+.chip .info{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:700;cursor:help}
+.chip[title]{cursor:help}
+.wk{color:var(--red);font-weight:700}
 .chip .sub{font-size:11px;font-weight:700;color:var(--accent);margin-left:6px}
 .seg{display:inline-flex;border:1px solid var(--accent);border-radius:8px;overflow:hidden}
 .seg button{border:0;border-radius:0;padding:7px 12px;background:var(--surface);color:var(--accent)}
@@ -103,6 +107,7 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
     </div>
     <div class="row">
       <span class="chip">Hafta <input id="week" type="text" style="width:80px;padding:2px 6px" placeholder="202645"></span>
+      <button id="btnSave2" class="hsave" disabled>Haftayı Kaydet</button>
     </div>
   </header>
 
@@ -124,7 +129,9 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
           <span class="chip">STR &lt; <input id="cSTR" type="number" step="1" value="50">%</span>
           <span class="chip">Mağaza Stok Adet <span class="sub">YD</span> <select id="cMSop_YurtDisi" style="padding:2px 4px"><option value="ge" selected>&ge;</option><option value="le">&le;</option></select> <input id="cMS_YurtDisi" type="number" step="1" min="0" placeholder="yok" title="Boş bırakılırsa kısıt uygulanmaz"> <span class="sub">TR</span> <select id="cMSop_YurtIci" style="padding:2px 4px"><option value="ge" selected>&ge;</option><option value="le">&le;</option></select> <input id="cMS_YurtIci" type="number" step="1" min="0" placeholder="yok" title="Boş bırakılırsa kısıt uygulanmaz"> </span>
           <span class="chip">Kaç Mağazada <span class="sub">YD</span> <select id="cKMop_YurtDisi" style="padding:2px 4px"><option value="ge" selected>&ge;</option><option value="le">&le;</option></select> <input id="cKM_YurtDisi" type="number" step="1" min="0" placeholder="yok" title="Boş bırakılırsa kısıt uygulanmaz"> <span class="sub">TR</span> <select id="cKMop_YurtIci" style="padding:2px 4px"><option value="ge" selected>&ge;</option><option value="le">&le;</option></select> <input id="cKM_YurtIci" type="number" step="1" min="0" placeholder="yok" title="Boş bırakılırsa kısıt uygulanmaz"> </span>
-          <span class="chip">Raf Ömrü = RafOk</span>
+          <span class="chip" title="Excel'deki kural: Raf Ömrü 14'ün üstündeyse RafOk. Boş bırakılırsa Excel'deki RafOk/RafNok kullanılır.">Raf Ömrü &gt; <input id="cRAF" type="number" step="1" min="0" value="14"></span>
+          <label class="chip" title="Ürün adında -EG geçen optionlar (ör. HRK,HERNA-EG) hesaplamaya alınmaz."><input id="cEG" type="checkbox" checked> Ürün adında "-EG" olanları dahil etme</label>
+          <span class="chip" title="Bir option önceki kayıtlı haftalarda kaç kez seçildiyse kartta kırmızı (sayı) olarak yazar. Buraya bir değer girersen, bu sayının ÜSTÜNDE haftada çıkmış optionlar hesaplamadan çıkarılır. Örn. 2 girersen 3 ve daha fazla hafta çıkmış olanlar listeye girmez. Boş bırakılırsa kısıt yok.">Hafta kısıtı ≤ <input id="cWK" type="number" step="1" min="0" placeholder="yok"> <span class="info" aria-hidden="true">i</span></span>
           <span class="chip">Ortama sipariş kontrol = OrtÜst <button type="button" id="btnLimits" style="padding:1px 8px;font-size:11px">Limitleri düzenle</button></span>
         </div>
         <div class="row">
@@ -263,7 +270,7 @@ const $ = id => document.getElementById(id);
 // ---------- Durum ----------
 let state = { week:'', fileName:'', rows:[], groups:[], selected:new Set(), readOnly:false };
 let images = {};          // key -> src (dataURL veya https URL)
-let prevKeys = new Map(); // key -> en son hangi haftada seçildi
+let prevCounts = new Map(); // scope|key -> önceki kayıtlı haftalarda kaç kez seçildi
 let activeSlot = null;
 
 // ---------- IndexedDB ----------
@@ -360,6 +367,12 @@ function scopeLimText(){ let t='';
   return t; }
 function slGet(){ const o={}; for(const id of SL_IDS) o[id]=$(id).value; return o; }
 function slSet(o){ for(const id of SL_IDS) if(o[id]!=null) $(id).value=o[id]; }
+function rafOk(o){ const t=$('cRAF').value.trim(); if(t==='') return o.rafFlag==='RafOk'; return o.raf!=null && o.raf>+t; }
+const egExcluded = o => $('cEG').checked && /-EG\b/i.test(o.urunAd||'');
+function weekOk(o){ const t=$('cWK').value.trim(); if(t==='') return true; return weekCount(o)<=+t; }
+const weekCount = o => prevCounts.get(o.scope+'|'+o.key)||0;
+const wkTag = o => { const n=weekCount(o); return n?` <span class="wk" title="Önceki ${n} kayıtlı haftada seçildi">(${n})</span>`:''; };
+const wkTagMail = o => { const n=weekCount(o); return n?` <span style="color:#e0234e;font-weight:bold;">(${n})</span>`:''; };
 function eligible(o){
   const dh=+$('cDH').value/100, gm=+$('cGM').value/100, str=+$('cSTR').value/100;
   const cmp=(v,op,t)=>v!=null && (op==='lt'? v<t : v>t);
@@ -368,7 +381,7 @@ function eligible(o){
   if(!lim(o.magazaStok,$('cMSop_'+o.scope).value,$('cMS_'+o.scope).value.trim())) return false;
   if(!lim(o.kacMagaza,$('cKMop_'+o.scope).value,$('cKM_'+o.scope).value.trim())) return false;
   return cmp(o.magDh,$('cDHop').value,dh) && cmp(o.magGm,$('cGMop').value,gm) && o.str!=null && o.str<str
-    && o.rafFlag==='RafOk' && ortUst(o);
+    && rafOk(o) && ortUst(o) && !egExcluded(o) && weekOk(o);
 }
 
 let groupMode='buyer';
@@ -395,7 +408,7 @@ const selectedIn = g=>g.list.filter(o=>state.selected.has(selKey(o)));
 // ---------- Ekran ----------
 function render(){
   const has = state.groups.length>0;
-  for(const id of ['btnEml','btnCopy','btnSave','btnPreview','btnFind']) $(id).disabled=!has;
+  for(const id of ['btnEml','btnCopy','btnSave','btnSave2','btnPreview','btnFind']) $(id).disabled=!has;
   $('summary').innerHTML = has ? summaryHTML(false) : '<div class="empty">Şartlara uyan option bulunamadı ya da dosya yüklenmedi.</div>';
   const host=$('groups'); host.innerHTML='';
   for(const g of state.groups){
@@ -411,7 +424,7 @@ function render(){
       d.innerHTML=`<summary>Uygun optionlar (${g.list.length}) — seçimi değiştir</summary><div class="scroll"><table><thead><tr>
         <th></th><th>OzelKod1</th><th>UrunAd</th><th>RenkKod</th><th>RenkTanim</th><th>GMROI</th><th>Devir Hızı</th><th>MAG a göre DH</th><th>MAG a göre GMROI</th><th>STR</th><th>Sipariş</th></tr></thead><tbody>
         ${g.list.map(o=>`<tr><td><input type="checkbox" id="c_${esc(selKey(o))}" data-k="${esc(selKey(o))}" ${state.selected.has(selKey(o))?'checked':''}></td>
-        <td>${esc(o.ozel)}</td><td>${esc(o.urunAd)}</td><td>${esc(o.renkKod)}</td><td>${esc(o.renkTanim)}</td>
+        <td>${esc(o.ozel)}</td><td>${esc(o.urunAd)}${wkTag(o)}</td><td>${esc(o.renkKod)}</td><td>${esc(o.renkTanim)}</td>
         <td class="n">${fmt(o.gmroi,'dec')}</td><td class="n">${fmt(o.dh,'dec')}</td><td class="n">${fmt(o.magDh,'pct')}</td><td class="n">${fmt(o.magGm,'pct')}</td><td class="n">${fmt(o.str,'pct')}</td><td class="n">${fmt(o.sip,'int')}</td></tr>`).join('')}
         </tbody></table></div>`;
       d.addEventListener('change',e=>{ const k=e.target.dataset.k; if(!k) return; e.target.checked?state.selected.add(k):state.selected.delete(k); render(); reopen(g); });
@@ -428,7 +441,7 @@ function googleLink(o){ return 'https://www.google.com/search?tbm=isch&q='+encod
 
 function cardEl(o){
   const el=document.createElement('div'); el.className='card';
-  el.innerHTML=`<div class="t">${esc(o.ozel)}-${esc(o.urunAd)} - ${esc(o.renkTanim)} -${esc(o.renkKod)}
+  el.innerHTML=`<div class="t">${esc(o.ozel)}-${esc(o.urunAd)} - ${esc(o.renkTanim)} -${esc(o.renkKod)}${wkTag(o)}
 </div>
     <div class="imgslot" tabindex="0" data-key="${esc(o.key)}" aria-label="Ürün görseli: yapıştır veya sürükle"></div>
     <table class="mt"><tbody>${METRICS.map(([l,k,t])=>`<tr><td>${esc(l)}</td><td>${fmt(o[k],t)}</td></tr>`).join('')}</tbody></table>`;
@@ -491,10 +504,16 @@ async function resolveImage(o,url){
   return storeFound(o,new URL(img,url).href);
 }
 const imgLoads = u => new Promise(res=>{ const i=new Image(); const t=setTimeout(()=>res(false),15000); i.onload=()=>{clearTimeout(t);res(i.naturalWidth>20);}; i.onerror=()=>{clearTimeout(t);res(false);}; i.src=u; });
+// Arka planda resim gömme kuyruğu (mail hazırlanırken beklememek için)
+const embedQ=[]; let embedRunning=0;
+function embedLater(key,url){ embedQ.push([key,url]); while(embedRunning<4 && embedQ.length) runEmbed(); }
+async function runEmbed(){ embedRunning++; try{ while(embedQ.length){ const [k,u]=embedQ.shift(); if(images[k]!==u) continue;
+  const d=await toEmbedded(u); if(d && images[k]===u){ images[k]=d; DB.put('images',k,d); measure(k,d); } } } finally { embedRunning--; } }
 let origins={};  // key -> resmin alındığı link (Excel linki değişirse resim yenilenir)
 async function storeFound(o,url){
   const r=await storeFound0(o,url); if(r && url===o.link){ origins[o.key]=url; DB.put('settings','origins',origins); } return r; }
 async function storeFound0(o,url){
+  if(isImgUrl(url)){ await setImage(o.key,url,true); embedLater(o.key,url); return true; }  // hemen göster, arka planda göm
   const d=await toEmbedded(url);            // resmi indirip sayfaya göm (mailde kesin görünsün)
   if(d){ await setImage(o.key,d,true); return true; }
   if(await imgLoads(url)){ await setImage(o.key,url,true); return true; }
@@ -504,8 +523,9 @@ async function findAll(){
   const list=[]; for(const g of state.groups) for(const o of selectedIn(g)) if(!images[o.key] || (o.link && origins[o.key]!==o.link)) list.push(o);
   const st=$('imgStatus');
   if(!list.length){ st.textContent='Seçili tüm optionların resmi var.'; return; }
-  $('btnFind').disabled=true; let ok=0;
-  for(let i=0;i<list.length;i++){ st.textContent=`Aranıyor ${i+1}/${list.length}: ${list[i].ozel} ${list[i].renkKod}`; if(await resolveImage(list[i])) ok++; }
+  $('btnFind').disabled=true; let ok=0, done=0, next=0;
+  const worker=async()=>{ while(next<list.length){ const o=list[next++]; if(await resolveImage(o)) ok++; done++; st.textContent=`Resimler yükleniyor ${done}/${list.length}`; } };
+  await Promise.all(Array.from({length:Math.min(8,list.length)},worker));  // 8 resim aynı anda
   $('btnFind').disabled=false;
   st.textContent=`${ok}/${list.length} resim bulundu.`+(ok<list.length?' Bulunamayanlar için kartta "LCW\'de ara" ile sayfayı aç, resmi karta sürükle ya da linkini "URL gir" alanına yapıştır.':'');
 }
@@ -548,7 +568,7 @@ function sumTable(scope,forMail){
   if(!forMail){
     return `<div class="scroll"><table class="st"><caption>${sc[1]}</caption><thead><tr>${groupMode==='direktor'?'<th>Direktör</th>':''}<th>BuyerGrupTanim</th><th>UrunAd</th><th>RenkKod</th><th>RenkTanim</th>
       <th class="r">Ortalma Reyon Devir Hızı</th><th class="b">GMROI (Son 7 Gün)</th><th>Geçilen Sipariş Adet</th></tr></thead><tbody>
-      ${rows.map(o=>`<tr>${groupMode==='direktor'?`<td>${esc(o.direktor)}</td>`:''}<td>${esc(o.buyer)}</td><td>${esc(o.urunAd)}</td><td>${esc(o.renkKod)}</td><td>${esc(o.renkTanim)}</td>
+      ${rows.map(o=>`<tr>${groupMode==='direktor'?`<td>${esc(o.direktor)}</td>`:''}<td>${esc(o.buyer)}</td><td>${esc(o.urunAd)}${wkTag(o)}</td><td>${esc(o.renkKod)}</td><td>${esc(o.renkTanim)}</td>
       <td class="n">${fmt(o.dh,'dec')}</td><td class="n">${fmt(o.gmroi,'dec')}</td><td class="n">${fmt(o.sip,'int')}</td></tr>`).join('')||'<tr><td colspan="8">Uygun option yok</td></tr>'}
       </tbody></table></div>`;
   }
@@ -557,7 +577,7 @@ function sumTable(scope,forMail){
   return `<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
     <tr><td colspan="${groupMode==='direktor'?8:7}" style="${B}${TD}background:#3d2cff;padding:3px;">${P(sc[1],'color:#ffffff;font-weight:bold;text-align:center;')}</td></tr>
     <tr>${groupMode==='direktor'?th('Direktör'):''}${th('BuyerGrupTanim')}${th('UrunAd')}${th('RenkKod')}${th('RenkTanim')}${th('Ortalma Reyon<br>Devir Hızı','#c00000')}${th('GMROI<br>(Son 7 Gün)','#0070c0')}${th('Geçilen<br>Sipariş Adet')}</tr>
-    ${rows.map(o=>`<tr>${groupMode==='direktor'?td(esc(o.direktor)):''}${td(esc(o.buyer))}${td(esc(o.urunAd))}${td(esc(o.renkKod))}${td(esc(o.renkTanim))}${td(fmt(o.dh,'dec'),1)}${td(fmt(o.gmroi,'dec'),1)}${td(fmt(o.sip,'int'),1)}</tr>`).join('')}
+    ${rows.map(o=>`<tr>${groupMode==='direktor'?td(esc(o.direktor)):''}${td(esc(o.buyer))}${td(esc(o.urunAd)+wkTagMail(o))}${td(esc(o.renkKod))}${td(esc(o.renkTanim))}${td(fmt(o.dh,'dec'),1)}${td(fmt(o.gmroi,'dec'),1)}${td(fmt(o.sip,'int'),1)}</tr>`).join('')}
   </table>`;
 }
 function summaryHTML(forMail){
@@ -568,13 +588,13 @@ function summaryHTML(forMail){
 function mailHTML(imgSrc){
   const intro=esc($('mIntro').value);
   let h=P(intro,'font-size:14px;line-height:18px;')+P('&nbsp;');
-  h+=`<p class="MsoNormal" style="margin:0 0 8px 0;${TD}color:#555;">Hafta: ${esc(state.week)} · Şartlar: MAG a göre DH ${$('cDHop').value==='lt'?'&lt;':'&gt;'} %${esc($('cDH').value)}, MAG a göre GMROI ${$('cGMop').value==='lt'?'&lt;':'&gt;'} %${esc($('cGM').value)}, STR &lt; %${esc($('cSTR').value)}${scopeLimText()}, Raf Ömrü RafOk, Ortalama sipariş OrtÜst${Object.keys(limits).length?' (revize limitlerle)':''}</p>`;
+  h+=`<p class="MsoNormal" style="margin:0 0 8px 0;${TD}color:#555;">Hafta: ${esc(state.week)} · Şartlar: MAG a göre DH ${$('cDHop').value==='lt'?'&lt;':'&gt;'} %${esc($('cDH').value)}, MAG a göre GMROI ${$('cGMop').value==='lt'?'&lt;':'&gt;'} %${esc($('cGM').value)}, STR &lt; %${esc($('cSTR').value)}${scopeLimText()}, Raf Ömrü ${$('cRAF').value.trim()!==''?'&gt; '+esc($('cRAF').value):'RafOk'}${$('cEG').checked?', -EG hariç':''}${$('cWK').value.trim()!==''?', önceki hafta sayısı &le; '+esc($('cWK').value):''}, Ortalama sipariş OrtÜst${Object.keys(limits).length?' (revize limitlerle)':''}</p>`;
   h+=summaryHTML(true)+P('&nbsp;')+P('&nbsp;');
   for(const g of state.groups){ const sel=selectedIn(g); if(!sel.length) continue;
     const sc=SCOPES.find(s=>s[0]===g.scope); const n=sel.length;
     h+=`<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:18px;">`;
     h+=`<tr><td colspan="${n*2}" style="${B}background:#3d2cff;padding:4px;">${P(esc(sc[2])+' / '+esc(g.buyer),'font-size:13px;line-height:16px;text-align:center;font-weight:bold;color:#ffffff;')}</td></tr>`;
-    h+=`<tr>${sel.map(o=>`<td colspan="2" style="${B}padding:2px 4px;width:260px;background:#eeecff;">${P(`${esc(o.ozel)}-${esc(o.urunAd)} - ${esc(o.renkTanim)} -${esc(o.renkKod)}`,'text-align:center;color:#3d2cff;font-weight:bold;')}</td>`).join('')}</tr>`;
+    h+=`<tr>${sel.map(o=>`<td colspan="2" style="${B}padding:2px 4px;width:260px;background:#eeecff;">${P(`${esc(o.ozel)}-${esc(o.urunAd)} - ${esc(o.renkTanim)} -${esc(o.renkKod)}${wkTagMail(o)}`,'text-align:center;color:#3d2cff;font-weight:bold;')}</td>`).join('')}</tr>`;
     h+=`<tr>${sel.map(o=>{ const s=images[o.key]; const src=s?imgSrc(o.key,s):'';
       const [w,hh]=imgSize(o.key);
       return `<td colspan="2" valign="middle" style="${B}padding:3px;">${P(src?`<img src="${esc(src)}" width="${w}" height="${hh}" style="width:${w}px;height:${hh}px;border:0;" alt="${esc(o.urunAd)}">`:'RESİM','text-align:center;line-height:normal;mso-line-height-rule:at-least;')}</td>`; }).join('')}</tr>`;
@@ -634,13 +654,14 @@ async function saveWeek(silent){
   if(!state.week){ toast('Önce hafta gir'); return; }
   const sel=[]; for(const g of state.groups) for(const o of selectedIn(g)) sel.push(o);
   await DB.put('weeks',state.week,{ week:state.week, savedAt:new Date().toISOString(), fileName:state.fileName, sortBy:$('sortBy').value, mode:groupMode, limits:{...limits},
-    criteria:{dhOp:$('cDHop').value,gmOp:$('cGMop').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value,scopeLims:slGet()}, eligibleCount:state.groups.reduce((a,g)=>a+g.list.length,0), rows:sel });
-  if(!silent) toast(state.week+' haftası kaydedildi');
+    criteria:{dhOp:$('cDHop').value,gmOp:$('cGMop').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value,scopeLims:slGet(),raf:$('cRAF').value,eg:$('cEG').checked,wk:$('cWK').value}, eligibleCount:state.groups.reduce((a,g)=>a+g.list.length,0), rows:sel });
+  if(!silent) toast(state.week+' haftası kaydedildi ('+sel.length+' option)');
   await renderHistory();
 }
 async function loadPrevKeys(){
-  prevKeys=new Map(); const all=(await DB.all('weeks')).map(x=>x[1]).sort((a,b)=>a.week.localeCompare(b.week));
-  for(const w of all){ if(w.week===state.week) continue; for(const o of w.rows) prevKeys.set(o.scope+'|'+o.key,w.week); }
+  prevCounts=new Map(); const all=(await DB.all('weeks')).map(x=>x[1]);
+  for(const w of all){ if(!(String(w.week)<String(state.week))) continue;  // yalnızca bu haftadan önceki haftalar
+    const seen=new Set(w.rows.map(o=>o.scope+'|'+o.key)); for(const k of seen) prevCounts.set(k,(prevCounts.get(k)||0)+1); }
 }
 async function renderHistory(){
   const all=(await DB.all('weeks')).map(x=>x[1]).sort((a,b)=>b.week.localeCompare(a.week));
@@ -697,8 +718,8 @@ $('drop').addEventListener('drop',e=>{ e.preventDefault(); const f=e.dataTransfe
 // Şart değişince liste hemen yenilenir (yazarken kısa bir beklemeyle), yeni seçilenlerin resmi de aranır
 let critTimer;
 function onCriteria(){ clearTimeout(critTimer); critTimer=setTimeout(()=>{ if(state.rows.length && !state.readOnly){ buildGroups(); render(); findAll(); } saveSettings(); },350); }
-for(const id of ['cDH','cGM','cDHop','cGMop','cSTR',...SL_IDS,'sortBy','perGroup']){ $(id).addEventListener('change',onCriteria); $(id).addEventListener('input',onCriteria); }
-$('week').addEventListener('change',async()=>{ state.week=$('week').value.trim(); await loadPrevKeys(); render(); });
+for(const id of ['cDH','cGM','cDHop','cGMop','cSTR','cRAF','cEG','cWK',...SL_IDS,'sortBy','perGroup']){ $(id).addEventListener('change',onCriteria); $(id).addEventListener('input',onCriteria); }
+$('week').addEventListener('change',async()=>{ state.week=$('week').value.trim(); await loadPrevKeys(); if(state.rows.length && !state.readOnly) buildGroups(); render(); });
 for(const id of ['mTo','mCc','mSubj','mIntro']) $(id).addEventListener('change',saveSettings);
 
 $('btnPreview').onclick=()=>{ const w=$('mailPreviewWrap'); w.hidden=!w.hidden; if(!w.hidden) $('mailPreview').innerHTML=mailHTML((k,s)=>s); };
@@ -729,6 +750,7 @@ $('btnCopy').onclick=async()=>{
   if(ok) location.href=href;
 };
 $('btnSave').onclick=()=>saveWeek(false);
+$('btnSave2').onclick=()=>saveWeek(false);
 $('btnFind').onclick=findAll;
 $('btnLimits').onclick=()=>{ const p=$('limitsPanel'); p.hidden=!p.hidden; if(!p.hidden){ renderLimits(); p.scrollIntoView({behavior:'smooth',block:'start'}); } };
 $('btnLimClose').onclick=()=>{ $('limitsPanel').hidden=true; };
@@ -744,11 +766,11 @@ $('importFile').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; tr
   await renderHistory(); toast('Yedek yüklendi'); }catch(err){ toast('Yedek dosyası okunamadı'); } e.target.value=''; };
 
 async function saveSettings(){ await DB.put('settings','s',{to:$('mTo').value,cc:$('mCc').value,subj:$('mSubj').value,intro:$('mIntro').value,
-  proxy:$('proxy').value,dhOp:$('cDHop').value,gmOp:$('cGMop').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value,scopeLims:slGet(),sortBy:$('sortBy').value,per:$('perGroup').value,mode:groupMode}); }
+  proxy:$('proxy').value,dhOp:$('cDHop').value,gmOp:$('cGMop').value,dh:$('cDH').value,gm:$('cGM').value,str:$('cSTR').value,scopeLims:slGet(),raf:$('cRAF').value,eg:$('cEG').checked,wk:$('cWK').value,sortBy:$('sortBy').value,per:$('perGroup').value,mode:groupMode}); }
 (async function init(){
   const s=await DB.get('settings','s');
   if(s){ $('mTo').value=s.to||''; $('mCc').value=s.cc||''; if(s.subj) $('mSubj').value=s.subj; if(s.intro) $('mIntro').value=s.intro;
-    if(s.proxy!=null) $('proxy').value=s.proxy; if(s.dhOp) $('cDHop').value=s.dhOp; if(s.gmOp) $('cGMop').value=s.gmOp; if(s.dh!=null) $('cDH').value=s.dh; if(s.gm!=null) $('cGM').value=s.gm; if(s.str!=null) $('cSTR').value=s.str; if(s.scopeLims) slSet(s.scopeLims); if(s.sortBy) $('sortBy').value=s.sortBy; if(s.per) $('perGroup').value=s.per; if(s.mode) setMode(s.mode); }
+    if(s.proxy!=null) $('proxy').value=s.proxy; if(s.dhOp) $('cDHop').value=s.dhOp; if(s.gmOp) $('cGMop').value=s.gmOp; if(s.dh!=null) $('cDH').value=s.dh; if(s.gm!=null) $('cGM').value=s.gm; if(s.str!=null) $('cSTR').value=s.str; if(s.scopeLims) slSet(s.scopeLims); if(s.raf!=null) $('cRAF').value=s.raf; if(s.eg!=null) $('cEG').checked=s.eg; if(s.wk!=null) $('cWK').value=s.wk; if(s.sortBy) $('sortBy').value=s.sortBy; if(s.per) $('perGroup').value=s.per; if(s.mode) setMode(s.mode); }
   origins=(await DB.get('settings','origins'))||{};
   limits=(await DB.get('settings','limits'))||{};
   images=Object.fromEntries(await DB.all('images')); for(const [k,v] of Object.entries(images)) measure(k,v);
