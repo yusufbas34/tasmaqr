@@ -356,9 +356,12 @@ function renderLimits(){
       <div class="small muted">Excel: ${ex!=null?nfInt.format(ex):'-'}${v!=null&&v!==''?' · <b style="color:var(--accent2)">değişti</b>':''}</div></td>`; };
   host.innerHTML=`<div class="scroll"><table class="st" style="width:auto"><thead><tr><th>Buyer Grup</th><th>YD limit</th><th>TR limit</th></tr></thead><tbody>
     ${buyers.map(b=>`<tr><td style="font-weight:600">${esc(b)}</td>${cell('YurtDisi',b)}${cell('YurtIci',b)}</tr>`).join('')}</tbody></table></div>`;
-  host.querySelectorAll('input').forEach(inp=>inp.addEventListener('change',()=>{
-    const k=inp.dataset.k; if(inp.value==='') delete limits[k]; else limits[k]=+inp.value;
-    DB.put('settings','limits',limits); if(!state.readOnly){ buildGroups(); render(); } setTimeout(renderLimits,0); }));
+  let lt;
+  const apply=inp=>{ const k=inp.dataset.k; if(inp.value==='') delete limits[k]; else limits[k]=+inp.value;
+    DB.put('settings','limits',limits); if(!state.readOnly){ buildGroups(); render(); findAll(); } };
+  host.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input',()=>{ clearTimeout(lt); lt=setTimeout(()=>apply(inp),350); });   // yazarken uygula
+    inp.addEventListener('change',()=>{ clearTimeout(lt); apply(inp); setTimeout(renderLimits,0); }); });
 }
 // Mağaza stok / kaç mağazada kısıtları YD ve TR için ayrı
 const SL_IDS=[];['cMS','cKM','cDS'].forEach(b=>['YurtDisi','YurtIci'].forEach(sc=>SL_IDS.push(b+'_'+sc,b+'op_'+sc)));
@@ -410,6 +413,8 @@ const selectedIn = g=>g.list.filter(o=>state.selected.has(selKey(o)));
 
 // ---------- Ekran ----------
 function render(){
+  const lc=$('liveCounts'); if(lc && !state.readOnly){ const n=state.groups.reduce((a,g)=>a+g.list.length,0);
+    lc.innerHTML=`<b>${n}</b> uygun option · <b>${state.selected.size}</b> seçildi`; }
   const has = state.groups.length>0;
   for(const id of ['btnEml','btnCopy','btnSave','btnSave2','btnPreview','btnFind']) $(id).disabled=!has;
   $('summary').innerHTML = has ? summaryHTML(false) : '<div class="empty">Şartlara uyan option bulunamadı ya da dosya yüklenmedi.</div>';
@@ -709,7 +714,7 @@ async function loadFile(f){
     await loadPrevKeys(); buildGroups(); render(); if(!$("limitsPanel").hidden) renderLimits();
     const n=state.groups.reduce((a,g)=>a+g.list.length,0);
     findAll();
-    $('fileInfo').innerHTML=`<span class="tag ok">${esc(f.name)}</span> <span class="muted">“${esc(sheetName)}” · ${rows.length} satır · ${n} uygun option · ${state.selected.size} seçildi</span>`;
+    $('fileInfo').innerHTML=`<span class="tag ok">${esc(f.name)}</span> <span class="muted">“${esc(sheetName)}” · ${rows.length} satır · <span id="liveCounts"></span></span>`; render();
   }catch(e){ console.error(e); $('fileInfo').innerHTML=`<span class="tag warn">Hata</span> ${esc(e.message)}`; }
 }
 $('drop').onclick=()=>$('file').click();
@@ -720,7 +725,10 @@ $('file').onchange=e=>{ const f=e.target.files[0]; if(f) loadFile(f); e.target.v
 $('drop').addEventListener('drop',e=>{ e.preventDefault(); const f=e.dataTransfer.files[0]; if(f) loadFile(f); });
 // Şart değişince liste hemen yenilenir (yazarken kısa bir beklemeyle), yeni seçilenlerin resmi de aranır
 let critTimer;
-function onCriteria(){ clearTimeout(critTimer); critTimer=setTimeout(()=>{ if(state.rows.length && !state.readOnly){ buildGroups(); render(); findAll(); } saveSettings(); },350); }
+function onCriteria(){ clearTimeout(critTimer); critTimer=setTimeout(()=>{
+  if(state.readOnly) toast('Kayıtlı bir hafta açık; şartları uygulamak için Excel dosyasını yükle.');
+  else if(state.rows.length){ buildGroups(); render(); findAll(); }
+  saveSettings(); },350); }
 for(const id of ['cDH','cGM','cDHop','cGMop','cSTR','cRAF','cEG','cWK',...SL_IDS,'sortBy','perGroup']){ $(id).addEventListener('change',onCriteria); $(id).addEventListener('input',onCriteria); }
 $('week').addEventListener('change',async()=>{ state.week=$('week').value.trim(); await loadPrevKeys(); if(state.rows.length && !state.readOnly) buildGroups(); render(); });
 for(const id of ['mTo','mCc','mSubj','mIntro']) $(id).addEventListener('change',saveSettings);
