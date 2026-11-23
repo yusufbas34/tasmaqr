@@ -129,6 +129,7 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
           <span class="chip">STR &lt; <input id="cSTR" type="number" step="1" value="50">%</span>
           <span class="chip">Mağaza Stok Adet <span class="sub">YD</span> <select id="cMSop_YurtDisi" style="padding:2px 4px"><option value="ge" selected>&ge;</option><option value="le">&le;</option></select> <input id="cMS_YurtDisi" type="number" step="1" min="0" placeholder="yok" title="Boş bırakılırsa kısıt uygulanmaz"> <span class="sub">TR</span> <select id="cMSop_YurtIci" style="padding:2px 4px"><option value="ge" selected>&ge;</option><option value="le">&le;</option></select> <input id="cMS_YurtIci" type="number" step="1" min="0" placeholder="yok" title="Boş bırakılırsa kısıt uygulanmaz"> </span>
           <span class="chip">Kaç Mağazada <span class="sub">YD</span> <select id="cKMop_YurtDisi" style="padding:2px 4px"><option value="ge" selected>&ge;</option><option value="le">&le;</option></select> <input id="cKM_YurtDisi" type="number" step="1" min="0" placeholder="yok" title="Boş bırakılırsa kısıt uygulanmaz"> <span class="sub">TR</span> <select id="cKMop_YurtIci" style="padding:2px 4px"><option value="ge" selected>&ge;</option><option value="le">&le;</option></select> <input id="cKM_YurtIci" type="number" step="1" min="0" placeholder="yok" title="Boş bırakılırsa kısıt uygulanmaz"> </span>
+          <span class="chip" title="YD için Antrepo Stok, TR için Merkez Sevke Hazır Depolar Stok Adet sütununa bakılır. Boş bırakılırsa kısıt uygulanmaz.">Depo stok <span class="sub">YD Antrepo Stok</span> <select id="cDSop_YurtDisi" style="padding:2px 4px"><option value="ge" selected>&ge;</option><option value="le">&le;</option></select> <input id="cDS_YurtDisi" type="number" step="1" min="0" placeholder="yok"> <span class="sub">TR Merkez Sevke Hazır Depo</span> <select id="cDSop_YurtIci" style="padding:2px 4px"><option value="ge" selected>&ge;</option><option value="le">&le;</option></select> <input id="cDS_YurtIci" type="number" step="1" min="0" placeholder="yok"></span>
           <span class="chip" title="Excel'deki kural: Raf Ömrü 14'ün üstündeyse RafOk. Boş bırakılırsa Excel'deki RafOk/RafNok kullanılır.">Raf Ömrü &gt; <input id="cRAF" type="number" step="1" min="0" value="14"></span>
           <label class="chip" title="Ürün adında -EG geçen optionlar (ör. HRK,HERNA-EG) hesaplamaya alınmaz."><input id="cEG" type="checkbox" checked> Ürün adında "-EG" olanları dahil etme</label>
           <span class="chip" title="Bir option önceki kayıtlı haftalarda kaç kez seçildiyse kartta kırmızı (sayı) olarak yazar. Buraya bir değer girersen, bu sayının ÜSTÜNDE haftada çıkmış optionlar hesaplamadan çıkarılır. Örn. 2 girersen 3 ve daha fazla hafta çıkmış olanlar listeye girmez. Boş bırakılırsa kısıt yok.">Hafta kısıtı ≤ <input id="cWK" type="number" step="1" min="0" placeholder="yok"> <span class="info" aria-hidden="true">i</span></span>
@@ -234,7 +235,7 @@ table{border-collapse:collapse;font-variant-numeric:tabular-nums}
 const COLS = {
   key:0, // ilk sütun (OzelKod1+RenkKod)
   scope:'YurtIci_YurtDisi', ozel:'OzelKod1', renkKod:'RenkKod', urunAd:'UrunAd', renkTanim:'RenkTanim',
-  gmroi:'GMROI', kacMagaza:'Kaç Mağazada', magazaStok:'Mağaza Stok Adet', merkezStok:'Merkez Sevke Hazır Depolar Stok Adet',
+  gmroi:'GMROI', kacMagaza:'Kaç Mağazada', antrepo:'Antrepo Stok', magazaStok:'Mağaza Stok Adet', merkezStok:'Merkez Sevke Hazır Depolar Stok Adet',
   sip:'Net Gelen Sipariş Adet', satis7:'Son 7 Gün Satış Adet', kumSatis:'Kümülatif Satış Adet',
   dh:'Ortalma Reyon Devir Hızı', indirim:'Son 7 Gün Gerçekleşen Ortalama İndirim Oranı',
   marj:'Son 7 Gün Brüt Kar Marjı (USD)', magDhRaw:'MAG DH', magDh:'MAG a göre DH', magGmRaw:'MAG GMROI',
@@ -319,7 +320,7 @@ function parseWorkbook(wb){
   [arr,hdrIdx]=res;
   const hdr = arr[hdrIdx].map(norm);
   const idx = {}; for(const [k,name] of Object.entries(COLS)){ if(typeof name==='number'){idx[k]=name;continue;}
-    const i=hdr.indexOf(norm(name)); if(i<0 && !['magDhRaw','magGmRaw','merkezStok','direktor','kontrol','kacMagaza'].includes(k)) throw new Error('Sütun bulunamadı: '+name); idx[k]=i; }
+    const i=hdr.indexOf(norm(name)); if(i<0 && !['magDhRaw','magGmRaw','merkezStok','direktor','kontrol','kacMagaza','antrepo'].includes(k)) throw new Error('Sütun bulunamadı: '+name); idx[k]=i; }
   const rafIdx = hdr.reduce((a,h,i)=>h==='Raf Ömrü'?a.concat(i):a,[]);
   idx.raf = rafIdx[0]; idx.rafFlag = rafIdx[rafIdx.length-1];
   idx.link = hdr.findIndex(h=>/resim|görsel|gorsel|link|url|image|foto/i.test(h));
@@ -332,7 +333,7 @@ function parseWorkbook(wb){
       rafFlag:norm(a[idx.rafFlag]), ortKontrol:norm(a[idx.ortKontrol]), link:'' };
     if(idx.link>=0){ const cell=ws[XLSX.utils.encode_cell({r:r+r0.r,c:idx.link+r0.c})];
       const t=(cell&&cell.l&&cell.l.Target)||norm(a[idx.link]); if(/^https?:\/\//i.test(t)) o.link=t; }
-    for(const k of ['kontrol','kacMagaza','gmroi','magazaStok','merkezStok','sip','satis7','kumSatis','dh','indirim','marj','magDhRaw','magDh','magGmRaw','magGm','str','raf'])
+    for(const k of ['kontrol','kacMagaza','antrepo','gmroi','magazaStok','merkezStok','sip','satis7','kumSatis','dh','indirim','marj','magDhRaw','magDh','magGmRaw','magGm','str','raf'])
       o[k] = idx[k]>=0 ? num(a[idx[k]]) : null;
     if(!o.buyer || o.buyer==='0') continue;
     rows.push(o);
@@ -360,10 +361,10 @@ function renderLimits(){
     DB.put('settings','limits',limits); if(!state.readOnly){ buildGroups(); render(); } setTimeout(renderLimits,0); }));
 }
 // Mağaza stok / kaç mağazada kısıtları YD ve TR için ayrı
-const SL_IDS=[];['cMS','cKM'].forEach(b=>['YurtDisi','YurtIci'].forEach(sc=>SL_IDS.push(b+'_'+sc,b+'op_'+sc)));
+const SL_IDS=[];['cMS','cKM','cDS'].forEach(b=>['YurtDisi','YurtIci'].forEach(sc=>SL_IDS.push(b+'_'+sc,b+'op_'+sc)));
 function scopeLimText(){ let t='';
-  for(const [b,l] of [['cMS','Mağaza Stok'],['cKM','Kaç Mağazada']]) for(const [sc,ab] of [['YurtDisi','YD'],['YurtIci','TR']]){
-    const v=$(b+'_'+sc).value.trim(); if(v!=='') t+=`, ${l} ${ab} ${$(b+'op_'+sc).value==='ge'?'&ge;':'&le;'} ${esc(v)}`; }
+  for(const [b,l] of [['cMS','Mağaza Stok'],['cKM','Kaç Mağazada'],['cDS','']]) for(const [sc,ab] of [['YurtDisi','YD'],['YurtIci','TR']]){
+    const v=$(b+'_'+sc).value.trim(); if(v!=='') t+=`, ${b==='cDS'?(sc==='YurtDisi'?'Antrepo Stok':'Merkez Sevke Hazır Depo Stok'):l} ${ab} ${$(b+'op_'+sc).value==='ge'?'&ge;':'&le;'} ${esc(v)}`; }
   return t; }
 function slGet(){ const o={}; for(const id of SL_IDS) o[id]=$(id).value; return o; }
 function slSet(o){ for(const id of SL_IDS) if(o[id]!=null) $(id).value=o[id]; }
@@ -380,6 +381,8 @@ function eligible(o){
   const lim=(v,op,t)=>{ if(t==='') return true; return v!=null && (op==='ge'? v>=+t : v<=+t); };
   if(!lim(o.magazaStok,$('cMSop_'+o.scope).value,$('cMS_'+o.scope).value.trim())) return false;
   if(!lim(o.kacMagaza,$('cKMop_'+o.scope).value,$('cKM_'+o.scope).value.trim())) return false;
+  // Depo stok: YD -> Antrepo Stok, TR -> Merkez Sevke Hazır Depolar Stok Adet
+  if(!lim(o.scope==='YurtDisi'?o.antrepo:o.merkezStok,$('cDSop_'+o.scope).value,$('cDS_'+o.scope).value.trim())) return false;
   return cmp(o.magDh,$('cDHop').value,dh) && cmp(o.magGm,$('cGMop').value,gm) && o.str!=null && o.str<str
     && rafOk(o) && ortUst(o) && !egExcluded(o) && weekOk(o);
 }
