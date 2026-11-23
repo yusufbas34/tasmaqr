@@ -244,7 +244,7 @@ const COLS = {
 // Kart metrikleri (sıra mail görseliyle aynı)
 const METRICS = [
   ['Mağaza Stok Adet','magazaStok','int'],
-  ['Merkez Sevke Hazır Depolar Stok Adet','merkezStok','int'],
+  ['Merkez Sevke Hazır Depolar Stok Adet','merkezStok','int', ['Antrepo Stok','antrepo']],  // YD'de Antrepo Stok gösterilir
   ['Son 7 Gün Satış Adet','satis7','int'],
   ['Kümülatif Satış Adet','kumSatis','int'],
   ['Ortalma Reyon Devir Hızı','dh','dec'],
@@ -257,6 +257,11 @@ const METRICS = [
   ['MAG a göre GMROI','magGm','pct'],
   ['STR','str','pct'],
 ];
+// Metrik satırı: YD için alternatif başlık/sütun varsa onu kullan
+const mOf = (m,o) => (m[3] && o.scope==='YurtDisi') ? [m[3][0],m[3][1],m[2]] : [m[0],m[1],m[2]];
+// Excel'de Direktör boşsa kullanılacak eşleşme (Excel'deki dolu değerler önceliklidir)
+const DEFAULT_DIREKTOR = {'CHINO DUVARI':'Aylin Rençber','BLAZER CEKET':'Aylin Rençber','KRAVAT/PAPYON':'Aylin Rençber','DOKUMA ALT':'Aylin Rençber',
+  'DIŞ GİYİM':'Abdullah Karakurt','DOKUMA ÜST':'Abdullah Karakurt','ÖRME':'Uğur Külahlı','ÖRME BASIC':'Uğur Külahlı','TRİKO':'Uğur Külahlı'};
 const SCOPES = [['YurtDisi','YD','Yurtdışı'],['YurtIci','TR','Yurtiçi']];
 const nfInt = new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0});
 const nf2 = new Intl.NumberFormat('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -338,6 +343,9 @@ function parseWorkbook(wb){
     if(!o.buyer || o.buyer==='0') continue;
     rows.push(o);
   }
+  // Direktör boş olan satırlara: aynı buyer grubun dosyadaki direktörü, yoksa varsayılan eşleşme
+  const dirByBuyer={}; for(const o of rows) if(o.direktor && !dirByBuyer[o.buyer]) dirByBuyer[o.buyer]=o.direktor;
+  for(const o of rows) if(!o.direktor) o.direktor=dirByBuyer[o.buyer]||DEFAULT_DIREKTOR[o.buyer]||'';
   return {sheetName, rows};
 }
 
@@ -452,7 +460,7 @@ function cardEl(o){
   el.innerHTML=`<div class="t">${esc(o.ozel)}-${esc(o.urunAd)} - ${esc(o.renkTanim)} -${esc(o.renkKod)}${wkTag(o)}
 </div>
     <div class="imgslot" tabindex="0" data-key="${esc(o.key)}" aria-label="Ürün görseli: yapıştır veya sürükle"></div>
-    <table class="mt"><tbody>${METRICS.map(([l,k,t])=>`<tr><td>${esc(l)}</td><td>${fmt(o[k],t)}</td></tr>`).join('')}</tbody></table>`;
+    <table class="mt"><tbody>${METRICS.map(m=>{ const [l,k,t]=mOf(m,o); return `<tr><td>${esc(l)}</td><td>${fmt(o[k],t)}</td></tr>`; }).join('')}</tbody></table>`;
   const slot=el.querySelector('.imgslot'); fillSlot(slot,o);
   slot.addEventListener('click',e=>{ if(e.target.closest('a,button')) return; setActive(slot); });
   slot.addEventListener('focus',()=>setActive(slot));
@@ -606,8 +614,8 @@ function mailHTML(imgSrc){
     h+=`<tr>${sel.map(o=>{ const s=images[o.key]; const src=s?imgSrc(o.key,s):'';
       const [w,hh]=imgSize(o.key);
       return `<td colspan="2" valign="middle" style="${B}padding:3px;">${P(src?`<img src="${esc(src)}" width="${w}" height="${hh}" style="width:${w}px;height:${hh}px;border:0;" alt="${esc(o.urunAd)}">`:'RESİM','text-align:center;line-height:normal;mso-line-height-rule:at-least;')}</td>`; }).join('')}</tr>`;
-    for(const [l,k,t] of METRICS){
-      h+=`<tr>${sel.map(o=>`<td style="${B}padding:1px 5px;white-space:nowrap;">${P(esc(l),'font-weight:bold;white-space:nowrap;')}</td><td style="${B}padding:1px 6px;white-space:nowrap;width:60px;">${P(fmt(o[k],t),'text-align:right;white-space:nowrap;')}</td>`).join('')}</tr>`;
+    for(const m of METRICS){
+      h+=`<tr>${sel.map(o=>{ const [l,k,t]=mOf(m,o); return `<td style="${B}padding:1px 5px;white-space:nowrap;">${P(esc(l),'font-weight:bold;white-space:nowrap;')}</td><td style="${B}padding:1px 6px;white-space:nowrap;width:60px;">${P(fmt(o[k],t),'text-align:right;white-space:nowrap;')}</td>`; }).join('')}</tr>`;
     }
     h+='</table>';
     h+=`<table cellspacing="0" cellpadding="0" width="100%"><tr><td height="22" style="height:22px;">${P('&nbsp;')}</td></tr></table>`;
